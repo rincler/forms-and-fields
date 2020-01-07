@@ -1,0 +1,46 @@
+{
+    "name": "forms-and-fields",
+    "version": "0.1.0",
+    "description": "A library to validation fields and submission forms",
+    "main": "lib/index.js",
+    "files": [
+        "/lib",
+        "README.md",
+        "LICENSE",
+        "package.json"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/rincler/forms-and-fields.git"
+    },
+    "author": "Dmitriy Romashov",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/rincler/forms-and-fields/issues"
+    },
+    "homepage": "https://github.com/rincler/forms-and-fields#readme",
+    "dependencies": {
+        "validator": "^12.1.0"
+    },
+    "devDependencies": {
+        "@babel/cli": "^7.7.7",
+        "@babel/core": "^7.7.7",
+        "@babel/plugin-transform-runtime": "^7.7.6",
+        "@babel/preset-env": "^7.7.7",
+        "@babel/runtime": "^7.7.7",
+        "babelify": "^10.0.0",
+        "browserify": "^16.5.0",
+        "eslint": "^6.8.0",
+        "eslint-config-airbnb-base": "^14.0.0",
+        "eslint-plugin-import": "^2.20.0",
+        "express": "^4.17.1"
+    },
+    "scripts": {
+        "build": "babel src --out-dir lib",
+        "prepare ": "npm run build",
+        "analyze": "eslint . --fix-dry-run",
+        "sandbox:create": "rm -rf sandbox && cp -r sandbox.dist sandbox && npm run sandbox:build && npm run sandbox:start",
+        "sandbox:build": "browserify sandbox/sandbox.js -o sandbox/bundle.js -t babelify --debug",
+        "sandbox:start": "node sandbox/server.js"
+    }
+}

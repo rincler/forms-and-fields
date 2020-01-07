@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sandbox</title>
+    <link rel="stylesheet" type="text/css" href="styles.css">
+</head>
+<body>
+
+Legend:
+<br><br>
+<div>
+    <span class="f-field-valid">valid field</span>
+    <span class="f-field-invalid">invalid field</span>
+    <span class="f-field-validating">validating field</span>
+    <span class="f-form-valid">valid form</span>
+    <span class="f-form-invalid">invalid form</span>
+    <span class="f-form-validating">validating form</span>
+    <span class="f-form-submit-success">success submit result form</span>
+    <span class="f-form-submit-error">error submit result form</span>
+    <span class="f-form-submitting">submitting form</span>
+</div>
+
+<hr>
+
+<form class="form js-form">
+    <div>
+        <div>Email</div>
+        <input type="text" name="email" class="js-email"/>
+    </div>
+    <div>
+        <div>Secret word ("sun")</div>
+        <textarea name="comment" class="js-secret-word"></textarea>
+    </div>
+    <div>
+        <div class="field-container js-f-field-container">
+            <input type="radio" name="sex" class="js-sex" value="man">Man
+            <input type="radio" name="sex" class="js-sex" value="woman">Woman
+        </div>
+    </div>
+    <div class="field-container js-f-field-container">
+        <input type="checkbox" name="agree" class="js-agree">I agree with rules
+    </div>
+    <div>
+        <div>City</div>
+        <select name="city" class="js-city">
+            <option value=""></option>
+            <option value="saint-petersburg">Saint Petersburg</option>
+            <option value="singapore">Singapore</option>
+            <option value="sorochinsk">Sorochinsk</option>
+        </select>
+    </div>
+    <div>
+        <div>Favorite Movie</div>
+        <select name="movie" multiple class="js-movie">
+            <option value=""></option>
+            <option value="interstellar">Interstellar</option>
+            <option value="the-prestige">The Prestige</option>
+            <option value="the-dark-knight">The Dark Knight</option>
+        </select>
+    </div>
+    <br>
+    <div>
+        <input type="file" name="attach" class="js-file">
+    </div>
+    <br>
+    <button type="submit">Submit</button>
+</form>
+
+<hr>
+
+<div class="js-f-field-container">
+    <div>FQDN</div>
+    <input type="text" class="js-fqdn">
+</div>
+
+<hr>
+
+<form class="form js-register-form">
+    <div>Login</div>
+    <input type="text" name="login" class="js-login">
+    <div>Password</div>
+    <input type="password" name="password" class="js-password">
+    <div>Confirm Password</div>
+    <input type="password" class="js-confirm-password">
+    <div>
+        <input type="radio" name="response" value="success" checked>
+        Success response
+        <br>
+        <input type="radio" name="response" value="error">
+        Error response
+        <br>
+        <input type="radio" name="response" value="http-error">
+        Http error response
+    </div>
+    <br><br>
+    <button type="submit">Register</button>
+</form>
+
+<script src="bundle.js"></script>
+</body>
+</html>
