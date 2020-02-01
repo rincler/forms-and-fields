@@ -1,5 +1,6 @@
 # Forms and Fields
 
+![npm](https://img.shields.io/npm/v/forms-and-fields)
 [![Build Status](https://travis-ci.com/rincler/forms-and-fields.svg?branch=master)](https://travis-ci.com/rincler/forms-and-fields)
 
 A library to validation fields and submission forms.
