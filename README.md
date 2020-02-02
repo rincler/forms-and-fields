@@ -25,7 +25,7 @@ or custom validator (including AJAX).
 ```JS
 import Form from 'forms-and-fields';
 import Field from 'forms-and-fields';
-import SubmitResult from 'forms-and-fields';
+import SubmissionResult from 'forms-and-fields';
 
 const form = new Form('.js-form', [
    new Field('.js-email', ['required', 'isEmail'], {
@@ -41,7 +41,7 @@ const form = new Form('.js-form', [
     submit: (formData) => {
         console.log(formData);
         // here can be AJAX-request
-        return new SubmitResult(true);
+        return new SubmissionResult(true);
     }
 });
 
@@ -85,7 +85,7 @@ For validation separate fields you need create `Field` object and call `listen` 
 
 Custom validators must return `ValidationResult` (can return `Promise`, so you can use AJAX).
 
-Form `submit` callback must return `SubmitResult` (can return `Promise`, so you can use AJAX).
+Form `submit` callback must return `SubmissionResult` (can return `Promise`, so you can use AJAX).
 
 Validation is triggered when user submits form. Form is not submitting if form is invalid.
 
@@ -100,13 +100,13 @@ Validation is triggered when user submits form. Form is not submitting if form i
 | setMessage(message: `string`): `void`                    | Sets validation result message             |
 | getMessage(): `string`                                   | Returns validation result message          |
 
-#### `SubmitResult` class
+#### `SubmissionResult` class
 
-| Method                                                | Description                                    |
-|-------------------------------------------------------|------------------------------------------------|
-| constructor(result: `boolean`, data?: ` object` = {}) | Initializes submit result object with any data |
-| isSuccess(): `boolean`                                | Returns boolean submit result                  |
-| getData(): `object`                                   | Returns data                                   |
+| Method                                                | Description                                        |
+|-------------------------------------------------------|----------------------------------------------------|
+| constructor(result: `boolean`, data?: ` object` = {}) | Initializes submission result object with any data |
+| isSuccess(): `boolean`                                | Returns boolean submission result                  |
+| getData(): `object`                                   | Returns data                                       |
 
 ### Fields
 
@@ -141,7 +141,7 @@ It is allowed only `required` validator for checkbox, select, radio and file inp
 | onTypingEnd           | `function`    | `null`             | It is triggered when user has finished typing. Passes arguments: `value: string, fieldElement: HTMLElement, formElement: HTMLElement`               |
 | onChange              | `function`    | `null`             | It is triggered when user has changed field. Passes arguments: `value: string, fieldElement: HTMLElement, formElement: HTMLElement`                 |
 | validatorParams       | `object`      | `{}`               | Params for [validator](https://www.npmjs.com/package/validator). (E.g. `{isEmail: {allow_utf8_local_part: false}}`)                                 |
-| trimEnabled           | `boolean`     | `true`             | Wheter to trim field value on validation                                                                                                            |
+| trimEnabled           | `boolean`     | `true`             | Whether to trim field value on validation                                                                                                           |
 | onBeforeValidate      | `function`    | `null`             | It is triggered before field validation. Passes arguments: `fieldElement: HTMLElement, formElement: HTMLElement`                                    |
 | onAfterValidate       | `function`    | `null`             | It is triggered after field validation. Passes arguments: `validationResult: ValidationResult, fieldElement: HTMLElement, formElement: HTMLElement` |
 
@@ -162,17 +162,17 @@ It is allowed only `required` validator for checkbox, select, radio and file inp
 
 Also `Form` supports following options:
 
-| Option                | Type       | Default | Description                                                                                                                                                                                                                                                                                                                        |
-|-----------------------|------------|---------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| onBeforeValidate      | `function` | `null`  | It is triggered before form validation. Passes argument `formElement: HTMLElement`                                                                                                                                                                                                                                                 |
-| onAfterValidate       | `function` | `null`  | It is triggered after form validation. Passes arguments: `isValid: boolean, formElement: HTMLElement`                                                                                                                                                                                                                              |
-| onBeforeSubmit        | `function` | `null`  | It is triggered when user submits form and before validation. Passes `formData: FormData, formElement: HTMLElement`                                                                                                                                                                                                                |
-| submit                | `function` | `null`  | Submit function. It is triggered when user submits form and after validation. Must return `SubmitResult` (can return `Promise`, so you can use AJAX). If exception occured it is  equivalent to `submit` returned  `SubmitResult` with `false` (error is logged to console). Passes `formElement: HTMLElement, formData: FormData` |
-| onAfterSubmit         | `function` | `null`  | It is triggered after submission.  Passes `submitResult: SubmitResult, formElement: HTMLElement`                                                                                                                                                                                                                                   |
-| onAfterSubmitSuccess  | `function` | `null`  | It is triggered after submission and `submit` function returned `SubmitResult` with `true` .  Passes `submitResultData: object, formElement: HTMLElement`                                                                                                                                                                          |
-| onAfterSubmitError    | `function` | `null`  | It is triggered after submission and `submit` function returned `SubmitResult` with `false` .  Passes `submitResultData: object, formElement: HTMLElement`                                                                                                                                                                         |
-| onBeforeFieldValidate | `function` | `null`  | It is triggered before each field validation. Passes arguments: `fieldElement: HTMLElement, formElement: HTMLElement                                                                                                                                                                                                               |
-| onAfterFieldValidate  | `function` | `null`  | It is triggered after each field validation. Passes arguments: `validationResult: ValidationResult, fieldElement: HTMLElement, formElement: HTMLElement`                                                                                                                                                                           |
+| Option                | Type       | Default | Description                                                                                                                                                                                                                                                                                                                                 |
+|-----------------------|------------|---------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| onBeforeValidate      | `function` | `null`  | It is triggered before form validation. Passes argument `formElement: HTMLElement`                                                                                                                                                                                                                                                          |
+| onAfterValidate       | `function` | `null`  | It is triggered after form validation. Passes arguments: `isValid: boolean, formElement: HTMLElement`                                                                                                                                                                                                                                       |
+| onBeforeSubmit        | `function` | `null`  | It is triggered when user submits form and before validation. Passes `formData: FormData, formElement: HTMLElement`                                                                                                                                                                                                                         |
+| submit                | `function` | `null`  | Submit function. It is triggered when user submits form and after validation. Must return `SubmissionResult` (can return `Promise`, so you can use AJAX). If exception occurred it is  equivalent to `submit` returned  `SubmissionResult` with `false` (error is logged to console). Passes `formData: FormData, formElement: HTMLElement` |
+| onAfterSubmit         | `function` | `null`  | It is triggered after submission.  Passes `submissionResult: SubmissionResult, formElement: HTMLElement`                                                                                                                                                                                                                                    |
+| onAfterSubmitSuccess  | `function` | `null`  | It is triggered after submission and `submit` function returned `SubmissionResult` with `true`. Passes `submissionResultData: object, formElement: HTMLElement`                                                                                                                                                                             |
+| onAfterSubmitError    | `function` | `null`  | It is triggered after submission and `submit` function returned `SubmissionResult` with `false`. Passes `submissionResultData: object, formElement: HTMLElement`                                                                                                                                                                            |
+| onBeforeFieldValidate | `function` | `null`  | It is triggered before each field validation. Passes arguments: `fieldElement: HTMLElement, formElement: HTMLElement`                                                                                                                                                                                                                       |
+| onAfterFieldValidate  | `function` | `null`  | It is triggered after each field validation. Passes arguments: `validationResult: ValidationResult, fieldElement: HTMLElement, formElement: HTMLElement`                                                                                                                                                                                    |
 
 To set `onBeforeValidate` or `onAfterValdiate` to each form field use `onBeforeFieldValidate` or `onAfterFieldValidate`, 
 because `onBeforeValidate` and `onAfterValidate` are for form.

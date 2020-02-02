@@ -1,6 +1,6 @@
 import Form from '../src/Form';
 import Field from '../src/Field';
-import SubmitResult from '../src/SubmitResult';
+import SubmissionResult from '../src/SubmissionResult';
 import ValidationResult from '../src/ValidationResult';
 
 const form = new Form('.js-form', [
@@ -30,7 +30,7 @@ const form = new Form('.js-form', [
     submit: (formData) => {
         console.log(formData);
         // here can be AJAX-request
-        return new SubmitResult(true);
+        return new SubmissionResult(true);
     },
 });
 
@@ -74,7 +74,7 @@ const registerForm = new Form('.js-register-form', [
 
         const result = await response.json();
 
-        return new SubmitResult(result.isSuccess);
+        return new SubmissionResult(result.isSuccess);
     },
 });
 

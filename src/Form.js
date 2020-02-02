@@ -1,4 +1,4 @@
-import SubmitResult from './SubmitResult';
+import SubmissionResult from './SubmissionResult';
 
 const FORM_SUBMITTING_CSS_CLASS = 'f-form-submitting';
 const FORM_SUBMIT_SUCCESS_CSS_CLASS = 'f-form-submit-success';
@@ -190,14 +190,14 @@ export default class Form {
             return;
         }
 
-        let submitResult = null;
+        let submissionResult = null;
 
         if (this.submit) {
             try {
-                submitResult = await this.submit(formData, this.formElement);
+                submissionResult = await this.submit(formData, this.formElement);
             } catch (error) {
                 console.error(error);
-                submitResult = new SubmitResult(false);
+                submissionResult = new SubmissionResult(false);
             }
         }
 
@@ -206,22 +206,22 @@ export default class Form {
         this.submitting = false;
 
         if (this.onAfterSubmit) {
-            this.onAfterSubmit(submitResult, this.formElement);
+            this.onAfterSubmit(submissionResult, this.formElement);
         }
 
-        if (submitResult && submitResult.isSuccess()) {
+        if (submissionResult && submissionResult.isSuccess()) {
             this.addCss(FORM_SUBMIT_SUCCESS_CSS_CLASS);
 
             if (this.onAfterSubmitSuccess) {
-                this.onAfterSubmitSuccess(submitResult.getData(), this.formElement);
+                this.onAfterSubmitSuccess(submissionResult.getData(), this.formElement);
             }
         }
 
-        if (submitResult && !submitResult.isSuccess()) {
+        if (submissionResult && !submissionResult.isSuccess()) {
             this.addCss(FORM_SUBMIT_ERROR_CSS_CLASS);
 
             if (this.onAfterSubmitError) {
-                this.onAfterSubmitError(submitResult.getData(), this.formElement);
+                this.onAfterSubmitError(submissionResult.getData(), this.formElement);
             }
         }
     }

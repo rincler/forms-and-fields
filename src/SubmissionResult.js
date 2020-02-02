@@ -1,4 +1,4 @@
-export default class SubmitResult {
+export default class SubmissionResult {
     /**
      * @public
      *

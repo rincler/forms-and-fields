@@ -1,6 +1,6 @@
 import Form from './Form';
 import Field from './Field';
 import ValidationResult from './ValidationResult';
-import SubmitResult from './SubmitResult';
+import SubmissionResult from './SubmissionResult';
 
-export { Form, Field, ValidationResult, SubmitResult }
+export { Form, Field, ValidationResult, SubmissionResult }
