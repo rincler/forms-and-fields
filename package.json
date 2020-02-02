@@ -1,6 +1,6 @@
 {
     "name": "forms-and-fields",
-    "version": "0.1.0",
+    "version": "1.0.0",
     "description": "A library to validation fields and submission forms",
     "main": "lib/index.js",
     "files": [
