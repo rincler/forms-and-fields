@@ -4,7 +4,7 @@
     "description": "A library to validation fields and submission forms",
     "main": "lib/index.js",
     "files": [
-        "/lib",
+        "lib",
         "README.md",
         "LICENSE",
         "package.json"
@@ -37,7 +37,7 @@
     },
     "scripts": {
         "build": "babel src --out-dir lib",
-        "prepare ": "npm run build",
+        "prepack": "npm run build",
         "analyze": "eslint . --fix-dry-run",
         "sandbox:create": "rm -rf sandbox && cp -r sandbox.dist sandbox && npm run sandbox:build && npm run sandbox:start",
         "sandbox:build": "browserify sandbox/sandbox.js -o sandbox/bundle.js -t babelify --debug",
