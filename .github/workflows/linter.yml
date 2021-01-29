@@ -1,0 +1,22 @@
+name: Linter
+
+on: push
+
+jobs:
+  lint:
+    name: Lint code
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Node
+        uses: actions/setup-node@v1
+        with:
+          node-version: 10
+
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Lint code
+        run: npm run analyze

@@ -239,7 +239,7 @@ export default class Field {
      *
      * @returns {object}
      */
-    getValidatorParamsByValidatorName(validatorName) {
+    getValidatorParamsByValidatorName( validatorName) {
         if (this.validatorParams && this.validatorParams[validatorName]) {
             return this.validatorParams[validatorName];
         }

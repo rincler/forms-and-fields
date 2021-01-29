@@ -1,0 +1,23 @@
+name: Publication
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  publish:
+    name: Publication package
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Node
+        uses: actions/setup-node@v1
+        with:
+          node-version: 10
+
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Publish package
+        uses: JS-DevTools/npm-publish@v1
+        with:
+          token: ${{ secrets.NPM_TOKEN }}
