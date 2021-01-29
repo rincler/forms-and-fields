@@ -1,6 +1,6 @@
 # Forms and Fields
 
-![npm](https://img.shields.io/npm/v/forms-and-fields)
+[![NPM Version](https://img.shields.io/npm/v/forms-and-fields)](https://www.npmjs.com/package/forms-and-fields)
 
 A library to validation fields and submission forms.
 
