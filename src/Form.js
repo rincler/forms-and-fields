@@ -233,18 +233,14 @@ export default class Form {
      */
     clearCss(action) {
         if (action === ACTION_VALIDATING) {
-            this.formElement.classList.remove(
-                FORM_VALIDATING_CSS_CLASS,
-                FORM_VALID_CSS_CLASS,
-                FORM_INVALID_CSS_CLASS,
-            );
+            this.formElement.classList.remove(FORM_VALIDATING_CSS_CLASS, FORM_VALID_CSS_CLASS, FORM_INVALID_CSS_CLASS);
         }
 
         if (action === ACTION_SUBMITTING) {
             this.formElement.classList.remove(
                 FORM_SUBMITTING_CSS_CLASS,
                 FORM_SUBMIT_SUCCESS_CSS_CLASS,
-                FORM_SUBMIT_ERROR_CSS_CLASS,
+                FORM_SUBMIT_ERROR_CSS_CLASS
             );
         }
     }

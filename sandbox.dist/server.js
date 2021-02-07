@@ -31,6 +31,7 @@ app.listen(3000, () => {
     console.log('Sandbox listening on port 3000');
 });
 
-const sleep = (ms) => new Promise((resolve) => {
-    setTimeout(resolve, ms);
-});
+const sleep = (ms) =>
+    new Promise((resolve) => {
+        setTimeout(resolve, ms);
+    });

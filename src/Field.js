@@ -55,7 +55,8 @@ export default class Field {
         this.validMessage = options.validMessage || this.validMessage;
         this.invalidMessages = options.invalidMessages || this.invalidMessages;
         this.defaultInvalidMessage = options.defaultInvalidMessage || this.defaultInvalidMessage;
-        this.validateOnChange = options.validateOnChange !== undefined ? options.validateOnChange : this.validateOnChange;
+        this.validateOnChange =
+            options.validateOnChange !== undefined ? options.validateOnChange : this.validateOnChange;
         this.validateOnType = options.validateOnType !== undefined ? options.validateOnType : this.validateOnType;
         this.typingDelay = options.typingDelay || this.typingDelay;
         this.onTypingStart = options.onTypingStart || this.onTypingStart;
@@ -202,27 +203,27 @@ export default class Field {
      */
     getValidatorFnByValidatorItem(validatorItem) {
         if (validatorItem === 'required') {
-            return ((value) => {
+            return (value) => {
                 const isValid = !this.isEmpty(value);
 
                 return new ValidationResult(
                     isValid,
-                    isValid ? this.validMessage : this.invalidMessages.required || this.defaultInvalidMessage,
+                    isValid ? this.validMessage : this.invalidMessages.required || this.defaultInvalidMessage
                 );
-            });
+            };
         }
 
         if (typeof validatorItem === 'string') {
-            return ((value) => {
+            return (value) => {
                 const params = this.getValidatorParamsByValidatorName(validatorItem);
                 const validatorFn = validator[validatorItem];
                 const isValid = validatorFn(value, ...params);
 
                 return new ValidationResult(
                     isValid,
-                    isValid ? this.validMessage : this.getErrorMessageByValidatorName(validatorItem),
+                    isValid ? this.validMessage : this.getErrorMessageByValidatorName(validatorItem)
                 );
-            });
+            };
         }
 
         if (typeof validatorItem === 'function') {
@@ -239,7 +240,7 @@ export default class Field {
      *
      * @returns {object}
      */
-    getValidatorParamsByValidatorName( validatorName) {
+    getValidatorParamsByValidatorName(validatorName) {
         if (this.validatorParams && this.validatorParams[validatorName]) {
             return this.validatorParams[validatorName];
         }
@@ -440,11 +441,7 @@ export default class Field {
      */
     clearCss() {
         const element = this.fieldContainerElement || this.fieldElement;
-        element.classList.remove(
-            FIELD_VALIDATING_CSS_CLASS,
-            FIELD_VALID_CSS_CLASS,
-            FIELD_INVALID_CSS_CLASS,
-        );
+        element.classList.remove(FIELD_VALIDATING_CSS_CLASS, FIELD_VALID_CSS_CLASS, FIELD_INVALID_CSS_CLASS);
     }
 
     /**
