@@ -113,7 +113,7 @@ Validation is triggered when user submits form. Form is not submitting if form i
 
 | Method                                                                                | Description                                                                                                                                  |
 |---------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------|
-| constructor (fieldSelector: `string`, validators: `object`, options?: `object` = {})  | Initializes field object with validators (see `Field` validators) and options (see `Field` options) for field with `fieldSelector` selector  |
+| constructor (fieldSelector: `string`, validators?: `object`, options?: `object` = {}) | Initializes field object with validators (see `Field` validators) and options (see `Field` options) for field with `fieldSelector` selector  |
 | setOptions(options: `object`): `void`                                                 | Sets options (see `Field` options)                                                                                                           |
 | listen(): `void`                                                                      | Starts listening field for triggering validation and trimming (if enabled)                                                                   |
 | isValid(force: `boolean`): `Promise<boolean>`                                         | Returns boolean validation result  (if field not yet validated  or `force` is `true` then field is validated).                               |

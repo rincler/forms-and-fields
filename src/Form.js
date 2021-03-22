@@ -28,7 +28,7 @@ export default class Form {
 
         this.fields = fields;
 
-        this.submitting = false;
+        this.validatingAllFields = false;
 
         this.onBeforeValidate = options.onBeforeValidate || null;
         this.onAfterValidate = options.onAfterValidate || null;
@@ -76,9 +76,32 @@ export default class Form {
      * @returns {Promise<void>}
      */
     async validate() {
+        this.validatingAllFields = true;
+
+        this.clearCss(ACTION_VALIDATING);
+
+        if (this.onBeforeValidate) {
+            this.onBeforeValidate(this.formElement);
+        }
+
+        this.addCss(FORM_VALIDATING_CSS_CLASS);
+
         for (const field of this.fields) {
             await field.validate();
         }
+
+        this.clearCss(ACTION_VALIDATING);
+
+        const isValid = await this.isValid();
+
+        const cssClass = isValid ? FORM_VALID_CSS_CLASS : FORM_INVALID_CSS_CLASS;
+        this.addCss(cssClass);
+
+        if (this.onAfterValidate) {
+            this.onAfterValidate(isValid, this.formElement);
+        }
+
+        this.validatingAllFields = false;
     }
 
     /**
@@ -105,7 +128,7 @@ export default class Form {
                         options.onBeforeFieldValidate(fieldElement, formElement);
                     }
 
-                    if (this.submitting) {
+                    if (this.validatingAllFields) {
                         return;
                     }
 
@@ -122,7 +145,7 @@ export default class Form {
                         options.onAfterFieldValidate(validationResult, fieldElement, formElement);
                     }
 
-                    if (this.submitting) {
+                    if (this.validatingAllFields) {
                         return;
                     }
 
@@ -160,32 +183,12 @@ export default class Form {
         this.clearCss(ACTION_SUBMITTING);
         this.addCss(FORM_SUBMITTING_CSS_CLASS);
 
-        this.submitting = true;
-
-        this.clearCss(ACTION_VALIDATING);
-
-        if (this.onBeforeValidate) {
-            this.onBeforeValidate(this.formElement);
-        }
-
-        this.addCss(FORM_VALIDATING_CSS_CLASS);
-
         await this.validate();
-
-        this.clearCss(ACTION_VALIDATING);
 
         const isValid = await this.isValid();
 
-        const cssClass = isValid ? FORM_VALID_CSS_CLASS : FORM_INVALID_CSS_CLASS;
-        this.addCss(cssClass);
-
-        if (this.onAfterValidate) {
-            this.onAfterValidate(isValid, this.formElement);
-        }
-
         if (!isValid) {
             this.clearCss(ACTION_SUBMITTING);
-            this.submitting = false;
 
             return;
         }
@@ -202,8 +205,6 @@ export default class Form {
         }
 
         this.clearCss(ACTION_SUBMITTING);
-
-        this.submitting = false;
 
         if (this.onAfterSubmit) {
             this.onAfterSubmit(submissionResult, this.formElement);

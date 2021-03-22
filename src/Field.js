@@ -18,7 +18,7 @@ export default class Field {
      * @param {object} validators
      * @param {object} options
      */
-    constructor(fieldSelector, validators, options = {}) {
+    constructor(fieldSelector, validators = [], options = {}) {
         this.fieldSelector = fieldSelector;
         this.rootElement = options.formElement || document;
 
@@ -96,9 +96,11 @@ export default class Field {
             return this.validationResult.isValid();
         }
 
+        const value = this.getValue();
+
         for (const validatorItem of this.validators) {
             const validatorFn = this.getValidatorFnByValidatorItem(validatorItem);
-            const validationResult = await validatorFn(this.getValue());
+            const validationResult = await validatorFn(value);
 
             if (!validationResult.isValid()) {
                 return false;
@@ -123,10 +125,11 @@ export default class Field {
         this.addCss(FIELD_VALIDATING_CSS_CLASS);
 
         this.validationResult = new ValidationResult(true, this.validMessage);
+        const value = this.getValue();
 
         for (const validatorItem of this.validators) {
             const validatorFn = this.getValidatorFnByValidatorItem(validatorItem);
-            this.validationResult = await validatorFn(this.getValue());
+            this.validationResult = await validatorFn(value);
 
             if (!this.validationResult.isValid()) {
                 break;
@@ -148,11 +151,15 @@ export default class Field {
     }
 
     /**
-     * @private
+     * @public
      *
      * @returns {string}
      */
     getValue() {
+        if (this.trimEnabled && this.trimAllowed()) {
+            this.fieldElement.value = this.fieldElement.value.trim();
+        }
+
         if (this.isCheckbox()) {
             return this.fieldElement.checked;
         }
@@ -217,7 +224,7 @@ export default class Field {
             return (value) => {
                 const params = this.getValidatorParamsByValidatorName(validatorItem);
                 const validatorFn = validator[validatorItem];
-                const isValid = validatorFn(value, ...params);
+                const isValid = value === '' || validatorFn(value, ...params);
 
                 return new ValidationResult(
                     isValid,
@@ -227,7 +234,13 @@ export default class Field {
         }
 
         if (typeof validatorItem === 'function') {
-            return validatorItem;
+            return (value) => {
+                if (value === '') {
+                    return new ValidationResult(true, this.validMessage);
+                }
+
+                return validatorItem(value);
+            };
         }
 
         throw new Error('Invalid validator item.');
@@ -270,14 +283,8 @@ export default class Field {
 
     /**
      * @private
-     *
-     * @param {object} e
      */
-    onChangeListener(e) {
-        if (this.trimEnabled && this.trimAllowed()) {
-            e.target.value = e.target.value.trim();
-        }
-
+    onChangeListener() {
         const value = this.getValue();
 
         if (this.typingDelayId) {
@@ -300,12 +307,12 @@ export default class Field {
 
     /**
      * @private
-     *
-     * @param {object} e
      */
-    onKeyUpListener(e) {
+    onKeyUpListener() {
+        const value = this.getValue();
+
         if (!this.typingDelayId && this.onTypingStart) {
-            this.onTypingStart(this.getValue(), this.fieldElement, this.formElement);
+            this.onTypingStart(value, this.fieldElement, this.formElement);
         }
 
         if (this.typingDelayId) {
@@ -315,12 +322,8 @@ export default class Field {
         this.typingDelayId = setTimeout(() => {
             this.typingDelayId = null;
 
-            if (this.trimEnabled && this.trimAllowed()) {
-                e.target.value = e.target.value.trim();
-            }
-
             if (this.onTypingEnd) {
-                this.onTypingEnd(this.getValue(), this.fieldElement, this.formElement);
+                this.onTypingEnd(value, this.fieldElement, this.formElement);
             }
 
             if (this.validateOnType) {
