@@ -20,7 +20,7 @@
     },
     "homepage": "https://github.com/rincler/forms-and-fields#readme",
     "dependencies": {
-        "validator": "^12.1.0"
+        "validator": "^13.6.0"
     },
     "devDependencies": {
         "@babel/cli": "^7.7.7",
