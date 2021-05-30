@@ -61,7 +61,7 @@ ValidationResult {result: false, message: "Invalid email"}
 When you submit form with valid email:
 ```
 ValidationResult {result: true, message: ""}
-FormData {}
+FormData {...}
 ```
 
 **Extended example:**
