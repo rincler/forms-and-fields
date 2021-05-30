@@ -20,6 +20,7 @@
         "max-len": ["error", { "code": 180 }],
         "no-restricted-syntax": ["warn"],
         "no-await-in-loop": ["warn"],
-        "import/export": ["warn"]
+        "import/export": ["warn"],
+        "no-new": ["warn"]
     }
 }

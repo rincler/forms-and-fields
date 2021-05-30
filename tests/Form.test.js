@@ -28,6 +28,65 @@ beforeEach(() => {
 });
 
 describe('test field options', () => {
+    test('pass options to fields', () => {
+        const invalidMessages = { required: 'this is required' };
+        const defaultInvalidMessage = 'some default invalid message';
+        const validateOnChange = jest.fn();
+        const validateOnType = jest.fn();
+        const typingDelay = 3;
+        const onTypingStart = jest.fn();
+        const onTypingEnd = jest.fn();
+        const onChange = jest.fn();
+        const validatorParams = { foo: 'bar' };
+        const trimEnabled = false;
+
+        const inputField = new Field('.js-input');
+        const checkboxField = new Field('.js-checkbox');
+
+        new Form('.js-form', [inputField, checkboxField], {
+            invalidMessages,
+            defaultInvalidMessage,
+            validateOnChange,
+            validateOnType,
+            typingDelay,
+            onTypingStart,
+            onTypingEnd,
+            onChange,
+            validatorParams,
+            trimEnabled,
+        });
+
+        expect(inputField.invalidMessages).toBe(invalidMessages);
+        expect(checkboxField.invalidMessages).toBe(invalidMessages);
+
+        expect(inputField.defaultInvalidMessage).toBe(defaultInvalidMessage);
+        expect(checkboxField.defaultInvalidMessage).toBe(defaultInvalidMessage);
+
+        expect(inputField.validateOnChange).toBe(validateOnChange);
+        expect(checkboxField.validateOnChange).toBe(validateOnChange);
+
+        expect(inputField.validateOnType).toBe(validateOnType);
+        expect(checkboxField.validateOnType).toBe(validateOnType);
+
+        expect(inputField.typingDelay).toBe(typingDelay);
+        expect(checkboxField.typingDelay).toBe(typingDelay);
+
+        expect(inputField.onTypingStart).toBe(onTypingStart);
+        expect(checkboxField.onTypingStart).toBe(onTypingStart);
+
+        expect(inputField.onTypingEnd).toBe(onTypingEnd);
+        expect(checkboxField.onTypingEnd).toBe(onTypingEnd);
+
+        expect(inputField.onChange).toBe(onChange);
+        expect(checkboxField.onChange).toBe(onChange);
+
+        expect(inputField.validatorParams).toBe(validatorParams);
+        expect(checkboxField.validatorParams).toBe(validatorParams);
+
+        expect(inputField.trimEnabled).toBe(trimEnabled);
+        expect(checkboxField.trimEnabled).toBe(trimEnabled);
+    });
+
     test('onChange is called on change', () => {
         const onChange = jest.fn();
         const form = new Form(

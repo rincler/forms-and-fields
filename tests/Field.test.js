@@ -503,7 +503,7 @@ describe('test init field', () => {
         expect(() => {
             document.body.innerHTML = '<form class="js-form"></form><input class="js-input">';
             const form = document.querySelector('.js-form');
-            Field('.js-input', [], {
+            new Field('.js-input', [], {
                 formElement: form,
             });
         }).toThrow(Error);
