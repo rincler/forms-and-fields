@@ -1,6 +1,7 @@
 # Forms and Fields
 
 [![NPM Version](https://img.shields.io/npm/v/forms-and-fields)](https://www.npmjs.com/package/forms-and-fields)
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/rincler/forms-and-fields/CI)
 
 A library to validation fields and submission forms.
 
