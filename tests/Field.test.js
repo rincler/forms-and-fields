@@ -1,3 +1,7 @@
+/**
+ * @jest-environment jsdom
+ */
+
 import { fireEvent } from '@testing-library/dom';
 import Field from '../src/Field';
 import ValidationResult from '../src/ValidationResult';

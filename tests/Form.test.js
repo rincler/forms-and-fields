@@ -1,3 +1,7 @@
+/**
+ * @jest-environment jsdom
+ */
+
 import { fireEvent, waitFor } from '@testing-library/dom';
 import Field from '../src/Field';
 import Form from '../src/Form';
