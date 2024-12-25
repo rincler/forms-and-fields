@@ -98,8 +98,10 @@ export default class Field {
 
         const value = this.getValue();
 
+        // eslint-disable-next-line no-restricted-syntax
         for (const validatorItem of this.validators) {
             const validatorFn = this.getValidatorFnByValidatorItem(validatorItem);
+            // eslint-disable-next-line no-await-in-loop
             const validationResult = await validatorFn(value);
 
             if (!validationResult.isValid()) {
@@ -127,8 +129,10 @@ export default class Field {
         this.validationResult = new ValidationResult(true, this.validMessage);
         const value = this.getValue();
 
+        // eslint-disable-next-line no-restricted-syntax
         for (const validatorItem of this.validators) {
             const validatorFn = this.getValidatorFnByValidatorItem(validatorItem);
+            // eslint-disable-next-line no-await-in-loop
             this.validationResult = await validatorFn(value);
 
             if (!this.validationResult.isValid()) {

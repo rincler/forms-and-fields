@@ -47,6 +47,7 @@ describe('test field options', () => {
         const inputField = new Field('.js-input');
         const checkboxField = new Field('.js-checkbox');
 
+        // eslint-disable-next-line no-new
         new Form('.js-form', [inputField, checkboxField], {
             invalidMessages,
             defaultInvalidMessage,

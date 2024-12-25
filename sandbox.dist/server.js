@@ -1,9 +1,15 @@
+// eslint-disable-next-line import/no-extraneous-dependencies
 const express = require('express');
 
 const app = express();
 app.use(express.static('sandbox'));
 
 const SERVER_DELAY = 1500;
+
+const sleep = (ms) =>
+    new Promise((resolve) => {
+        setTimeout(resolve, ms);
+    });
 
 app.get('/check-login', async (req, res) => {
     await sleep(SERVER_DELAY);
@@ -28,10 +34,6 @@ app.post('/submit-with-http-error-response', async (req, res) => {
 });
 
 app.listen(3000, () => {
+    // eslint-disable-next-line no-console
     console.log('Sandbox listening on port 3000');
 });
-
-const sleep = (ms) =>
-    new Promise((resolve) => {
-        setTimeout(resolve, ms);
-    });

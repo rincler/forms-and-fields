@@ -222,7 +222,7 @@ describe('test callback options', () => {
     });
 });
 
-describe('test validation result', function () {
+describe('test validation result', () => {
     test('validation result is true in onAfterValidate', async () => {
         const onAfterValidate = (validationResult) => {
             expect(validationResult.isValid()).toBe(true);
@@ -507,6 +507,7 @@ describe('test init field', () => {
         expect(() => {
             document.body.innerHTML = '<form class="js-form"></form><input class="js-input">';
             const form = document.querySelector('.js-form');
+            // eslint-disable-next-line no-new
             new Field('.js-input', [], {
                 formElement: form,
             });

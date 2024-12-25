@@ -3,6 +3,22 @@ import Field from '../src/Field';
 import SubmissionResult from '../src/SubmissionResult';
 import ValidationResult from '../src/ValidationResult';
 
+const mapResponseTypeToUrl = (value) => {
+    if (value === 'success') {
+        return '/submit-with-success-response';
+    }
+
+    if (value === 'error') {
+        return '/submit-with-error-response';
+    }
+
+    if (value === 'http-error') {
+        return '/submit-with-http-error-response';
+    }
+
+    throw new Error('Invalid argument.');
+};
+
 const form = new Form(
     '.js-form',
     [
@@ -25,12 +41,15 @@ const form = new Form(
     ],
     {
         onAfterFieldValidate: (validationResult) => {
+            // eslint-disable-next-line no-console
             console.log(validationResult);
         },
         onChange: (value) => {
+            // eslint-disable-next-line no-console
             console.log(value);
         },
         submit: (formData) => {
+            // eslint-disable-next-line no-console
             console.log(formData);
             // here can be AJAX-request
             return new SubmissionResult(true);
@@ -93,19 +112,3 @@ const registerForm = new Form(
 );
 
 registerForm.listen();
-
-const mapResponseTypeToUrl = (value) => {
-    if (value === 'success') {
-        return '/submit-with-success-response';
-    }
-
-    if (value === 'error') {
-        return '/submit-with-error-response';
-    }
-
-    if (value === 'http-error') {
-        return '/submit-with-http-error-response';
-    }
-
-    throw new Error('Invalid argument.');
-};

@@ -47,6 +47,7 @@ export default class Form {
     listen() {
         this.formElement.addEventListener('submit', this.onSubmitForm.bind(this));
 
+        // eslint-disable-next-line no-restricted-syntax
         for (const field of this.fields) {
             field.listen();
         }
@@ -60,7 +61,9 @@ export default class Form {
      * @returns {Promise<boolean>}
      */
     async isValid(force = false) {
+        // eslint-disable-next-line no-restricted-syntax
         for (const field of this.fields) {
+            // eslint-disable-next-line no-await-in-loop
             const isValid = await field.isValid(force);
             if (!isValid) {
                 return false;
@@ -86,7 +89,9 @@ export default class Form {
 
         this.addCss(FORM_VALIDATING_CSS_CLASS);
 
+        // eslint-disable-next-line no-restricted-syntax
         for (const field of this.fields) {
+            // eslint-disable-next-line no-await-in-loop
             await field.validate();
         }
 
@@ -110,6 +115,7 @@ export default class Form {
      * @param {object} options
      */
     initFields(options) {
+        // eslint-disable-next-line no-restricted-syntax
         for (const field of this.fields) {
             field.setOptions({
                 formElement: this.formElement,
@@ -199,6 +205,7 @@ export default class Form {
             try {
                 submissionResult = await this.submit(formData, this.formElement);
             } catch (error) {
+                // eslint-disable-next-line no-console
                 console.error(error);
                 submissionResult = new SubmissionResult(false);
             }
