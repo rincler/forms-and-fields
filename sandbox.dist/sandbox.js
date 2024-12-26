@@ -22,22 +22,22 @@ const mapResponseTypeToUrl = (value) => {
 const form = new Form(
     '.js-form',
     [
-        new Field('.js-email', ['required', 'isEmail'], {
+        new Field('.js-email', '.js-form', ['required', 'isEmail'], {
             invalidMessages: {
                 required: 'Email is required',
                 isEmail: 'Invalid email',
             },
         }),
-        new Field('.js-secret-word', ['equals'], {
+        new Field('.js-secret-word', '.js-form', ['equals'], {
             validatorParams: {
                 equals: ['sun'],
             },
         }),
-        new Field('.js-sex', ['required']),
-        new Field('.js-agree', ['required']),
-        new Field('.js-city', ['required']),
-        new Field('.js-movie', ['required']),
-        new Field('.js-file', ['required']),
+        new Field('.js-sex', '.js-form', ['required']),
+        new Field('.js-agree', '.js-form', ['required']),
+        new Field('.js-city', '.js-form', ['required']),
+        new Field('.js-movie', '.js-form', ['required']),
+        new Field('.js-file', '.js-form', ['required']),
     ],
     {
         onAfterFieldValidate: (validationResult) => {
@@ -59,7 +59,7 @@ const form = new Form(
 
 form.listen();
 
-const fqdnField = new Field('.js-fqdn', ['required', 'isFQDN'], {
+const fqdnField = new Field('.js-fqdn', undefined, ['required', 'isFQDN'], {
     validateOnType: true,
 });
 
@@ -68,7 +68,7 @@ fqdnField.listen();
 const registerForm = new Form(
     '.js-register-form',
     [
-        new Field('.js-login', [
+        new Field('.js-login', '.js-register-form', [
             'required',
             async (value) => {
                 const response = await fetch(`/check-login?login=${encodeURIComponent(value)}`);
@@ -77,8 +77,8 @@ const registerForm = new Form(
                 return new ValidationResult(result.isValid);
             },
         ]),
-        new Field('.js-password', ['required']),
-        new Field('.js-confirm-password', [
+        new Field('.js-password', '.js-register-form', ['required']),
+        new Field('.js-confirm-password', '.js-register-form', [
             'required',
             (value) => {
                 const password = document.querySelector('.js-password').value;

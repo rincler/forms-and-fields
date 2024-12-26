@@ -7,25 +7,49 @@ const FIELD_INVALID_CSS_CLASS = 'f-field-invalid';
 
 const FIELD_CONTAINER_CSS_CLASS = 'js-f-field-container';
 
-const DEFAULT_TYPING_DELAY = 1000;
-const DEFAULT_ERROR_MESSAGE = 'Invalid value.';
+const NOOP = () => {};
+
+const DEFAULT_OPTIONS = {
+    validMessage: '',
+    invalidMessages: {},
+    defaultInvalidMessage: 'Invalid value.',
+    validateOnChange: false,
+    validateOnType: false,
+    typingDelay: 1000,
+    onTypingStart: NOOP,
+    onTypingEnd: NOOP,
+    onChange: NOOP,
+    validatorParams: {},
+    trimEnabled: true,
+    onBeforeValidate: NOOP,
+    onAfterValidate: NOOP,
+};
 
 export default class Field {
     /**
      * @public
      *
      * @param {string} fieldSelector
-     * @param {object} validators
+     * @param {string} formSelector
+     * @param {array} validators
      * @param {object} options
      */
-    constructor(fieldSelector, validators = [], options = {}) {
-        this.fieldSelector = fieldSelector;
-        this.rootElement = options.formElement || document;
+    constructor(fieldSelector, formSelector = undefined, validators = [], options = {}) {
+        if (formSelector) {
+            this.formElement = document.querySelector(formSelector);
 
+            if (!this.formElement) {
+                throw new Error(`Form element with the "${formSelector}" selector not found.`);
+            }
+        } else {
+            this.formElement = null;
+        }
+
+        this.rootElement = this.formElement || document;
         this.fieldElement = this.rootElement.querySelector(fieldSelector);
 
         if (!this.fieldElement) {
-            throw new Error(`Field element with "${this.fieldSelector}" selector not found.`);
+            throw new Error(`Field element with the "${fieldSelector}" selector not found.`);
         }
 
         if (this.fieldElement.parentElement.classList.contains(FIELD_CONTAINER_CSS_CLASS)) {
@@ -34,7 +58,9 @@ export default class Field {
 
         this.validators = validators;
         this.validationResult = null;
-        this.initOptions(options);
+
+        this.options = {};
+        this.setOptions(options);
     }
 
     /**
@@ -43,29 +69,21 @@ export default class Field {
      * @param {object} options
      */
     setOptions(options) {
-        this.rootElement = options.formElement || document;
+        this.options = {
+            ...this.options,
+            ...options,
+        };
+    }
 
-        this.fieldElement = this.rootElement.querySelector(this.fieldSelector);
-
-        if (!this.fieldElement) {
-            throw new Error(`Field element with "${this.fieldSelector}" selector not found.`);
-        }
-
-        this.formElement = options.formElement || this.formElement;
-        this.validMessage = options.validMessage || this.validMessage;
-        this.invalidMessages = options.invalidMessages || this.invalidMessages;
-        this.defaultInvalidMessage = options.defaultInvalidMessage || this.defaultInvalidMessage;
-        this.validateOnChange =
-            options.validateOnChange !== undefined ? options.validateOnChange : this.validateOnChange;
-        this.validateOnType = options.validateOnType !== undefined ? options.validateOnType : this.validateOnType;
-        this.typingDelay = options.typingDelay || this.typingDelay;
-        this.onTypingStart = options.onTypingStart || this.onTypingStart;
-        this.onTypingEnd = options.onTypingEnd || this.onTypingEnd;
-        this.onChange = options.onChange || this.onChange;
-        this.validatorParams = options.validatorParams || this.validatorParams;
-        this.trimEnabled = options.trimEnabled !== undefined ? options.trimEnabled : this.trimEnabled;
-        this.onBeforeValidate = options.onBeforeValidate || this.onBeforeValidate;
-        this.onAfterValidate = options.onAfterValidate || this.onAfterValidate;
+    /**
+     * @public
+     *
+     * @param {string} name
+     *
+     * @returns {any}
+     */
+    getOption(name) {
+        return this.options[name] !== undefined ? this.options[name] : DEFAULT_OPTIONS[name];
     }
 
     /**
@@ -118,15 +136,17 @@ export default class Field {
      * @returns {Promise<void>}
      */
     async validate() {
+        if (this.validators.length === 0) {
+            return;
+        }
+
         this.clearCss();
 
-        if (this.onBeforeValidate) {
-            this.onBeforeValidate(this.fieldElement, this.formElement);
-        }
+        this.getOption('onBeforeValidate')(this.fieldElement, this.formElement);
 
         this.addCss(FIELD_VALIDATING_CSS_CLASS);
 
-        this.validationResult = new ValidationResult(true, this.validMessage);
+        this.validationResult = new ValidationResult(true, this.getOption('validMessage'));
         const value = this.getValue();
 
         // eslint-disable-next-line no-restricted-syntax
@@ -143,24 +163,22 @@ export default class Field {
         this.clearCss();
 
         if (!this.validationResult.isValid() && !this.validationResult.hasMessage()) {
-            this.validationResult.setMessage(this.defaultInvalidMessage);
+            this.validationResult.setMessage(this.getOption('defaultInvalidMessage'));
         }
 
         const cssClass = this.validationResult.isValid() ? FIELD_VALID_CSS_CLASS : FIELD_INVALID_CSS_CLASS;
         this.addCss(cssClass);
 
-        if (this.onAfterValidate) {
-            this.onAfterValidate(this.validationResult, this.fieldElement, this.formElement);
-        }
+        this.getOption('onAfterValidate')(this.validationResult, this.fieldElement, this.formElement);
     }
 
     /**
      * @public
      *
-     * @returns {string}
+     * @returns {string|string[]|boolean|null}
      */
     getValue() {
-        if (this.trimEnabled && this.trimAllowed()) {
+        if (this.getOption('trimEnabled') && this.trimAllowed()) {
             this.fieldElement.value = this.fieldElement.value.trim();
         }
 
@@ -186,28 +204,6 @@ export default class Field {
     /**
      * @private
      *
-     * @param {object} options
-     */
-    initOptions(options) {
-        this.formElement = options.formElement || null;
-        this.validMessage = options.validMessage || '';
-        this.invalidMessages = options.invalidMessages || {};
-        this.defaultInvalidMessage = options.defaultInvalidMessage || DEFAULT_ERROR_MESSAGE;
-        this.validateOnChange = options.validateOnChange !== undefined ? options.validateOnChange : false;
-        this.validateOnType = options.validateOnType !== undefined ? options.validateOnType : false;
-        this.typingDelay = options.typingDelay || DEFAULT_TYPING_DELAY;
-        this.onTypingStart = options.onTypingStart || null;
-        this.onTypingEnd = options.onTypingEnd || null;
-        this.onChange = options.onChange || null;
-        this.validatorParams = options.validatorParams || {};
-        this.trimEnabled = options.trimEnabled !== undefined ? options.trimEnabled : true;
-        this.onBeforeValidate = options.onBeforeValidate || null;
-        this.onAfterValidate = options.onAfterValidate || null;
-    }
-
-    /**
-     * @private
-     *
      * @param {string|function} validatorItem
      *
      * @returns {function}
@@ -219,20 +215,24 @@ export default class Field {
 
                 return new ValidationResult(
                     isValid,
-                    isValid ? this.validMessage : this.invalidMessages.required || this.defaultInvalidMessage
+                    isValid
+                        ? this.getOption('validMessage')
+                        : this.getInvalidErrorMessage(this.getOption('invalidMessages').required)
                 );
             };
         }
 
         if (typeof validatorItem === 'string') {
             return (value) => {
-                const params = this.getValidatorParamsByValidatorName(validatorItem);
+                const params = this.getOption('validatorParams')[validatorItem] || [];
                 const validatorFn = validator[validatorItem];
                 const isValid = value === '' || validatorFn(value, ...params);
 
                 return new ValidationResult(
                     isValid,
-                    isValid ? this.validMessage : this.getErrorMessageByValidatorName(validatorItem)
+                    isValid
+                        ? this.validMessage
+                        : this.getInvalidErrorMessage(this.getOption('invalidMessages')[validatorItem])
                 );
             };
         }
@@ -240,7 +240,7 @@ export default class Field {
         if (typeof validatorItem === 'function') {
             return (value) => {
                 if (value === '') {
-                    return new ValidationResult(true, this.validMessage);
+                    return new ValidationResult(true, this.getOption('validMessage'));
                 }
 
                 return validatorItem(value);
@@ -248,32 +248,6 @@ export default class Field {
         }
 
         throw new Error('Invalid validator item.');
-    }
-
-    /**
-     * @private
-     *
-     * @param {string} validatorName
-     *
-     * @returns {object}
-     */
-    getValidatorParamsByValidatorName(validatorName) {
-        if (this.validatorParams && this.validatorParams[validatorName]) {
-            return this.validatorParams[validatorName];
-        }
-
-        return [];
-    }
-
-    /**
-     * @private
-     *
-     * @param {string} validatorName
-     *
-     * @returns {string}
-     */
-    getErrorMessageByValidatorName(validatorName) {
-        return this.invalidMessages[validatorName] || this.defaultInvalidMessage;
     }
 
     /**
@@ -294,17 +268,16 @@ export default class Field {
         if (this.typingDelayId) {
             clearTimeout(this.typingDelayId);
             this.typingDelayId = null;
+            this.getOption('onTypingEnd')(value, this.fieldElement, this.formElement);
+            this.getOption('onChange')(value, this.fieldElement, this.formElement);
+            if (this.getOption('validateOnType') || this.getOption('validateOnChange')) {
+                this.validate();
+            }
+            return;
         }
 
-        if (this.onTypingEnd) {
-            this.onTypingEnd(value, this.fieldElement, this.formElement);
-        }
-
-        if (this.onChange) {
-            this.onChange(value, this.fieldElement, this.formElement);
-        }
-
-        if (this.validateOnChange || this.validateOnType) {
+        this.getOption('onChange')(value, this.fieldElement, this.formElement);
+        if (this.getOption('validateOnChange')) {
             this.validate();
         }
     }
@@ -315,25 +288,21 @@ export default class Field {
     onKeyUpListener() {
         const value = this.getValue();
 
-        if (!this.typingDelayId && this.onTypingStart) {
-            this.onTypingStart(value, this.fieldElement, this.formElement);
-        }
-
         if (this.typingDelayId) {
             clearTimeout(this.typingDelayId);
+        } else {
+            this.getOption('onTypingStart')(value, this.fieldElement, this.formElement);
         }
 
         this.typingDelayId = setTimeout(() => {
             this.typingDelayId = null;
 
-            if (this.onTypingEnd) {
-                this.onTypingEnd(value, this.fieldElement, this.formElement);
-            }
+            this.getOption('onTypingEnd')(value, this.fieldElement, this.formElement);
 
-            if (this.validateOnType) {
+            if (this.getOption('validateOnType')) {
                 this.validate();
             }
-        }, this.typingDelay);
+        }, this.getOption('typingDelay'));
     }
 
     /**
@@ -459,5 +428,9 @@ export default class Field {
     addCss(cssClass) {
         const element = this.fieldContainerElement || this.fieldElement;
         element.classList.add(cssClass);
+    }
+
+    getInvalidErrorMessage(invalidErrorMessage) {
+        return invalidErrorMessage || this.getOption('defaultInvalidMessage');
     }
 }
