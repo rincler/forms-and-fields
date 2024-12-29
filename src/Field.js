@@ -35,25 +35,21 @@ export default class Field {
      * @param {object} options
      */
     constructor(fieldSelector, formSelector = undefined, validators = [], options = {}) {
+        this.fieldSelector = fieldSelector;
+        this.formSelector = formSelector;
+
         if (formSelector) {
             this.formElement = document.querySelector(formSelector);
 
             if (!this.formElement) {
                 throw new Error(`Form element with the "${formSelector}" selector not found.`);
             }
+
+            this.rootElement = this.formElement;
         } else {
             this.formElement = null;
-        }
-
-        this.rootElement = this.formElement || document;
-        this.fieldElement = this.rootElement.querySelector(fieldSelector);
-
-        if (!this.fieldElement) {
-            throw new Error(`Field element with the "${fieldSelector}" selector not found.`);
-        }
-
-        if (this.fieldElement.parentElement.classList.contains(FIELD_CONTAINER_CSS_CLASS)) {
-            this.fieldContainerElement = this.fieldElement.parentElement;
+            this.rootElement = document;
+            this.getFieldElement();
         }
 
         this.validators = validators;
@@ -69,10 +65,12 @@ export default class Field {
      * @param {object} options
      */
     setOptions(options) {
-        this.options = {
-            ...this.options,
-            ...options,
-        };
+        // eslint-disable-next-line no-restricted-syntax
+        for (const name of Object.keys(options)) {
+            if (name in DEFAULT_OPTIONS && options[name] !== undefined) {
+                this.options[name] = options[name];
+            }
+        }
     }
 
     /**
@@ -90,6 +88,12 @@ export default class Field {
      * @public
      */
     listen() {
+        if (this.formElement) {
+            this.addDelegatedToFormEventListener('change', this.fieldSelector, this.onChangeListener.bind(this));
+            this.addDelegatedToFormEventListener('keyup', this.fieldSelector, this.onKeyUpListener.bind(this));
+            return;
+        }
+
         if (this.isRadio()) {
             this.getRadioElements().forEach((radioElement) => {
                 radioElement.addEventListener('change', this.onChangeListener.bind(this));
@@ -98,8 +102,8 @@ export default class Field {
             return;
         }
 
-        this.fieldElement.addEventListener('change', this.onChangeListener.bind(this));
-        this.fieldElement.addEventListener('keyup', this.onKeyUpListener.bind(this));
+        this.getFieldElement().addEventListener('change', this.onChangeListener.bind(this));
+        this.getFieldElement().addEventListener('keyup', this.onKeyUpListener.bind(this));
     }
 
     /**
@@ -140,9 +144,11 @@ export default class Field {
             return;
         }
 
+        const fieldElement = this.getFieldElement();
+
         this.clearCss();
 
-        this.getOption('onBeforeValidate')(this.fieldElement, this.formElement);
+        this.getOption('onBeforeValidate')(fieldElement, this.formElement);
 
         this.addCss(FIELD_VALIDATING_CSS_CLASS);
 
@@ -169,7 +175,7 @@ export default class Field {
         const cssClass = this.validationResult.isValid() ? FIELD_VALID_CSS_CLASS : FIELD_INVALID_CSS_CLASS;
         this.addCss(cssClass);
 
-        this.getOption('onAfterValidate')(this.validationResult, this.fieldElement, this.formElement);
+        this.getOption('onAfterValidate')(this.validationResult, fieldElement, this.formElement);
     }
 
     /**
@@ -178,12 +184,14 @@ export default class Field {
      * @returns {string|string[]|boolean|null}
      */
     getValue() {
+        const fieldElement = this.getFieldElement();
+
         if (this.getOption('trimEnabled') && this.trimAllowed()) {
-            this.fieldElement.value = this.fieldElement.value.trim();
+            fieldElement.value = fieldElement.value.trim();
         }
 
         if (this.isCheckbox()) {
-            return this.fieldElement.checked;
+            return fieldElement.checked;
         }
 
         if (this.isRadio()) {
@@ -198,7 +206,54 @@ export default class Field {
             return Array.from(checkedElements).map((element) => element.value);
         }
 
-        return this.fieldElement.value;
+        return fieldElement.value;
+    }
+
+    /**
+     * @private
+     *
+     * @returns {Element}
+     */
+    getFieldElement = () => {
+        const fieldElement = this.rootElement.querySelector(this.fieldSelector);
+        if (!fieldElement) {
+            throw new Error(`Field element with the "${this.fieldSelector}" selector not found.`);
+        }
+        return fieldElement;
+    };
+
+    /**
+     * @private
+     *
+     * @returns {Element|null}
+     */
+    getFieldContainerElement = () => {
+        const fieldElement = this.getFieldElement();
+        return fieldElement.parentElement.classList.contains(FIELD_CONTAINER_CSS_CLASS)
+            ? fieldElement.parentElement
+            : null;
+    };
+
+    /**
+     * @private
+     */
+    addDelegatedToFormEventListener(type, selector, listener, options = undefined) {
+        this.formElement.addEventListener(
+            type,
+            (event) => {
+                const { target } = event;
+
+                if (target.classList.contains(selector.substring(1))) {
+                    if (
+                        target.type !== 'radio' ||
+                        (target.type === 'radio' && target.name === this.getFieldElement().name)
+                    ) {
+                        listener.call(this, event);
+                    }
+                }
+            },
+            options
+        );
     }
 
     /**
@@ -264,19 +319,20 @@ export default class Field {
      */
     onChangeListener() {
         const value = this.getValue();
+        const fieldElement = this.getFieldElement();
 
         if (this.typingDelayId) {
             clearTimeout(this.typingDelayId);
             this.typingDelayId = null;
-            this.getOption('onTypingEnd')(value, this.fieldElement, this.formElement);
-            this.getOption('onChange')(value, this.fieldElement, this.formElement);
+            this.getOption('onTypingEnd')(value, fieldElement, this.formElement);
+            this.getOption('onChange')(value, fieldElement, this.formElement);
             if (this.getOption('validateOnType') || this.getOption('validateOnChange')) {
                 this.validate();
             }
             return;
         }
 
-        this.getOption('onChange')(value, this.fieldElement, this.formElement);
+        this.getOption('onChange')(value, fieldElement, this.formElement);
         if (this.getOption('validateOnChange')) {
             this.validate();
         }
@@ -287,17 +343,18 @@ export default class Field {
      */
     onKeyUpListener() {
         const value = this.getValue();
+        const fieldElement = this.getFieldElement();
 
         if (this.typingDelayId) {
             clearTimeout(this.typingDelayId);
         } else {
-            this.getOption('onTypingStart')(value, this.fieldElement, this.formElement);
+            this.getOption('onTypingStart')(value, fieldElement, this.formElement);
         }
 
         this.typingDelayId = setTimeout(() => {
             this.typingDelayId = null;
 
-            this.getOption('onTypingEnd')(value, this.fieldElement, this.formElement);
+            this.getOption('onTypingEnd')(value, fieldElement, this.formElement);
 
             if (this.getOption('validateOnType')) {
                 this.validate();
@@ -315,7 +372,7 @@ export default class Field {
             return [];
         }
 
-        return this.rootElement.querySelectorAll(`[name=${this.fieldElement.name}]`);
+        return this.rootElement.querySelectorAll(`[name=${this.getFieldElement().name}]`);
     }
 
     /**
@@ -328,7 +385,7 @@ export default class Field {
             return null;
         }
 
-        return this.rootElement.querySelector(`[name=${this.fieldElement.name}]:checked`);
+        return this.rootElement.querySelector(`[name=${this.getFieldElement().name}]:checked`);
     }
 
     /**
@@ -341,7 +398,7 @@ export default class Field {
             return [];
         }
 
-        return this.fieldElement.querySelectorAll('option:checked');
+        return this.getFieldElement().querySelectorAll('option:checked');
     }
 
     /**
@@ -350,7 +407,7 @@ export default class Field {
      * @returns {boolean}
      */
     isText() {
-        return this.fieldElement.type === 'text';
+        return this.getFieldElement().type === 'text';
     }
 
     /**
@@ -359,7 +416,7 @@ export default class Field {
      * @returns {boolean}
      */
     isTextarea() {
-        return this.fieldElement.type === 'textarea';
+        return this.getFieldElement().type === 'textarea';
     }
 
     /**
@@ -368,7 +425,7 @@ export default class Field {
      * @returns {boolean}
      */
     isCheckbox() {
-        return this.fieldElement.type === 'checkbox';
+        return this.getFieldElement().type === 'checkbox';
     }
 
     /**
@@ -377,7 +434,7 @@ export default class Field {
      * @returns {boolean}
      */
     isRadio() {
-        return this.fieldElement.type === 'radio';
+        return this.getFieldElement().type === 'radio';
     }
 
     /**
@@ -386,7 +443,7 @@ export default class Field {
      * @returns {boolean}
      */
     isMultipleSelect() {
-        return this.fieldElement.type === 'select-multiple';
+        return this.getFieldElement().type === 'select-multiple';
     }
 
     /**
@@ -416,7 +473,7 @@ export default class Field {
      * @private
      */
     clearCss() {
-        const element = this.fieldContainerElement || this.fieldElement;
+        const element = this.getFieldContainerElement() || this.getFieldElement();
         element.classList.remove(FIELD_VALIDATING_CSS_CLASS, FIELD_VALID_CSS_CLASS, FIELD_INVALID_CSS_CLASS);
     }
 
@@ -426,7 +483,7 @@ export default class Field {
      * @param {string} cssClass
      */
     addCss(cssClass) {
-        const element = this.fieldContainerElement || this.fieldElement;
+        const element = this.getFieldContainerElement() || this.getFieldElement();
         element.classList.add(cssClass);
     }
 

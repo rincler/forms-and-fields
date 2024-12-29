@@ -15,8 +15,8 @@ beforeEach(() => {
     document.body.innerHTML = `
         <input class="js-input" />
         <input class="js-checkbox" type="checkbox" />
-        <input class="js-radio-1" type="radio" name="radio" value="1">
-        <input class="js-radio-2" type="radio" name="radio" value="2" />
+        <input class="js-radio js-radio-1" type="radio" name="radio" value="1">
+        <input class="js-radio js-radio-2" type="radio" name="radio" value="2" />
         <select class="js-select">
             <option class="js-select-option-1" value="1"></option>
             <option class="js-select-option-2" value="2"></option>
@@ -240,7 +240,7 @@ describe('callback options', () => {
         expect(onTypingEnd.mock.calls[0][2]).toBeNull();
     });
 
-    test('onChange is called on change', () => {
+    test('"onChange" is called on change', () => {
         const onChange = jest.fn();
         const field = new Field('.js-input', undefined, [], {
             onChange,
@@ -541,7 +541,7 @@ describe('test init field', () => {
             document.body.innerHTML = '<form class="js-form"></form><input class="js-input" />';
             // eslint-disable-next-line no-new
             new Field('.js-input', '.js-form', []);
-        }).toThrow(Error);
+        }).not.toThrow(Error);
     });
 
     test('root element is form', () => {
@@ -567,7 +567,7 @@ describe('"getValue"', () => {
     });
 
     test('get radio value', () => {
-        const field = new Field('.js-radio-1');
+        const field = new Field('.js-radio');
         expect(field.getValue()).toBeNull();
         document.querySelector('.js-radio-2').checked = true;
         expect(field.getValue()).toBe('2');
@@ -641,10 +641,10 @@ describe('special css classes', () => {
     test('invalid special css class using container', async () => {
         document.body.innerHTML = `
             <div class="js-wrapped js-f-field-container">
-                <input class="js-radio-1" type="radio" name="radio" value="1" />
-                <input class="js-radio-2" type="radio" name="radio" value="2" />
+                <input class="js-radio" type="radio" name="radio" value="1" />
+                <input class="js-radio" type="radio" name="radio" value="2" />
             </div>`;
-        const field = new Field('.js-radio-1', undefined, ['required']);
+        const field = new Field('.js-radio', undefined, ['required']);
         const wrapped = document.querySelector('.js-wrapped');
         await field.validate();
         expect(wrapped.classList.contains('f-field-invalid')).toBe(true);

@@ -32,6 +32,7 @@ export default class Form {
      * @param {object} options
      */
     constructor(formSelector, fields = [], options = {}) {
+        this.formSelector = formSelector;
         this.formElement = document.querySelector(formSelector);
 
         if (!this.formElement) {
@@ -53,7 +54,7 @@ export default class Form {
     setOptions(options) {
         // eslint-disable-next-line no-restricted-syntax
         for (const name of Object.keys(options)) {
-            if (name in DEFAULT_OPTIONS) {
+            if (name in DEFAULT_OPTIONS && options[name] !== undefined) {
                 this.options[name] = options[name];
             }
         }

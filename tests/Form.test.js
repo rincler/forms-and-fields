@@ -18,15 +18,15 @@ beforeEach(() => {
         <form class="js-form">
             <input class="js-input" name="input-name" />
             <input class="js-checkbox" type="checkbox" name="checkbox-name" />
-            <input class="js-radio-1" type="radio" name="radio-name" value="1" />
-            <input class="js-radio-2" type="radio" name="radio-name" value="2" />
+            <input class="js-radio" type="radio" name="radio-name" value="1" />
+            <input class="js-radio" type="radio" name="radio-name" value="2" />
             <select class="js-select" name="select-name">
-                <option class="js-select-option-1" value="1"></option>
-                <option class="js-select-option-2" value="2"></option>
+                <option value="1"></option>
+                <option value="2"></option>
             </select>
-            <select multiple class="js-mselect" name="mselect-name">
-                <option class="js-mselect-option-1" value="1"></option>
-                <option class="js-mselect-option-2" value="2"></option>
+            <select multiple class="js-multi-select" name="multi-select-name">
+                <option value="1"></option>
+                <option value="2"></option>
             </select>
             <textarea class="js-textarea" name="textarea-name"></textarea>
         </form>`;
@@ -97,23 +97,37 @@ describe('field options', () => {
         expect(checkboxField.getOption('trimEnabled')).toBe(trimEnabled);
     });
 
-    test('"onChange" is called on change', () => {
+    test('"onChange" is called on text input change', () => {
         const onChange = jest.fn();
-        const form = new Form(
-            '.js-form',
-            [new Field('.js-input', '.js-form', ['required']), new Field('.js-checkbox', '.js-form', ['required'])],
-            {
-                onChange,
-            }
-        );
+        const form = new Form('.js-form', [new Field('.js-input', '.js-form')], {
+            onChange,
+        });
         form.listen();
 
         input.value = 'foo';
 
         fireEvent.change(input, { target: { value: 'bar' } });
 
+        expect(onChange).toHaveBeenCalled();
         expect(onChange.mock.calls[0][0]).toBe('bar');
         expect(onChange.mock.calls[0][1]).toBe(input);
+        expect(onChange.mock.calls[0][2]).toBe(formElement);
+    });
+
+    test('"onChange" is called on radio input change', () => {
+        const onChange = jest.fn();
+        const form = new Form('.js-form', [new Field('.js-radio', '.js-form')], {
+            onChange,
+        });
+        form.listen();
+
+        const radio = document.querySelector('.js-radio');
+
+        fireEvent.click(radio);
+
+        expect(onChange).toHaveBeenCalled();
+        expect(onChange.mock.calls[0][0]).toBe('1');
+        expect(onChange.mock.calls[0][1]).toBe(radio);
         expect(onChange.mock.calls[0][2]).toBe(formElement);
     });
 });
@@ -481,6 +495,53 @@ describe('submit callback options', () => {
             expect(submit.mock.calls[0][0]).toStrictEqual(formData);
             expect(submit.mock.calls[0][1]).toBe(formElement);
         });
+    });
+});
+
+describe('dynamic inputs', () => {
+    test('"onChange" is called on text input change', () => {
+        const onChange = jest.fn();
+        const form = new Form('.js-form', [new Field('.js-dynamic-input', '.js-form')], {
+            onChange,
+        });
+        form.listen();
+
+        document
+            .querySelector('.js-form')
+            .insertAdjacentHTML('beforeend', '<input class="js-dynamic-input" name="dynamic-input-name" />');
+
+        const dynamicInput = document.querySelector('.js-dynamic-input');
+        dynamicInput.value = 'foo';
+
+        fireEvent.change(dynamicInput, { target: { value: 'bar' } });
+
+        expect(onChange).toHaveBeenCalled();
+        expect(onChange.mock.calls[0][0]).toBe('bar');
+        expect(onChange.mock.calls[0][1]).toBe(dynamicInput);
+        expect(onChange.mock.calls[0][2]).toBe(formElement);
+    });
+
+    test('"onChange" is called on radio input change', () => {
+        const onChange = jest.fn();
+        const form = new Form('.js-form', [new Field('.js-dynamic-radio', '.js-form')], {
+            onChange,
+        });
+        form.listen();
+
+        document.querySelector('.js-form').insertAdjacentHTML(
+            'beforeend',
+            `<input class="js-dynamic-radio" type="radio" name="dynamic-radio-name" value="1" />
+                  <input class="js-dynamic-radio" type="radio" name="dynamic-radio-name" value="2" />`
+        );
+
+        const dynamicRadio = document.querySelector('.js-dynamic-radio');
+
+        fireEvent.click(dynamicRadio);
+
+        expect(onChange).toHaveBeenCalled();
+        expect(onChange.mock.calls[0][0]).toBe('1');
+        expect(onChange.mock.calls[0][1]).toBe(dynamicRadio);
+        expect(onChange.mock.calls[0][2]).toBe(formElement);
     });
 });
 
