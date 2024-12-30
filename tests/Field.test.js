@@ -14,6 +14,8 @@ jest.useFakeTimers();
 beforeEach(() => {
     document.body.innerHTML = `
         <input class="js-input" />
+        <input class="js-list-input" name="list-input-name[0]" />
+        <input class="js-list-input" name="list-input-name[1]" />
         <input class="js-checkbox" type="checkbox" />
         <input class="js-radio js-radio-1" type="radio" name="radio" value="1">
         <input class="js-radio js-radio-2" type="radio" name="radio" value="2" />
@@ -240,7 +242,7 @@ describe('callback options', () => {
         expect(onTypingEnd.mock.calls[0][2]).toBeNull();
     });
 
-    test('"onChange" is called on change', () => {
+    test('"onChange" is called on text input change', () => {
         const onChange = jest.fn();
         const field = new Field('.js-input', undefined, [], {
             onChange,
@@ -251,6 +253,40 @@ describe('callback options', () => {
 
         expect(onChange.mock.calls[0][0]).toBe('bar');
         expect(onChange.mock.calls[0][1]).toBe(input);
+        expect(onChange.mock.calls[0][2]).toBeNull();
+    });
+
+    test('"onChange" is called on text input (one of the list) change', () => {
+        const onChange = jest.fn();
+        const field = new Field('.js-list-input', undefined, [], {
+            onChange,
+        });
+        field.listen();
+
+        const listInput = document.querySelectorAll('.js-list-input');
+        listInput[1].value = 'foo';
+
+        fireEvent.change(listInput[1], { target: { value: 'bar' } });
+
+        expect(onChange).toHaveBeenCalled();
+        expect(onChange.mock.calls[0][0]).toBe('bar');
+        expect(onChange.mock.calls[0][1]).toBe(listInput[1]);
+        expect(onChange.mock.calls[0][2]).toBeNull();
+    });
+
+    test('"onChange" is called on radio input change', () => {
+        const onChange = jest.fn();
+        const field = new Field('.js-radio', undefined, [], {
+            onChange,
+        });
+        field.listen();
+
+        const radio = document.querySelectorAll('.js-radio');
+
+        fireEvent.click(radio[1]);
+
+        expect(onChange.mock.calls[0][0]).toBe('2');
+        expect(onChange.mock.calls[0][1]).toBe(radio[1]);
         expect(onChange.mock.calls[0][2]).toBeNull();
     });
 });

@@ -89,8 +89,8 @@ export default class Field {
      */
     listen() {
         if (this.formElement) {
-            this.addDelegatedToFormEventListener('change', this.fieldSelector, this.onChangeListener.bind(this));
-            this.addDelegatedToFormEventListener('keyup', this.fieldSelector, this.onKeyUpListener.bind(this));
+            this.addEventListenerDelegatedToForm('change', this.onChangeListener, this.fieldSelector);
+            this.addEventListenerDelegatedToForm('keyup', this.onKeyUpListener, this.fieldSelector);
             return;
         }
 
@@ -100,6 +100,13 @@ export default class Field {
             });
 
             return;
+        }
+
+        if (this.isList()) {
+            this.getOtherListElements().forEach((listElement) => {
+                const field = this.createFieldForElement(listElement);
+                field.listen();
+            });
         }
 
         this.getFieldElement().addEventListener('change', this.onChangeListener.bind(this));
@@ -219,6 +226,14 @@ export default class Field {
         if (!fieldElement) {
             throw new Error(`Field element with the "${this.fieldSelector}" selector not found.`);
         }
+
+        if (fieldElement.type === 'radio') {
+            const checkedRadioElement = this.rootElement.querySelector(`[name=${fieldElement.name}]:checked`);
+            if (checkedRadioElement) {
+                return checkedRadioElement;
+            }
+        }
+
         return fieldElement;
     };
 
@@ -237,23 +252,20 @@ export default class Field {
     /**
      * @private
      */
-    addDelegatedToFormEventListener(type, selector, listener, options = undefined) {
-        this.formElement.addEventListener(
-            type,
-            (event) => {
-                const { target } = event;
+    addEventListenerDelegatedToForm(type, listener, selector) {
+        this.formElement.addEventListener(type, (event) => {
+            const { target } = event;
 
-                if (target.classList.contains(selector.substring(1))) {
-                    if (
-                        target.type !== 'radio' ||
-                        (target.type === 'radio' && target.name === this.getFieldElement().name)
-                    ) {
-                        listener.call(this, event);
-                    }
+            if (target.classList.contains(selector.substring(1))) {
+                let field = this;
+                if (this.isList()) {
+                    const listElement = this.getOtherListElements().find((e) => e.isEqualNode(target));
+                    field = this.createFieldForElement(listElement);
                 }
-            },
-            options
-        );
+
+                listener.call(field, target);
+            }
+        });
     }
 
     /**
@@ -341,7 +353,7 @@ export default class Field {
     /**
      * @private
      */
-    onKeyUpListener() {
+    async onKeyUpListener() {
         const value = this.getValue();
         const fieldElement = this.getFieldElement();
 
@@ -360,6 +372,24 @@ export default class Field {
                 this.validate();
             }
         }, this.getOption('typingDelay'));
+    }
+
+    /**
+     * @private
+     *
+     * @returns {Element[]}
+     */
+    getOtherListElements() {
+        return Array.from(this.rootElement.querySelectorAll(this.fieldSelector)).slice(1);
+    }
+
+    /**
+     * @private
+     *
+     * @returns {Field[]}
+     */
+    getOtherListFields() {
+        return this.getOtherListElements().map((listElement) => this.createFieldForElement(listElement));
     }
 
     /**
@@ -408,6 +438,15 @@ export default class Field {
      */
     isText() {
         return this.getFieldElement().type === 'text';
+    }
+
+    /**
+     * @private
+     *
+     * @returns {boolean}
+     */
+    isList() {
+        return this.rootElement.querySelectorAll(this.fieldSelector).length > 1;
     }
 
     /**
@@ -489,5 +528,20 @@ export default class Field {
 
     getInvalidErrorMessage(invalidErrorMessage) {
         return invalidErrorMessage || this.getOption('defaultInvalidMessage');
+    }
+
+    /**
+     * @private
+     */
+    createFieldForElement(element) {
+        const fieldId = Date.now();
+        // eslint-disable-next-line no-param-reassign
+        element.dataset.fieldId = fieldId;
+        return new Field(
+            `${this.fieldSelector}[data-field-id="${fieldId}"]`,
+            this.formSelector,
+            this.validators,
+            this.options
+        );
     }
 }

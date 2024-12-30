@@ -92,16 +92,8 @@ export default class Form {
      * @returns {Promise<boolean>}
      */
     async isValid(force = false) {
-        // eslint-disable-next-line no-restricted-syntax
-        for (const field of this.fields) {
-            // eslint-disable-next-line no-await-in-loop
-            const isValid = await field.isValid(force);
-            if (!isValid) {
-                return false;
-            }
-        }
-
-        return true;
+        const result = await Promise.all(this.getAllFields().map((field) => field.isValid(force)));
+        return result.every((isValid) => isValid);
     }
 
     /**
@@ -123,7 +115,7 @@ export default class Form {
         this.addCss(FORM_VALIDATING_CSS_CLASS);
 
         // eslint-disable-next-line no-restricted-syntax
-        for (const field of this.fields) {
+        for (const field of this.getAllFields()) {
             // eslint-disable-next-line no-await-in-loop
             await field.validate();
         }
@@ -252,6 +244,26 @@ export default class Form {
 
             this.getOption('onAfterSubmitError')(submissionResult.getData(), this.formElement);
         }
+    }
+
+    /**
+     * @private
+     *
+     * @returns {Field[]}
+     */
+    getAllFields() {
+        const fields = [];
+
+        // eslint-disable-next-line no-restricted-syntax
+        for (const field of this.fields) {
+            fields.push(field);
+
+            if (field.isList()) {
+                fields.push(...field.getOtherListFields());
+            }
+        }
+
+        return fields;
     }
 
     /**

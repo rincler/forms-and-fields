@@ -17,6 +17,8 @@ beforeEach(() => {
     document.body.innerHTML = `
         <form class="js-form">
             <input class="js-input" name="input-name" />
+            <input class="js-list-input" name="list-input-name[0]" />
+            <input class="js-list-input" name="list-input-name[1]" />
             <input class="js-checkbox" type="checkbox" name="checkbox-name" />
             <input class="js-radio" type="radio" name="radio-name" value="1" />
             <input class="js-radio" type="radio" name="radio-name" value="2" />
@@ -114,6 +116,24 @@ describe('field options', () => {
         expect(onChange.mock.calls[0][2]).toBe(formElement);
     });
 
+    test('"onChange" is called on text input (one of the list) change', () => {
+        const onChange = jest.fn();
+        const form = new Form('.js-form', [new Field('.js-list-input', '.js-form')], {
+            onChange,
+        });
+        form.listen();
+
+        const listInput = document.querySelectorAll('.js-list-input');
+        listInput[1].value = 'foo';
+
+        fireEvent.change(listInput[1], { target: { value: 'bar' } });
+
+        expect(onChange).toHaveBeenCalled();
+        expect(onChange.mock.calls[0][0]).toBe('bar');
+        expect(onChange.mock.calls[0][1]).toBe(listInput[1]);
+        expect(onChange.mock.calls[0][2]).toBe(formElement);
+    });
+
     test('"onChange" is called on radio input change', () => {
         const onChange = jest.fn();
         const form = new Form('.js-form', [new Field('.js-radio', '.js-form')], {
@@ -121,13 +141,13 @@ describe('field options', () => {
         });
         form.listen();
 
-        const radio = document.querySelector('.js-radio');
+        const radio = document.querySelectorAll('.js-radio');
 
-        fireEvent.click(radio);
+        fireEvent.click(radio[1]);
 
         expect(onChange).toHaveBeenCalled();
-        expect(onChange.mock.calls[0][0]).toBe('1');
-        expect(onChange.mock.calls[0][1]).toBe(radio);
+        expect(onChange.mock.calls[0][0]).toBe('2');
+        expect(onChange.mock.calls[0][1]).toBe(radio[1]);
         expect(onChange.mock.calls[0][2]).toBe(formElement);
     });
 });
@@ -534,14 +554,54 @@ describe('dynamic inputs', () => {
                   <input class="js-dynamic-radio" type="radio" name="dynamic-radio-name" value="2" />`
         );
 
-        const dynamicRadio = document.querySelector('.js-dynamic-radio');
+        const dynamicRadio = document.querySelectorAll('.js-dynamic-radio');
 
-        fireEvent.click(dynamicRadio);
+        fireEvent.click(dynamicRadio[1]);
 
         expect(onChange).toHaveBeenCalled();
-        expect(onChange.mock.calls[0][0]).toBe('1');
-        expect(onChange.mock.calls[0][1]).toBe(dynamicRadio);
+        expect(onChange.mock.calls[0][0]).toBe('2');
+        expect(onChange.mock.calls[0][1]).toBe(dynamicRadio[1]);
         expect(onChange.mock.calls[0][2]).toBe(formElement);
+    });
+
+    test('"isValid" is called for all list', async () => {
+        const form = new Form('.js-form', [new Field('.js-dynamic-input', '.js-form', ['required'])]);
+
+        document.querySelector('.js-form').insertAdjacentHTML(
+            'beforeend',
+            `
+                <input class="js-dynamic-input" name="dynamic-input-name[0]" />
+                <input class="js-dynamic-input" name="dynamic-input-name[1]" />
+            `
+        );
+
+        const dynamicInput = document.querySelectorAll('.js-dynamic-input');
+        dynamicInput[0].value = 'foo';
+
+        const isValid = await form.isValid(true);
+
+        expect(isValid).toBeFalsy();
+    });
+
+    test('"validate" is called for all list', async () => {
+        const form = new Form('.js-form', [new Field('.js-dynamic-input', '.js-form', ['required'])]);
+
+        document.querySelector('.js-form').insertAdjacentHTML(
+            'beforeend',
+            `
+                <input class="js-dynamic-input" name="dynamic-input-name[0]" />
+                <input class="js-dynamic-input" name="dynamic-input-name[1]" />
+            `
+        );
+
+        const dynamicInput = document.querySelectorAll('.js-dynamic-input');
+        dynamicInput[0].value = 'foo';
+
+        await form.validate();
+
+        const isValid = await form.isValid();
+
+        expect(isValid).toBeFalsy();
     });
 });
 
