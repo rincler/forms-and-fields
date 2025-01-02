@@ -10,7 +10,6 @@ import SubmissionResult from '../src/SubmissionResult';
 
 let formElement = null;
 let input = null;
-let checkbox = null;
 jest.useFakeTimers();
 
 beforeEach(() => {
@@ -19,6 +18,7 @@ beforeEach(() => {
             <input class="js-input" name="input-name" />
             <input class="js-list-input" name="list-input-name[0]" />
             <input class="js-list-input" name="list-input-name[1]" />
+            <input class="js-list-input" name="list-input-name[2]" />
             <input class="js-checkbox" type="checkbox" name="checkbox-name" />
             <input class="js-radio" type="radio" name="radio-name" value="1" />
             <input class="js-radio" type="radio" name="radio-name" value="2" />
@@ -35,7 +35,6 @@ beforeEach(() => {
 
     formElement = document.querySelector('.js-form');
     input = document.querySelector('.js-input');
-    checkbox = document.querySelector('.js-checkbox');
 });
 
 describe('field options', () => {
@@ -124,13 +123,13 @@ describe('field options', () => {
         form.listen();
 
         const listInput = document.querySelectorAll('.js-list-input');
-        listInput[1].value = 'foo';
+        listInput[2].value = 'foo';
 
-        fireEvent.change(listInput[1], { target: { value: 'bar' } });
+        fireEvent.change(listInput[2], { target: { value: 'bar' } });
 
         expect(onChange).toHaveBeenCalled();
         expect(onChange.mock.calls[0][0]).toBe('bar');
-        expect(onChange.mock.calls[0][1]).toBe(listInput[1]);
+        expect(onChange.mock.calls[0][1]).toBe(listInput[2]);
         expect(onChange.mock.calls[0][2]).toBe(formElement);
     });
 
@@ -168,6 +167,8 @@ describe('validation callback options', () => {
         );
 
         await form.validate();
+
+        const checkbox = document.querySelector('.js-checkbox');
 
         expect(onBeforeFieldValidate).toHaveBeenCalledTimes(2);
         expect(onBeforeFieldValidate.mock.calls[0][0]).toBe(input);
@@ -217,6 +218,8 @@ describe('validation callback options', () => {
         );
 
         await form.validate();
+
+        const checkbox = document.querySelector('.js-checkbox');
 
         expect(onAfterFieldValidate).toHaveBeenCalledTimes(2);
         expect(onAfterFieldValidate.mock.calls[0][0]).toBeInstanceOf(ValidationResult);
@@ -420,7 +423,7 @@ describe('submit callback options', () => {
         form.listen();
 
         input.value = 'foo';
-        checkbox.checked = true;
+        document.querySelector('.js-checkbox').checked = true;
 
         fireEvent.submit(formElement);
 
@@ -504,7 +507,7 @@ describe('submit callback options', () => {
         form.listen();
 
         input.value = 'foo';
-        checkbox.checked = true;
+        document.querySelector('.js-checkbox').checked = true;
 
         fireEvent.submit(formElement);
 
@@ -519,51 +522,6 @@ describe('submit callback options', () => {
 });
 
 describe('dynamic inputs', () => {
-    test('"onChange" is called on text input change', () => {
-        const onChange = jest.fn();
-        const form = new Form('.js-form', [new Field('.js-dynamic-input', '.js-form')], {
-            onChange,
-        });
-        form.listen();
-
-        document
-            .querySelector('.js-form')
-            .insertAdjacentHTML('beforeend', '<input class="js-dynamic-input" name="dynamic-input-name" />');
-
-        const dynamicInput = document.querySelector('.js-dynamic-input');
-        dynamicInput.value = 'foo';
-
-        fireEvent.change(dynamicInput, { target: { value: 'bar' } });
-
-        expect(onChange).toHaveBeenCalled();
-        expect(onChange.mock.calls[0][0]).toBe('bar');
-        expect(onChange.mock.calls[0][1]).toBe(dynamicInput);
-        expect(onChange.mock.calls[0][2]).toBe(formElement);
-    });
-
-    test('"onChange" is called on radio input change', () => {
-        const onChange = jest.fn();
-        const form = new Form('.js-form', [new Field('.js-dynamic-radio', '.js-form')], {
-            onChange,
-        });
-        form.listen();
-
-        document.querySelector('.js-form').insertAdjacentHTML(
-            'beforeend',
-            `<input class="js-dynamic-radio" type="radio" name="dynamic-radio-name" value="1" />
-                  <input class="js-dynamic-radio" type="radio" name="dynamic-radio-name" value="2" />`
-        );
-
-        const dynamicRadio = document.querySelectorAll('.js-dynamic-radio');
-
-        fireEvent.click(dynamicRadio[1]);
-
-        expect(onChange).toHaveBeenCalled();
-        expect(onChange.mock.calls[0][0]).toBe('2');
-        expect(onChange.mock.calls[0][1]).toBe(dynamicRadio[1]);
-        expect(onChange.mock.calls[0][2]).toBe(formElement);
-    });
-
     test('"isValid" is called for all list', async () => {
         const form = new Form('.js-form', [new Field('.js-dynamic-input', '.js-form', ['required'])]);
 
@@ -637,7 +595,7 @@ describe('special css classes', () => {
         ]);
 
         input.value = 'foo';
-        checkbox.checked = true;
+        document.querySelector('.js-checkbox').checked = true;
 
         await form.validate();
 

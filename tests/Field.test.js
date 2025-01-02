@@ -7,32 +7,31 @@ import Field from '../src/Field';
 import ValidationResult from '../src/ValidationResult';
 
 let input = null;
-let checkbox = null;
-let textarea = null;
 jest.useFakeTimers();
 
 beforeEach(() => {
     document.body.innerHTML = `
-        <input class="js-input" />
-        <input class="js-list-input" name="list-input-name[0]" />
-        <input class="js-list-input" name="list-input-name[1]" />
-        <input class="js-checkbox" type="checkbox" />
-        <input class="js-radio js-radio-1" type="radio" name="radio" value="1">
-        <input class="js-radio js-radio-2" type="radio" name="radio" value="2" />
-        <select class="js-select">
-            <option class="js-select-option-1" value="1"></option>
-            <option class="js-select-option-2" value="2"></option>
-        </select>
-        <select multiple class="js-multi-select">
-            <option class="js-multi-select-option-1" value="1"></option>
-            <option class="js-multi-select-option-2" value="2"></option>
-        </select>
-        <textarea class="js-textarea"></textarea>
+        <div class="js-container">
+            <input class="js-input" />
+            <input class="js-list-input js-list-input-1" name="list-input-name[0]" />
+            <input class="js-list-input js-list-input-2" name="list-input-name[1]" />
+            <input class="js-list-input js-list-input-3" name="list-input-name[2]" />
+            <input class="js-checkbox" type="checkbox" />
+            <input class="js-radio js-radio-1" type="radio" name="radio" value="1">
+            <input class="js-radio js-radio-2" type="radio" name="radio" value="2" />
+            <select class="js-select">
+                <option class="js-select-option-1" value="1"></option>
+                <option class="js-select-option-2" value="2"></option>
+            </select>
+            <select multiple class="js-multi-select">
+                <option class="js-multi-select-option-1" value="1"></option>
+                <option class="js-multi-select-option-2" value="2"></option>
+            </select>
+            <textarea class="js-textarea"></textarea>
+        </div>
     `;
 
     input = document.querySelector('.js-input');
-    checkbox = document.querySelector('.js-checkbox');
-    textarea = document.querySelector('.js-textarea');
 });
 
 describe('"validateOnType" and "validateOnChange" options', () => {
@@ -42,7 +41,7 @@ describe('"validateOnType" and "validateOnChange" options', () => {
         [true, false, 1],
         [true, true, 2],
     ])('Type and change. validateOnType=%s, validateOnChange=%s', (validateOnType, validateOnChange, times) => {
-        const field = new Field('.js-input', undefined, ['required'], {
+        const field = new Field('.js-input', '.js-container', ['required'], {
             validateOnType,
             validateOnChange,
         });
@@ -64,7 +63,7 @@ describe('"validateOnType" and "validateOnChange" options', () => {
         [true, false, 3],
         [true, true, 4],
     ])('Type slowly and change. validateOnType=%s, validateOnChange=%s', (validateOnType, validateOnChange, times) => {
-        const field = new Field('.js-input', undefined, ['required'], {
+        const field = new Field('.js-input', '.js-container', ['required'], {
             validateOnType,
             validateOnChange,
         });
@@ -90,7 +89,7 @@ describe('"validateOnType" and "validateOnChange" options', () => {
     ])(
         'Type and change immediately. validateOnType=%s, validateOnChange=%s',
         (validateOnType, validateOnChange, times) => {
-            const field = new Field('.js-input', undefined, ['required'], {
+            const field = new Field('.js-input', '.js-container', ['required'], {
                 validateOnType,
                 validateOnChange,
             });
@@ -115,7 +114,7 @@ describe('"validateOnType" and "validateOnChange" options', () => {
     ])(
         'Type slowly and change immediately. validateOnType=%s, validateOnChange=%s',
         (validateOnType, validateOnChange, times) => {
-            const field = new Field('.js-input', undefined, ['required'], {
+            const field = new Field('.js-input', '.js-container', ['required'], {
                 validateOnType,
                 validateOnChange,
             });
@@ -135,7 +134,7 @@ describe('"validateOnType" and "validateOnChange" options', () => {
     );
 
     test('"validate" is not called on type when "validateOnChange" is true', () => {
-        const field = new Field('.js-input', undefined, ['required'], {
+        const field = new Field('.js-input', '.js-container', ['required'], {
             validateOnChange: true,
         });
         field.validate = jest.fn();
@@ -148,7 +147,7 @@ describe('"validateOnType" and "validateOnChange" options', () => {
     });
 
     test('"validate" is not called on change when "validateOnType" is true', () => {
-        const field = new Field('.js-input', undefined, ['required'], {
+        const field = new Field('.js-input', '.js-container', ['required'], {
             validateOnType: true,
         });
         field.validate = jest.fn();
@@ -163,7 +162,7 @@ describe('"validateOnType" and "validateOnChange" options', () => {
 describe('validation callback options', () => {
     test('"onBeforeValidate" is called', async () => {
         const onBeforeValidate = jest.fn();
-        const field = new Field('.js-input', undefined, ['required'], {
+        const field = new Field('.js-input', '.js-container', ['required'], {
             onBeforeValidate,
         });
 
@@ -176,7 +175,7 @@ describe('validation callback options', () => {
 
     test('"onAfterValidate" is called', async () => {
         const onAfterValidate = jest.fn();
-        const field = new Field('.js-input', undefined, ['required'], {
+        const field = new Field('.js-input', '.js-container', ['required'], {
             onAfterValidate,
         });
 
@@ -192,7 +191,7 @@ describe('validation callback options', () => {
 describe('callback options', () => {
     test('"onTypingStart" is called on key up', () => {
         const onTypingStart = jest.fn();
-        const field = new Field('.js-input', undefined, [], {
+        const field = new Field('.js-input', '.js-container', [], {
             onTypingStart,
         });
         field.listen();
@@ -208,7 +207,7 @@ describe('callback options', () => {
 
     test('"onTypingEnd" is called  on key up', () => {
         const onTypingEnd = jest.fn();
-        const field = new Field('.js-input', undefined, [], {
+        const field = new Field('.js-input', '.js-container', [], {
             onTypingEnd,
         });
         field.listen();
@@ -228,7 +227,7 @@ describe('callback options', () => {
 
     test('"onTypingEnd" is called on change', () => {
         const onTypingEnd = jest.fn();
-        const field = new Field('.js-input', undefined, [], {
+        const field = new Field('.js-input', '.js-container', [], {
             onTypingEnd,
         });
         field.listen();
@@ -244,49 +243,120 @@ describe('callback options', () => {
 
     test('"onChange" is called on text input change', () => {
         const onChange = jest.fn();
-        const field = new Field('.js-input', undefined, [], {
+        const field = new Field('.js-input', '.js-container', [], {
             onChange,
         });
         field.listen();
         input.value = 'foo';
         fireEvent.change(input, { target: { value: 'bar' } });
 
+        expect(onChange).toHaveBeenCalled();
         expect(onChange.mock.calls[0][0]).toBe('bar');
         expect(onChange.mock.calls[0][1]).toBe(input);
         expect(onChange.mock.calls[0][2]).toBeNull();
     });
 
-    test('"onChange" is called on text input (one of the list) change', () => {
+    test('"onChange" is called on text input (which is added programmatically) change', () => {
         const onChange = jest.fn();
-        const field = new Field('.js-list-input', undefined, [], {
+        const field = new Field('.js-dynamic-input', '.js-container', [], {
             onChange,
         });
         field.listen();
 
-        const listInput = document.querySelectorAll('.js-list-input');
-        listInput[1].value = 'foo';
+        document
+            .querySelector('.js-container')
+            .insertAdjacentHTML('beforeend', '<input class="js-dynamic-input" name="dynamic-input-name" />');
 
-        fireEvent.change(listInput[1], { target: { value: 'bar' } });
+        const dynamicInput = document.querySelector('.js-dynamic-input');
+        dynamicInput.value = 'foo';
+        fireEvent.change(dynamicInput, { target: { value: 'bar' } });
 
         expect(onChange).toHaveBeenCalled();
         expect(onChange.mock.calls[0][0]).toBe('bar');
-        expect(onChange.mock.calls[0][1]).toBe(listInput[1]);
+        expect(onChange.mock.calls[0][1]).toBe(dynamicInput);
+        expect(onChange.mock.calls[0][2]).toBeNull();
+    });
+
+    test('"onChange" is called on text input (which is one of the list) change', () => {
+        const onChange = jest.fn();
+        const field = new Field('.js-list-input', '.js-container', [], {
+            onChange,
+        });
+        field.listen();
+
+        const listInput = document.querySelector('.js-list-input-3');
+        listInput.value = 'foo';
+
+        fireEvent.change(listInput, { target: { value: 'bar' } });
+
+        expect(onChange).toHaveBeenCalled();
+        expect(onChange.mock.calls[0][0]).toBe('bar');
+        expect(onChange.mock.calls[0][1]).toBe(listInput);
+        expect(onChange.mock.calls[0][2]).toBeNull();
+    });
+
+    test('"onChange" is called on text input (which is one of the list and added programmatically) change', () => {
+        const onChange = jest.fn();
+        const field = new Field('.js-list-input', '.js-container', [], {
+            onChange,
+        });
+        field.listen();
+
+        document
+            .querySelector('.js-container')
+            .insertAdjacentHTML(
+                'beforeend',
+                `<input class="js-list-input js-dynamic-input-x" name="list-input-name[x]" />`
+            );
+
+        const dynamicListInput = document.querySelector('.js-dynamic-input-x');
+        dynamicListInput.value = 'foo';
+
+        fireEvent.change(dynamicListInput, { target: { value: 'bar' } });
+
+        expect(onChange).toHaveBeenCalled();
+        expect(onChange.mock.calls[0][0]).toBe('bar');
+        expect(onChange.mock.calls[0][1]).toBe(dynamicListInput);
         expect(onChange.mock.calls[0][2]).toBeNull();
     });
 
     test('"onChange" is called on radio input change', () => {
         const onChange = jest.fn();
-        const field = new Field('.js-radio', undefined, [], {
+        const field = new Field('.js-radio', '.js-container', [], {
             onChange,
         });
         field.listen();
 
-        const radio = document.querySelectorAll('.js-radio');
+        const radio = document.querySelector('.js-radio-2');
 
-        fireEvent.click(radio[1]);
+        fireEvent.click(radio);
 
+        expect(onChange).toHaveBeenCalled();
         expect(onChange.mock.calls[0][0]).toBe('2');
-        expect(onChange.mock.calls[0][1]).toBe(radio[1]);
+        expect(onChange.mock.calls[0][1]).toBe(radio);
+        expect(onChange.mock.calls[0][2]).toBeNull();
+    });
+
+    test('"onChange" is called on radio input (which is added programmatically) change', () => {
+        const onChange = jest.fn();
+        const field = new Field('.js-dynamic-radio', '.js-container', [], {
+            onChange,
+        });
+        field.listen();
+
+        document.querySelector('.js-container').insertAdjacentHTML(
+            'beforeend',
+            `<input class="js-dynamic-radio js-dynamic-radio-1" type="radio" name="dynamic-radio-name" value="1" />
+             <input class="js-dynamic-radio js-dynamic-radio-2" type="radio" name="dynamic-radio-name" value="2" />`
+        );
+
+        const dynamicRadio = document.querySelector('.js-dynamic-radio-2');
+
+        fireEvent.click(dynamicRadio);
+
+        expect(onChange).toHaveBeenCalled();
+        expect(onChange.mock.calls[0][0]).toBe('2');
+        expect(onChange.mock.calls[0][1]).toBe(dynamicRadio);
         expect(onChange.mock.calls[0][2]).toBeNull();
     });
 });
@@ -297,7 +367,7 @@ describe('validation result', () => {
             expect(validationResult.isValid()).toBeTruthy();
         };
 
-        const field = new Field('.js-input', undefined, ['required'], {
+        const field = new Field('.js-input', '.js-container', ['required'], {
             onAfterValidate,
         });
 
@@ -311,7 +381,7 @@ describe('validation result', () => {
             expect(validationResult.isValid()).toBeFalsy();
         };
 
-        const field = new Field('.js-input', undefined, ['required'], {
+        const field = new Field('.js-input', '.js-container', ['required'], {
             onAfterValidate,
         });
 
@@ -319,7 +389,7 @@ describe('validation result', () => {
     });
 
     test('"isValid" is true', async () => {
-        const field = new Field('.js-input', undefined, ['required']);
+        const field = new Field('.js-input', '.js-container', ['required']);
 
         input.value = 'foo';
 
@@ -329,7 +399,7 @@ describe('validation result', () => {
     });
 
     test('"isValid" is false', async () => {
-        const field = new Field('.js-input', undefined, ['required']);
+        const field = new Field('.js-input', '.js-container', ['required']);
 
         const isValid = await field.isValid();
 
@@ -337,7 +407,7 @@ describe('validation result', () => {
     });
 
     test('"isValid" with state', async () => {
-        const field = new Field('.js-input', undefined, ['required']);
+        const field = new Field('.js-input', '.js-container', ['required']);
         let isValid;
 
         field.validationResult = new ValidationResult(true);
@@ -350,7 +420,7 @@ describe('validation result', () => {
     });
 
     test('forced "isValid" with state', async () => {
-        const field = new Field('.js-input', undefined, ['required']);
+        const field = new Field('.js-input', '.js-container', ['required']);
         let isValid;
 
         field.validationResult = new ValidationResult(true);
@@ -368,7 +438,7 @@ describe('some validators', () => {
     test('no validators', async () => {
         let isValid;
 
-        const field = new Field('.js-input');
+        const field = new Field('.js-input', '.js-container');
 
         input.value = '';
         isValid = await field.isValid(true);
@@ -382,7 +452,7 @@ describe('some validators', () => {
     test('"isEmail" validator', async () => {
         let isValid;
 
-        const field = new Field('.js-input', undefined, ['isEmail']);
+        const field = new Field('.js-input', '.js-container', ['isEmail']);
 
         input.value = '';
         isValid = await field.isValid(true);
@@ -400,7 +470,7 @@ describe('some validators', () => {
     test('"required" and "isEmail"', async () => {
         let isValid;
 
-        const field = new Field('.js-input', undefined, ['required', 'isEmail']);
+        const field = new Field('.js-input', '.js-container', ['required', 'isEmail']);
 
         input.value = '';
         isValid = await field.isValid(true);
@@ -418,7 +488,7 @@ describe('some validators', () => {
     test('custom validator', async () => {
         let isValid;
 
-        const field = new Field('.js-input', undefined, [
+        const field = new Field('.js-input', '.js-container', [
             (value) => {
                 return new ValidationResult(value === '12345');
             },
@@ -440,7 +510,7 @@ describe('some validators', () => {
     test('promised custom validator', async () => {
         let isValid;
 
-        const field = new Field('.js-input', undefined, [
+        const field = new Field('.js-input', '.js-container', [
             (value) => {
                 return new Promise((resolve) => {
                     resolve(new ValidationResult(value === '12345'));
@@ -464,7 +534,7 @@ describe('some validators', () => {
     test('"required" and custom validator', async () => {
         let isValid;
 
-        const field = new Field('.js-input', undefined, [
+        const field = new Field('.js-input', '.js-container', [
             'required',
             (value) => {
                 return new ValidationResult(value === '12345');
@@ -487,7 +557,7 @@ describe('some validators', () => {
     test('validator params', async () => {
         let isValid;
 
-        const field = new Field('.js-input', undefined, ['isCurrency'], {
+        const field = new Field('.js-input', '.js-container', ['isCurrency'], {
             validatorParams: {
                 isCurrency: [{ require_symbol: true }],
             },
@@ -509,7 +579,7 @@ describe('message options', () => {
             expect(validationResult.getMessage()).toBe('');
         };
 
-        const field = new Field('.js-input', undefined, ['required'], {
+        const field = new Field('.js-input', '.js-container', ['required'], {
             onAfterValidate,
         });
 
@@ -523,7 +593,7 @@ describe('message options', () => {
             expect(validationResult.getMessage()).toBe('Field is valid.');
         };
 
-        const field = new Field('.js-input', undefined, ['required'], {
+        const field = new Field('.js-input', '.js-container', ['required'], {
             onAfterValidate,
             validMessage: 'Field is valid.',
         });
@@ -538,7 +608,7 @@ describe('message options', () => {
             expect(validationResult.getMessage()).toBe('Invalid value.');
         };
 
-        const field = new Field('.js-input', undefined, ['required'], {
+        const field = new Field('.js-input', '.js-container', ['required'], {
             onAfterValidate,
         });
 
@@ -550,7 +620,7 @@ describe('message options', () => {
             expect(validationResult.getMessage()).toBe('This field is required.');
         };
 
-        const field = new Field('.js-input', undefined, ['required'], {
+        const field = new Field('.js-input', '.js-container', ['required'], {
             onAfterValidate,
             invalidMessages: {
                 required: 'This field is required.',
@@ -561,63 +631,46 @@ describe('message options', () => {
     });
 });
 
-describe('test init field', () => {
-    test('non-existent element', () => {
-        expect(() => new Field('.js-foo')).toThrow(Error);
+describe('init field', () => {
+    test('non-existent root element', () => {
+        expect(() => new Field('.js-input', '.js-foo')).toThrow(Error);
     });
 
-    test('root element is document', () => {
-        const field = new Field('.js-input');
-
-        expect(field.rootElement).toBe(document);
-    });
-
-    test('non-existent element in form', () => {
-        expect(() => {
-            document.body.innerHTML = '<form class="js-form"></form><input class="js-input" />';
-            // eslint-disable-next-line no-new
-            new Field('.js-input', '.js-form', []);
-        }).not.toThrow(Error);
-    });
-
-    test('root element is form', () => {
-        document.body.innerHTML = '<form class="js-form"><input class="js-input" /></form>';
-        const field = new Field('.js-input', '.js-form', []);
-
-        expect(field.rootElement.tagName).toBe('FORM');
+    test('non-existent field element', () => {
+        expect(() => new Field('.js-foo', '.js-container')).not.toThrow(Error);
     });
 });
 
 describe('"getValue"', () => {
     test('get input value', () => {
-        const field = new Field('.js-input');
+        const field = new Field('.js-input', '.js-container');
         input.value = ' foo ';
         expect(field.getValue()).toBe('foo');
     });
 
     test('get checkbox value', () => {
-        const field = new Field('.js-checkbox');
+        const field = new Field('.js-checkbox', '.js-container');
         expect(field.getValue()).toBe(false);
-        checkbox.checked = true;
+        document.querySelector('.js-checkbox').checked = true;
         expect(field.getValue()).toBe(true);
     });
 
     test('get radio value', () => {
-        const field = new Field('.js-radio');
+        const field = new Field('.js-radio', '.js-container');
         expect(field.getValue()).toBeNull();
         document.querySelector('.js-radio-2').checked = true;
         expect(field.getValue()).toBe('2');
     });
 
     test('get select value', () => {
-        const field = new Field('.js-select');
+        const field = new Field('.js-select', '.js-container');
         expect(field.getValue()).toBe('1');
         document.querySelector('.js-select-option-2').selected = true;
         expect(field.getValue()).toBe('2');
     });
 
     test('get multi select value', () => {
-        const field = new Field('.js-multi-select');
+        const field = new Field('.js-multi-select', '.js-container');
         expect(field.getValue()).toStrictEqual([]);
         document.querySelector('.js-multi-select-option-1').selected = true;
         document.querySelector('.js-multi-select-option-2').selected = true;
@@ -625,31 +678,31 @@ describe('"getValue"', () => {
     });
 
     test('get textarea value', () => {
-        const field = new Field('.js-textarea');
-        textarea.value = ' foo ';
+        const field = new Field('.js-textarea', '.js-container');
+        document.querySelector('.js-textarea').value = ' foo ';
         expect(field.getValue()).toBe('foo');
     });
 
     test('get not trimmed value', () => {
-        const fieldInput = new Field('.js-input', undefined, [], {
+        const fieldInput = new Field('.js-input', '.js-container', [], {
             trimEnabled: false,
         });
-        const fieldTextarea = new Field('.js-textarea', undefined, [], {
+        const fieldTextarea = new Field('.js-textarea', '.js-container', [], {
             trimEnabled: false,
         });
 
         input.value = ' foo ';
-        textarea.value = ' foo ';
+        document.querySelector('.js-textarea').value = ' foo ';
         expect(fieldInput.getValue()).toBe(' foo ');
         expect(fieldTextarea.getValue()).toBe(' foo ');
     });
 });
 
 describe('special css classes', () => {
-    test('validating special css class', async () => {
+    test('"validating" special css class', async () => {
         expect.assertions(1);
 
-        const field = new Field('.js-input', undefined, [
+        const field = new Field('.js-input', '.js-container', [
             (value) => {
                 expect(input.classList.contains('f-field-validating')).toBe(true);
                 return new ValidationResult(value === 'bar');
@@ -661,26 +714,26 @@ describe('special css classes', () => {
         await field.validate();
     });
 
-    test('valid special css class', async () => {
-        const field = new Field('.js-input', undefined, ['required']);
+    test('"valid" special css class', async () => {
+        const field = new Field('.js-input', '.js-container', ['required']);
         input.value = 'foo';
         await field.validate();
         expect(input.classList.contains('f-field-valid')).toBe(true);
     });
 
-    test('invalid special css class', async () => {
-        const field = new Field('.js-input', undefined, ['required']);
+    test('"invalid" special css class', async () => {
+        const field = new Field('.js-input', '.js-container', ['required']);
         await field.validate();
         expect(input.classList.contains('f-field-invalid')).toBe(true);
     });
 
-    test('invalid special css class using container', async () => {
+    test('"invalid" special css class using container', async () => {
         document.body.innerHTML = `
             <div class="js-wrapped js-f-field-container">
                 <input class="js-radio" type="radio" name="radio" value="1" />
                 <input class="js-radio" type="radio" name="radio" value="2" />
             </div>`;
-        const field = new Field('.js-radio', undefined, ['required']);
+        const field = new Field('.js-radio', '.js-f-field-container', ['required']);
         const wrapped = document.querySelector('.js-wrapped');
         await field.validate();
         expect(wrapped.classList.contains('f-field-invalid')).toBe(true);

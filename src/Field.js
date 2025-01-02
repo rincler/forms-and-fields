@@ -30,27 +30,22 @@ export default class Field {
      * @public
      *
      * @param {string} fieldSelector
-     * @param {string} formSelector
+     * @param {string} rootSelector
      * @param {array} validators
      * @param {object} options
      */
-    constructor(fieldSelector, formSelector = undefined, validators = [], options = {}) {
-        this.fieldSelector = fieldSelector;
-        this.formSelector = formSelector;
+    constructor(fieldSelector, rootSelector, validators = [], options = {}) {
+        this.rootElement = document.querySelector(rootSelector);
 
-        if (formSelector) {
-            this.formElement = document.querySelector(formSelector);
-
-            if (!this.formElement) {
-                throw new Error(`Form element with the "${formSelector}" selector not found.`);
-            }
-
-            this.rootElement = this.formElement;
-        } else {
-            this.formElement = null;
-            this.rootElement = document;
-            this.getFieldElement();
+        if (!this.rootElement) {
+            throw new Error(`Root element with the "${rootSelector}" selector not found.`);
         }
+
+        this.fieldSelector = fieldSelector;
+        this.rootSelector = rootSelector;
+
+        this.formElement =
+            this.rootElement.tagName === 'FORM' ? this.rootElement : this.rootElement.querySelector('form');
 
         this.validators = validators;
         this.validationResult = null;
@@ -88,29 +83,8 @@ export default class Field {
      * @public
      */
     listen() {
-        if (this.formElement) {
-            this.addEventListenerDelegatedToForm('change', this.onChangeListener, this.fieldSelector);
-            this.addEventListenerDelegatedToForm('keyup', this.onKeyUpListener, this.fieldSelector);
-            return;
-        }
-
-        if (this.isRadio()) {
-            this.getRadioElements().forEach((radioElement) => {
-                radioElement.addEventListener('change', this.onChangeListener.bind(this));
-            });
-
-            return;
-        }
-
-        if (this.isList()) {
-            this.getOtherListElements().forEach((listElement) => {
-                const field = this.createFieldForElement(listElement);
-                field.listen();
-            });
-        }
-
-        this.getFieldElement().addEventListener('change', this.onChangeListener.bind(this));
-        this.getFieldElement().addEventListener('keyup', this.onKeyUpListener.bind(this));
+        this.addEventListenerDelegatedToRootElement('change', this.onChangeListener, this.fieldSelector);
+        this.addEventListenerDelegatedToRootElement('keyup', this.onKeyUpListener, this.fieldSelector);
     }
 
     /**
@@ -227,13 +201,6 @@ export default class Field {
             throw new Error(`Field element with the "${this.fieldSelector}" selector not found.`);
         }
 
-        if (fieldElement.type === 'radio') {
-            const checkedRadioElement = this.rootElement.querySelector(`[name=${fieldElement.name}]:checked`);
-            if (checkedRadioElement) {
-                return checkedRadioElement;
-            }
-        }
-
         return fieldElement;
     };
 
@@ -252,8 +219,8 @@ export default class Field {
     /**
      * @private
      */
-    addEventListenerDelegatedToForm(type, listener, selector) {
-        this.formElement.addEventListener(type, (event) => {
+    addEventListenerDelegatedToRootElement(type, listener, selector) {
+        this.rootElement.addEventListener(type, (event) => {
             const { target } = event;
 
             if (target.classList.contains(selector.substring(1))) {
@@ -395,19 +362,6 @@ export default class Field {
     /**
      * @private
      *
-     * @returns {NodeListOf<Element>}
-     */
-    getRadioElements() {
-        if (!this.isRadio()) {
-            return [];
-        }
-
-        return this.rootElement.querySelectorAll(`[name=${this.getFieldElement().name}]`);
-    }
-
-    /**
-     * @private
-     *
      * @returns {Element|null}
      */
     getCheckedRadioElement() {
@@ -534,12 +488,12 @@ export default class Field {
      * @private
      */
     createFieldForElement(element) {
-        const fieldId = Date.now();
+        const fieldId = Math.random().toString(36).substring(2);
         // eslint-disable-next-line no-param-reassign
         element.dataset.fieldId = fieldId;
         return new Field(
             `${this.fieldSelector}[data-field-id="${fieldId}"]`,
-            this.formSelector,
+            this.rootSelector,
             this.validators,
             this.options
         );

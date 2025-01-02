@@ -32,12 +32,13 @@ export default class Form {
      * @param {object} options
      */
     constructor(formSelector, fields = [], options = {}) {
-        this.formSelector = formSelector;
         this.formElement = document.querySelector(formSelector);
 
         if (!this.formElement) {
             throw new Error(`Form element with the "${formSelector}" selector not found.`);
         }
+
+        this.formSelector = formSelector;
 
         this.fields = fields;
         this.validatingAllFields = false;
