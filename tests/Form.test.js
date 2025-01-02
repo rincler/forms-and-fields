@@ -521,45 +521,33 @@ describe('submit callback options', () => {
     });
 });
 
-describe('dynamic inputs', () => {
-    test('"isValid" is called for all list', async () => {
-        const form = new Form('.js-form', [new Field('.js-dynamic-input', '.js-form', ['required'])]);
+describe('validation', () => {
+    test('"isValid"', async () => {
+        const validateFn = jest.fn(() => new ValidationResult(true));
+        const form = new Form('.js-form', [
+            new Field('.js-input', '.js-form', [validateFn]),
+            new Field('.js-radio', '.js-form', [validateFn]),
+            new Field('.js-list-input', '.js-form', [validateFn]),
+            new Field('.js-no', '.js-form', [validateFn]),
+        ]);
 
-        document.querySelector('.js-form').insertAdjacentHTML(
-            'beforeend',
-            `
-                <input class="js-dynamic-input" name="dynamic-input-name[0]" />
-                <input class="js-dynamic-input" name="dynamic-input-name[1]" />
-            `
-        );
+        await form.isValid(true);
 
-        const dynamicInput = document.querySelectorAll('.js-dynamic-input');
-        dynamicInput[0].value = 'foo';
-
-        const isValid = await form.isValid(true);
-
-        expect(isValid).toBeFalsy();
+        expect(validateFn).toHaveBeenCalledTimes(5);
     });
 
-    test('"validate" is called for all list', async () => {
-        const form = new Form('.js-form', [new Field('.js-dynamic-input', '.js-form', ['required'])]);
-
-        document.querySelector('.js-form').insertAdjacentHTML(
-            'beforeend',
-            `
-                <input class="js-dynamic-input" name="dynamic-input-name[0]" />
-                <input class="js-dynamic-input" name="dynamic-input-name[1]" />
-            `
-        );
-
-        const dynamicInput = document.querySelectorAll('.js-dynamic-input');
-        dynamicInput[0].value = 'foo';
+    test('"validate"', async () => {
+        const validateFn = jest.fn(() => new ValidationResult(true));
+        const form = new Form('.js-form', [
+            new Field('.js-input', '.js-form', [validateFn]),
+            new Field('.js-radio', '.js-form', [validateFn]),
+            new Field('.js-list-input', '.js-form', [validateFn]),
+            new Field('.js-no', '.js-form', [validateFn]),
+        ]);
 
         await form.validate();
 
-        const isValid = await form.isValid();
-
-        expect(isValid).toBeFalsy();
+        expect(validateFn).toHaveBeenCalledTimes(5);
     });
 });
 

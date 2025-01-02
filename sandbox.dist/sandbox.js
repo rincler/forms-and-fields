@@ -59,7 +59,7 @@ const form = new Form(
 
 form.listen();
 
-const fqdnField = new Field('.js-fqdn', undefined, ['required', 'isFQDN'], {
+const fqdnField = new Field('.js-fqdn', '.js-container', ['required', 'isFQDN'], {
     validateOnType: true,
 });
 
@@ -112,3 +112,26 @@ const registerForm = new Form(
 );
 
 registerForm.listen();
+
+const domainsForm = new Form(
+    '.js-domains-form',
+    [
+        new Field('.js-domain', '.js-domains-form', [
+            'isFQDN',
+            (value) => {
+                return new Promise((resolve) => {
+                    setTimeout(() => {
+                        resolve(new ValidationResult(!['example.com', 'example.net'].includes(value)));
+                    }, 2000);
+                });
+            },
+        ]),
+    ],
+    {
+        submit: async () => {
+            return new SubmissionResult(true);
+        },
+    }
+);
+
+domainsForm.listen();

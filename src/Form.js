@@ -115,11 +115,7 @@ export default class Form {
 
         this.addCss(FORM_VALIDATING_CSS_CLASS);
 
-        // eslint-disable-next-line no-restricted-syntax
-        for (const field of this.getAllFields()) {
-            // eslint-disable-next-line no-await-in-loop
-            await field.validate();
-        }
+        await Promise.all(this.getAllFields().map((field) => field.validate()));
 
         this.clearCss(ACTION_VALIDATING);
 
@@ -257,10 +253,14 @@ export default class Form {
 
         // eslint-disable-next-line no-restricted-syntax
         for (const field of this.fields) {
+            if (!field.exists()) {
+                continue;
+            }
+
             fields.push(field);
 
-            if (field.isList()) {
-                fields.push(...field.getOtherListFields());
+            if (field.isList() && !field.isRadio()) {
+                fields.push(...field.getVirtualFieldsOfList());
             }
         }
 

@@ -25,6 +25,8 @@ const DEFAULT_OPTIONS = {
     onAfterValidate: NOOP,
 };
 
+const virtualFieldsCache = {};
+
 export default class Field {
     /**
      * @public
@@ -193,6 +195,15 @@ export default class Field {
     /**
      * @private
      *
+     * @returns {boolean}
+     */
+    exists() {
+        return this.rootElement.querySelector(this.fieldSelector) !== null;
+    }
+
+    /**
+     * @private
+     *
      * @returns {Element}
      */
     getFieldElement = () => {
@@ -226,8 +237,11 @@ export default class Field {
             if (target.classList.contains(selector.substring(1))) {
                 let field = this;
                 if (this.isList()) {
-                    const listElement = this.getOtherListElements().find((e) => e.isEqualNode(target));
-                    field = this.createFieldForElement(listElement);
+                    const listElementsExceptFirst = this.getListElementsExceptFirst();
+                    const notFirstListElement = listElementsExceptFirst.find((e) => e.isSameNode(target));
+                    if (notFirstListElement) {
+                        field = this.getVirtualFieldForElement(notFirstListElement);
+                    }
                 }
 
                 listener.call(field, target);
@@ -273,10 +287,6 @@ export default class Field {
 
         if (typeof validatorItem === 'function') {
             return (value) => {
-                if (value === '') {
-                    return new ValidationResult(true, this.getOption('validMessage'));
-                }
-
                 return validatorItem(value);
             };
         }
@@ -346,7 +356,7 @@ export default class Field {
      *
      * @returns {Element[]}
      */
-    getOtherListElements() {
+    getListElementsExceptFirst() {
         return Array.from(this.rootElement.querySelectorAll(this.fieldSelector)).slice(1);
     }
 
@@ -355,8 +365,8 @@ export default class Field {
      *
      * @returns {Field[]}
      */
-    getOtherListFields() {
-        return this.getOtherListElements().map((listElement) => this.createFieldForElement(listElement));
+    getVirtualFieldsOfList() {
+        return this.getListElementsExceptFirst().map((listElement) => this.getVirtualFieldForElement(listElement));
     }
 
     /**
@@ -487,15 +497,22 @@ export default class Field {
     /**
      * @private
      */
-    createFieldForElement(element) {
+    getVirtualFieldForElement(element) {
+        if (element.dataset.fieldId && virtualFieldsCache[element.dataset.fieldId]) {
+            return virtualFieldsCache[element.dataset.fieldId];
+        }
+
         const fieldId = Math.random().toString(36).substring(2);
         // eslint-disable-next-line no-param-reassign
         element.dataset.fieldId = fieldId;
-        return new Field(
+        const field = new Field(
             `${this.fieldSelector}[data-field-id="${fieldId}"]`,
             this.rootSelector,
             this.validators,
             this.options
         );
+        virtualFieldsCache[element.dataset.fieldId] = field;
+
+        return field;
     }
 }

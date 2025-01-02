@@ -496,7 +496,7 @@ describe('some validators', () => {
 
         input.value = '';
         isValid = await field.isValid(true);
-        expect(isValid).toBe(true);
+        expect(isValid).toBe(false);
 
         input.value = 'foo';
         isValid = await field.isValid(true);
@@ -520,7 +520,7 @@ describe('some validators', () => {
 
         input.value = '';
         isValid = await field.isValid(true);
-        expect(isValid).toBe(true);
+        expect(isValid).toBe(false);
 
         input.value = 'foo';
         isValid = await field.isValid(true);
