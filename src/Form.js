@@ -14,7 +14,12 @@ const ACTION_SUBMITTING = 'action-submitting';
 const NOOP = () => {};
 
 const DEFAULT_OPTIONS = {
+    onChangeField: NOOP,
+    onTypingStartField: NOOP,
+    onTypingEndField: NOOP,
+    onBeforeValidateField: NOOP,
     onBeforeValidate: NOOP,
+    onAfterValidateField: NOOP,
     onAfterValidate: NOOP,
     onBeforeSubmit: NOOP,
     submit: NOOP,
@@ -137,21 +142,44 @@ export default class Form {
     setFieldOptions(options) {
         // eslint-disable-next-line no-restricted-syntax
         for (const field of this.fields) {
+            const onChangeField = field.getOption('onChange');
+            const onTypingStartField = field.getOption('onTypingStart');
+            const onTypingEndField = field.getOption('onTypingEnd');
+            const onBeforeValidateField = field.getOption('onBeforeValidate');
+            const onAfterValidateField = field.getOption('onAfterValidate');
             field.setOptions({
-                invalidMessages: options.invalidMessages,
-                defaultInvalidMessage: options.defaultInvalidMessage,
-                validateOnChange: options.validateOnChange,
-                validateOnType: options.validateOnType,
-                typingDelay: options.typingDelay,
-                onTypingStart: options.onTypingStart,
-                onTypingEnd: options.onTypingEnd,
-                onChange: options.onChange,
-                validatorParams: options.validatorParams,
-                trimEnabled: options.trimEnabled,
+                invalidMessages: field.hasOption('invalidMessages')
+                    ? field.getOption('invalidMessages')
+                    : options.invalidMessages,
+                defaultInvalidMessage: field.hasOption('defaultInvalidMessage')
+                    ? field.getOption('defaultInvalidMessage')
+                    : options.defaultInvalidMessage,
+                trimEnabled: field.hasOption('trimEnabled') ? field.getOption('trimEnabled') : options.trimEnabled,
+                typingDelay: field.hasOption('typingDelay') ? field.getOption('typingDelay') : options.typingDelay,
+                validateOnChange: field.hasOption('validateOnChange')
+                    ? field.getOption('validateOnChange')
+                    : options.validateOnChange,
+                validateOnType: field.hasOption('validateOnType')
+                    ? field.getOption('validateOnType')
+                    : options.validateOnType,
+                validatorParams: field.hasOption('validatorParams')
+                    ? this.getOption('validatorParams')
+                    : options.validatorParams,
+                onChange: (value, fieldElement, formElement) => {
+                    onChangeField(value, fieldElement, formElement);
+                    this.getOption('onChangeField')(value, fieldElement, formElement);
+                },
+                onTypingStart: (value, fieldElement, formElement) => {
+                    onTypingStartField(value, fieldElement, formElement);
+                    this.getOption('onTypingStartField')(value, fieldElement, formElement);
+                },
+                onTypingEnd: (value, fieldElement, formElement) => {
+                    onTypingEndField(value, fieldElement, formElement);
+                    this.getOption('onTypingEndField')(value, fieldElement, formElement);
+                },
                 onBeforeValidate: (fieldElement, formElement) => {
-                    if (options.onBeforeFieldValidate) {
-                        options.onBeforeFieldValidate(fieldElement, formElement);
-                    }
+                    onBeforeValidateField(fieldElement, formElement);
+                    this.getOption('onBeforeValidateField')(fieldElement, formElement);
 
                     if (this.validatingAllFields) {
                         return;
@@ -164,9 +192,8 @@ export default class Form {
                     this.addCss(FORM_VALIDATING_CSS_CLASS);
                 },
                 onAfterValidate: async (validationResult, fieldElement, formElement) => {
-                    if (options.onAfterFieldValidate) {
-                        options.onAfterFieldValidate(validationResult, fieldElement, formElement);
-                    }
+                    onAfterValidateField(validationResult, fieldElement, formElement);
+                    this.getOption('onAfterValidateField')(validationResult, fieldElement, formElement);
 
                     if (this.validatingAllFields) {
                         return;

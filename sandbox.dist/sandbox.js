@@ -40,7 +40,7 @@ const form = new Form(
         new Field('.js-file', '.js-form', ['required']),
     ],
     {
-        onAfterFieldValidate: (validationResult) => {
+        onAfterValidateField: (validationResult) => {
             // eslint-disable-next-line no-console
             console.log(validationResult);
         },

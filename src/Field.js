@@ -13,14 +13,14 @@ const DEFAULT_OPTIONS = {
     validMessage: '',
     invalidMessages: {},
     defaultInvalidMessage: 'Invalid value.',
+    trimEnabled: true,
+    typingDelay: 1000,
     validateOnChange: false,
     validateOnType: false,
-    typingDelay: 1000,
+    validatorParams: {},
+    onChange: NOOP,
     onTypingStart: NOOP,
     onTypingEnd: NOOP,
-    onChange: NOOP,
-    validatorParams: {},
-    trimEnabled: true,
     onBeforeValidate: NOOP,
     onAfterValidate: NOOP,
 };
@@ -78,7 +78,18 @@ export default class Field {
      * @returns {any}
      */
     getOption(name) {
-        return this.options[name] !== undefined ? this.options[name] : DEFAULT_OPTIONS[name];
+        return this.hasOption(name) ? this.options[name] : DEFAULT_OPTIONS[name];
+    }
+
+    /**
+     * @private
+     *
+     * @param {string} name
+     *
+     * @returns {boolean}
+     */
+    hasOption(name) {
+        return this.options[name] !== undefined;
     }
 
     /**

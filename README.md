@@ -35,7 +35,7 @@ const form = new Form('.js-form', [
         }
    })
 ], {
-    onAfterFieldValidate: (validationResult) => {
+    onAfterValidateField: (validationResult) => {
         console.log(validationResult);
     },
     submit: (formData) => {
@@ -171,10 +171,10 @@ Also `Form` supports following options:
 | onAfterSubmit         | `function` | `null`  | It is triggered after submission.  Passes `submissionResult: SubmissionResult, formElement: HTMLElement`                                                                                                                                                                                                                                    |
 | onAfterSubmitSuccess  | `function` | `null`  | It is triggered after submission and `submit` function returned `SubmissionResult` with `true`. Passes `submissionResultData: object, formElement: HTMLElement`                                                                                                                                                                             |
 | onAfterSubmitError    | `function` | `null`  | It is triggered after submission and `submit` function returned `SubmissionResult` with `false`. Passes `submissionResultData: object, formElement: HTMLElement`                                                                                                                                                                            |
-| onBeforeFieldValidate | `function` | `null`  | It is triggered before each field validation. Passes arguments: `fieldElement: HTMLElement, formElement: HTMLElement`                                                                                                                                                                                                                       |
-| onAfterFieldValidate  | `function` | `null`  | It is triggered after each field validation. Passes arguments: `validationResult: ValidationResult, fieldElement: HTMLElement, formElement: HTMLElement`                                                                                                                                                                                    |
+| onBeforeValidateField | `function` | `null`  | It is triggered before each field validation. Passes arguments: `fieldElement: HTMLElement, formElement: HTMLElement`                                                                                                                                                                                                                       |
+| onAfterValidateField  | `function` | `null`  | It is triggered after each field validation. Passes arguments: `validationResult: ValidationResult, fieldElement: HTMLElement, formElement: HTMLElement`                                                                                                                                                                                    |
 
-To set `onBeforeValidate` or `onAfterValdiate` to each form field use `onBeforeFieldValidate` or `onAfterFieldValidate`, 
+To set `onBeforeValidate` or `onAfterValdiate` to each form field use `onBeforeValidateField` or `onAfterValidateField`, 
 because `onBeforeValidate` and `onAfterValidate` are for form.
 
 ### CSS classes
