@@ -2,22 +2,7 @@ import Form from '../src/Form';
 import Field from '../src/Field';
 import SubmissionResult from '../src/SubmissionResult';
 import ValidationResult from '../src/ValidationResult';
-
-const mapResponseTypeToUrl = (value) => {
-    if (value === 'success') {
-        return '/submit-with-success-response';
-    }
-
-    if (value === 'error') {
-        return '/submit-with-error-response';
-    }
-
-    if (value === 'http-error') {
-        return '/submit-with-http-error-response';
-    }
-
-    throw new Error('Invalid argument.');
-};
+import FileValidator from '../src/validators/FileValidator';
 
 const form = new Form(
     '.js-form',
@@ -64,6 +49,22 @@ const fqdnField = new Field('.js-fqdn', '.js-container', ['required', 'isFQDN'],
 });
 
 fqdnField.listen();
+
+const mapResponseTypeToUrl = (value) => {
+    if (value === 'success') {
+        return '/submit-with-success-response';
+    }
+
+    if (value === 'error') {
+        return '/submit-with-error-response';
+    }
+
+    if (value === 'http-error') {
+        return '/submit-with-http-error-response';
+    }
+
+    throw new Error('Invalid argument.');
+};
 
 const registerForm = new Form(
     '.js-register-form',
@@ -135,3 +136,37 @@ const domainsForm = new Form(
 );
 
 domainsForm.listen();
+
+const uploadForm = new Form(
+    '.js-upload-form',
+    [
+        new Field(
+            '.js-upload',
+            '.js-upload-form',
+            [
+                new FileValidator(
+                    { allowedMimes: ['image/jpeg'], maxSize: 307200, maxCount: 2, allowedExtensions: ['.jpg'] },
+                    {
+                        allowedMimes:
+                            'The "{file}" file has invalid MIME type. MIME type of file: {fileMimeType}. Allowed MIME types: {allowedMimes}.',
+                        maxSize:
+                            'The "{file}" file exceeded the allowed max file size: {maxSizeInKiB} KiB. File size: {fileSizeInKib} KiB.',
+                    }
+                ),
+            ],
+            {
+                onAfterValidate: (validationResult) => {
+                    // eslint-disable-next-line no-console
+                    console.log(validationResult);
+                },
+            }
+        ),
+    ],
+    {
+        submit: async () => {
+            return new SubmissionResult(true);
+        },
+    }
+);
+
+uploadForm.listen();

@@ -5,6 +5,7 @@
 import { fireEvent } from '@testing-library/dom';
 import Field from '../src/Field';
 import ValidationResult from '../src/ValidationResult';
+import FileValidator from '../src/validators/FileValidator';
 
 let input = null;
 jest.useFakeTimers();
@@ -28,6 +29,7 @@ beforeEach(() => {
                 <option class="js-multi-select-option-2" value="2"></option>
             </select>
             <textarea class="js-textarea"></textarea>
+            <input class="js-file" type="file" />
         </div>
     `;
 
@@ -509,6 +511,30 @@ describe('some validators', () => {
         expect(isValid).toBe(true);
     });
 
+    test('custom object validator', async () => {
+        let isValid;
+
+        const validator = {
+            validate: (value) => {
+                return new ValidationResult(value === '12345');
+            },
+        };
+
+        const field = new Field('.js-input', '.js-container', [validator]);
+
+        input.value = '';
+        isValid = await field.isValid(true);
+        expect(isValid).toBe(false);
+
+        input.value = 'foo';
+        isValid = await field.isValid(true);
+        expect(isValid).toBe(false);
+
+        input.value = '12345';
+        isValid = await field.isValid(true);
+        expect(isValid).toBe(true);
+    });
+
     test('promised custom validator', async () => {
         let isValid;
 
@@ -572,6 +598,111 @@ describe('some validators', () => {
         input.value = '$23';
         isValid = await field.isValid(true);
         expect(isValid).toBe(true);
+    });
+});
+
+describe('file validator', () => {
+    const newFileValidator = (invalidMessages = {}) => {
+        return new FileValidator(
+            {
+                maxCount: 2,
+                allowedMimes: ['image/png', 'image/jpg'],
+                allowedExtensions: ['.png', '.jpg'],
+                maxSize: 3,
+            },
+            invalidMessages
+        );
+    };
+
+    test('valid file', async () => {
+        const field = new Field('.js-file', '.js-container', [newFileValidator()]);
+
+        fireEvent.change(document.querySelector('.js-file'), {
+            target: {
+                files: [new File([], 'example.jpg', { type: 'image/jpg' })],
+            },
+        });
+
+        await field.validate();
+        expect(field.validationResult.isValid()).toBeTruthy();
+    });
+
+    test('valid when no file', async () => {
+        const field = new Field('.js-file', '.js-container', [newFileValidator()]);
+
+        await field.validate();
+        expect(field.validationResult.isValid()).toBeTruthy();
+    });
+
+    test.each([
+        [
+            'MIME type, default error message',
+            [new File([], 'example.jpg', { type: 'text/plain' })],
+            { allowedMimes: undefined },
+            'example.jpg is invalid.',
+        ],
+        [
+            'MIME type, custom error message',
+            [new File([], 'example.jpg', { type: 'text/plain' })],
+            { allowedMimes: '{file} has invalid MIME type.' },
+            'example.jpg has invalid MIME type.',
+        ],
+        [
+            'extension, default error message',
+            [new File([], 'example.exe', { type: 'image/jpg' })],
+            { allowedExtensions: undefined },
+            'example.exe is invalid.',
+        ],
+        [
+            'extension, custom error message',
+            [new File([], 'example.exe', { type: 'image/jpg' })],
+            { allowedExtensions: '{file} has invalid extension.' },
+            'example.exe has invalid extension.',
+        ],
+        [
+            'size, default error message',
+            [new File(['content'], 'example.jpg', { type: 'image/jpg' })],
+            { maxSize: undefined },
+            'example.jpg is invalid.',
+        ],
+        [
+            'size, custom error message',
+            [new File(['content'], 'example.jpg', { type: 'image/jpg' })],
+            { maxSize: '{file} must be less than {maxSize} bytes.' },
+            'example.jpg must be less than 3 bytes.',
+        ],
+        [
+            'count, default error message',
+            [
+                new File([], 'example1.jpg', { type: 'image/jpg' }),
+                new File([], 'example2.jpg', { type: 'image/jpg' }),
+                new File([], 'example3.jpg', { type: 'image/jpg' }),
+            ],
+            { maxCount: undefined },
+            'Invalid count.',
+        ],
+        [
+            'count, custom error message',
+            [
+                new File([], 'example1.jpg', { type: 'image/jpg' }),
+                new File([], 'example2.jpg', { type: 'image/jpg' }),
+                new File([], 'example3.jpg', { type: 'image/jpg' }),
+            ],
+            { maxCount: 'Max count of files is {maxCount}.' },
+            'Max count of files is 2.',
+        ],
+    ])('invalid %s', async (_, files, invalidMessages, expectedErrorMessage) => {
+        const field = new Field('.js-file', '.js-container', [newFileValidator(invalidMessages)]);
+
+        fireEvent.change(document.querySelector('.js-file'), {
+            target: {
+                files,
+            },
+        });
+
+        await field.validate();
+        expect(field.validationResult.isValid()).toBeFalsy();
+        expect(field.validationResult.getMessage()).toBe(expectedErrorMessage);
     });
 });
 
@@ -677,6 +808,23 @@ describe('"getValue"', () => {
         document.querySelector('.js-multi-select-option-1').selected = true;
         document.querySelector('.js-multi-select-option-2').selected = true;
         expect(field.getValue()).toStrictEqual(['1', '2']);
+    });
+
+    test('get file value', () => {
+        const field = new Field('.js-file', '.js-container');
+        expect(field.getValue()).toBeInstanceOf(FileList);
+        expect(field.getValue().length).toBe(0);
+
+        const expectedFile = new File([], 'example.jpg', { type: 'image/jpg' });
+        fireEvent.change(document.querySelector('.js-file'), {
+            target: {
+                files: [expectedFile],
+            },
+        });
+
+        expect(field.getValue().length).toBe(1);
+        const file = field.getValue()[0];
+        expect(file).toBe(expectedFile);
     });
 
     test('get textarea value', () => {

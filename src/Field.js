@@ -175,7 +175,7 @@ export default class Field {
     /**
      * @public
      *
-     * @returns {string|string[]|boolean|null}
+     * @returns {string|string[]|boolean|null|FileList}
      */
     getValue() {
         const fieldElement = this.getFieldElement();
@@ -198,6 +198,10 @@ export default class Field {
             const checkedElements = this.getCheckedSelectElements();
 
             return Array.from(checkedElements).map((element) => element.value);
+        }
+
+        if (this.isFile()) {
+            return fieldElement.files;
         }
 
         return fieldElement.value;
@@ -297,8 +301,12 @@ export default class Field {
         }
 
         if (typeof validatorItem === 'function') {
+            return validatorItem;
+        }
+
+        if (typeof validatorItem === 'object' && typeof validatorItem.validate === 'function') {
             return (value) => {
-                return validatorItem(value);
+                return validatorItem.validate(value);
             };
         }
 
@@ -463,6 +471,15 @@ export default class Field {
     /**
      * @private
      *
+     * @returns {boolean}
+     */
+    isFile() {
+        return this.getFieldElement().type === 'file';
+    }
+
+    /**
+     * @private
+     *
      * @param {string|boolean|object} value
      *
      * @returns {boolean}
@@ -476,7 +493,7 @@ export default class Field {
             return value === null;
         }
 
-        if (this.isMultipleSelect()) {
+        if (this.isMultipleSelect() || this.isFile()) {
             return value.length === 0;
         }
 
