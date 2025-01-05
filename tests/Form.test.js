@@ -203,9 +203,9 @@ describe('field options', () => {
         );
         form.listen();
 
-        fireEvent.keyUp(input, { key: 'B', code: 'KeyB' });
-        fireEvent.keyUp(input, { key: 'A', code: 'KeyA' });
-        fireEvent.keyUp(input, { key: 'R', code: 'KeyR' });
+        fireEvent.keyUp(input, { key: 'b', code: 'KeyB' });
+        fireEvent.keyUp(input, { key: 'a', code: 'KeyA' });
+        fireEvent.keyUp(input, { key: 'r', code: 'KeyR' });
 
         expect(onTypingStart).toHaveBeenCalledTimes(2);
     });
@@ -225,9 +225,9 @@ describe('field options', () => {
         );
         form.listen();
 
-        fireEvent.keyUp(input, { key: 'B', code: 'KeyB' });
-        fireEvent.keyUp(input, { key: 'A', code: 'KeyA' });
-        fireEvent.keyUp(input, { key: 'R', code: 'KeyR' });
+        fireEvent.keyUp(input, { key: 'b', code: 'KeyB' });
+        fireEvent.keyUp(input, { key: 'a', code: 'KeyA' });
+        fireEvent.keyUp(input, { key: 'r', code: 'KeyR' });
         jest.runAllTimers();
 
         expect(onTypingEnd).toHaveBeenCalledTimes(2);

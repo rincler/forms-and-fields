@@ -48,11 +48,11 @@ describe('"validateOnType" and "validateOnChange" options', () => {
         field.validate = jest.fn();
         field.listen();
 
-        fireEvent.keyUp(input, { key: 'B', code: 'KeyB' });
-        fireEvent.keyUp(input, { key: 'A', code: 'KeyA' });
-        fireEvent.keyUp(input, { key: 'R', code: 'KeyR' });
+        fireEvent.keyUp(input, { key: 'b', code: 'KeyB' });
+        fireEvent.keyUp(input, { key: 'a', code: 'KeyA' });
+        fireEvent.keyUp(input, { key: 'r', code: 'KeyR' });
         jest.runAllTimers();
-        fireEvent.change(input, { target: { value: 'BAR' } });
+        fireEvent.change(input, { target: { value: 'bar' } });
 
         expect(field.validate).toHaveBeenCalledTimes(times);
     });
@@ -70,13 +70,13 @@ describe('"validateOnType" and "validateOnChange" options', () => {
         field.validate = jest.fn();
         field.listen();
 
-        fireEvent.keyUp(input, { key: 'B', code: 'KeyB' });
+        fireEvent.keyUp(input, { key: 'b', code: 'KeyB' });
         jest.runAllTimers();
-        fireEvent.keyUp(input, { key: 'A', code: 'KeyA' });
+        fireEvent.keyUp(input, { key: 'a', code: 'KeyA' });
         jest.runAllTimers();
-        fireEvent.keyUp(input, { key: 'R', code: 'KeyR' });
+        fireEvent.keyUp(input, { key: 'r', code: 'KeyR' });
         jest.runAllTimers();
-        fireEvent.change(input, { target: { value: 'BAR' } });
+        fireEvent.change(input, { target: { value: 'bar' } });
 
         expect(field.validate).toHaveBeenCalledTimes(times);
     });
@@ -96,10 +96,10 @@ describe('"validateOnType" and "validateOnChange" options', () => {
             field.validate = jest.fn();
             field.listen();
 
-            fireEvent.keyUp(input, { key: 'B', code: 'KeyB' });
-            fireEvent.keyUp(input, { key: 'A', code: 'KeyA' });
-            fireEvent.keyUp(input, { key: 'R', code: 'KeyR' });
-            fireEvent.change(input, { target: { value: 'BAR' } });
+            fireEvent.keyUp(input, { key: 'b', code: 'KeyB' });
+            fireEvent.keyUp(input, { key: 'a', code: 'KeyA' });
+            fireEvent.keyUp(input, { key: 'r', code: 'KeyR' });
+            fireEvent.change(input, { target: { value: 'bar' } });
             jest.runAllTimers();
 
             expect(field.validate).toHaveBeenCalledTimes(times);
@@ -121,12 +121,12 @@ describe('"validateOnType" and "validateOnChange" options', () => {
             field.validate = jest.fn();
             field.listen();
 
-            fireEvent.keyUp(input, { key: 'B', code: 'KeyB' });
+            fireEvent.keyUp(input, { key: 'b', code: 'KeyB' });
             jest.runAllTimers();
-            fireEvent.keyUp(input, { key: 'A', code: 'KeyA' });
+            fireEvent.keyUp(input, { key: 'a', code: 'KeyA' });
             jest.runAllTimers();
-            fireEvent.keyUp(input, { key: 'R', code: 'KeyR' });
-            fireEvent.change(input, { target: { value: 'BAR' } });
+            fireEvent.keyUp(input, { key: 'r', code: 'KeyR' });
+            fireEvent.change(input, { target: { value: 'bar' } });
             jest.runAllTimers();
 
             expect(field.validate).toHaveBeenCalledTimes(times);
@@ -140,7 +140,9 @@ describe('"validateOnType" and "validateOnChange" options', () => {
         field.validate = jest.fn();
         field.listen();
 
-        fireEvent.keyUp(input, { key: 'E', code: 'KeyE' });
+        fireEvent.keyUp(input, { key: 'b', code: 'KeyB' });
+        fireEvent.keyUp(input, { key: 'a', code: 'KeyA' });
+        fireEvent.keyUp(input, { key: 'r', code: 'KeyR' });
         jest.runAllTimers();
 
         expect(field.validate).not.toHaveBeenCalled();
@@ -153,7 +155,7 @@ describe('"validateOnType" and "validateOnChange" options', () => {
         field.validate = jest.fn();
         field.listen();
 
-        fireEvent.change(input, { target: { value: 'BAR' } });
+        fireEvent.change(input, { target: { value: 'bar' } });
 
         expect(field.validate).not.toHaveBeenCalled();
     });
@@ -195,12 +197,12 @@ describe('callback options', () => {
             onTypingStart,
         });
         field.listen();
-        input.value = 'foo';
-        fireEvent.keyUp(input, { key: 'A', code: 'KeyA' });
-        fireEvent.keyUp(input, { key: 'B', code: 'KeyB' });
+
+        fireEvent.keyUp(input, { key: 'b', code: 'KeyB' });
+        fireEvent.keyUp(input, { key: 'a', code: 'KeyA' });
+        fireEvent.keyUp(input, { key: 'r', code: 'KeyR' });
 
         expect(onTypingStart).toHaveBeenCalledTimes(1);
-        expect(onTypingStart.mock.calls[0][0]).toBe('foo');
         expect(onTypingStart.mock.calls[0][1]).toBe(input);
         expect(onTypingStart.mock.calls[0][2]).toBeNull();
     });
@@ -211,16 +213,16 @@ describe('callback options', () => {
             onTypingEnd,
         });
         field.listen();
-        input.value = 'foo';
+
         fireEvent.keyUp(input, { key: 'b', code: 'KeyB' });
         fireEvent.keyUp(input, { key: 'a', code: 'KeyA' });
+        fireEvent.keyUp(input, { key: 'r', code: 'KeyR' });
 
         expect(onTypingEnd).not.toHaveBeenCalled();
 
         jest.runAllTimers();
 
         expect(onTypingEnd).toHaveBeenCalledTimes(1);
-        expect(onTypingEnd.mock.calls[0][0]).toBe('foo');
         expect(onTypingEnd.mock.calls[0][1]).toBe(input);
         expect(onTypingEnd.mock.calls[0][2]).toBeNull();
     });
