@@ -327,24 +327,36 @@ describe('validation callback options', () => {
 });
 
 describe('submit callback options', () => {
-    test('"onBeforeSubmit" is called', () => {
+    test('"onBeforeSubmit" is called', async () => {
         const onBeforeSubmit = jest.fn();
-        const form = new Form(
-            '.js-form',
-            [new Field('.js-input', '.js-form', ['required']), new Field('.js-checkbox', '.js-form', ['required'])],
-            submit,
-            {
-                onBeforeSubmit,
-            }
-        );
+        const form = new Form('.js-form', [], submit, {
+            onBeforeSubmit,
+        });
 
         form.listen();
 
         fireEvent.submit(formElement);
 
-        expect(onBeforeSubmit).toHaveBeenCalledTimes(1);
-        expect(onBeforeSubmit.mock.calls[0][0]).toBeInstanceOf(FormData);
-        expect(onBeforeSubmit.mock.calls[0][1]).toBe(formElement);
+        await waitFor(() => {
+            expect(onBeforeSubmit).toHaveBeenCalledTimes(1);
+            expect(onBeforeSubmit.mock.calls[0][0]).toBeInstanceOf(FormData);
+            expect(onBeforeSubmit.mock.calls[0][1]).toBe(formElement);
+        });
+    });
+
+    test('"onBeforeSubmit" is not called because of invalid form', async () => {
+        const onBeforeSubmit = jest.fn();
+        const form = new Form('.js-form', [new Field('.js-input', '.js-form', ['required'])], submit, {
+            onBeforeSubmit,
+        });
+
+        form.listen();
+
+        fireEvent.submit(formElement);
+
+        await waitFor(() => {
+            expect(onBeforeSubmit).not.toHaveBeenCalled();
+        });
     });
 
     test('"onAfterSubmit" is called with submission result', async () => {
@@ -364,7 +376,7 @@ describe('submit callback options', () => {
         });
     });
 
-    test('"onAfterSubmit" is not called because of invalid form', () => {
+    test('"onAfterSubmit" is not called because of invalid form', async () => {
         const onAfterSubmit = jest.fn();
         const form = new Form(
             '.js-form',
@@ -379,7 +391,9 @@ describe('submit callback options', () => {
 
         fireEvent.submit(formElement);
 
-        expect(onAfterSubmit).not.toHaveBeenCalled();
+        await waitFor(() => {
+            expect(onAfterSubmit).not.toHaveBeenCalled();
+        });
     });
 
     test('"onAfterSubmitSuccess" is called and "onAfterSubmitError" is not called', async () => {
@@ -471,7 +485,7 @@ describe('validation', () => {
 
 describe('submission', () => {
     test('submit valid form', async () => {
-        const submitMock = jest.fn();
+        const submitMock = jest.fn(() => new SubmissionResult(true));
         const form = new Form(
             '.js-form',
             [new Field('.js-input', '.js-form', ['required']), new Field('.js-checkbox', '.js-form', ['required'])],
@@ -494,7 +508,7 @@ describe('submission', () => {
     });
 
     test('submit invalid form (invalid fields)', async () => {
-        const submitMock = jest.fn();
+        const submitMock = jest.fn(() => new SubmissionResult(true));
         const form = new Form(
             '.js-form',
             [new Field('.js-input', '.js-form', ['required']), new Field('.js-checkbox', '.js-form', ['required'])],
@@ -511,7 +525,7 @@ describe('submission', () => {
     });
 
     test('submit invalid form (invalid form)', async () => {
-        const submitMock = jest.fn();
+        const submitMock = jest.fn(() => new SubmissionResult(true));
         const form = new Form('.js-form', [], submitMock, {
             validate: () => new ValidationResult(false),
         });

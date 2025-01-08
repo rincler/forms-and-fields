@@ -9,9 +9,6 @@ const FORM_SUBMITTING_CSS_CLASS = 'f-form-submitting';
 const FORM_SUBMIT_SUCCESS_CSS_CLASS = 'f-form-submit-success';
 const FORM_SUBMIT_ERROR_CSS_CLASS = 'f-form-submit-error';
 
-const ACTION_VALIDATING = 'action-validating';
-const ACTION_SUBMITTING = 'action-submitting';
-
 const NOOP = () => {};
 
 const DEFAULT_OPTIONS = {
@@ -107,11 +104,9 @@ export default class Form {
             return [];
         }
 
-        this.clearCss(ACTION_VALIDATING);
-
         this.getOption('onBeforeValidate')(this.formElement);
 
-        this.addCss(FORM_VALIDATING_CSS_CLASS);
+        this.setCssClass(FORM_VALIDATING_CSS_CLASS);
 
         const validationResults = await Promise.all(this.getAllFields().map((field) => field.validate()));
         const formValidationResult = this.hasOption('validate')
@@ -119,12 +114,9 @@ export default class Form {
             : new ValidationResult(true);
         validationResults.push(formValidationResult);
 
-        this.clearCss(ACTION_VALIDATING);
-
         const isValid = validationResults.every((validationResult) => validationResult.isValid());
 
-        const cssClass = isValid ? FORM_VALID_CSS_CLASS : FORM_INVALID_CSS_CLASS;
-        this.addCss(cssClass);
+        this.setCssClass(isValid ? FORM_VALID_CSS_CLASS : FORM_INVALID_CSS_CLASS);
 
         this.getOption('onAfterValidate')(validationResults, this.formElement);
 
@@ -188,22 +180,19 @@ export default class Form {
 
         const formData = new FormData(this.formElement);
 
-        this.getOption('onBeforeSubmit')(formData, this.formElement);
-
-        this.clearCss(ACTION_SUBMITTING);
-        this.addCss(FORM_SUBMITTING_CSS_CLASS);
-
         const validationResults = await this.validate();
 
         const isValid = validationResults.every((validationResult) => validationResult.isValid());
 
         if (!isValid) {
-            this.clearCss(ACTION_SUBMITTING);
-
             return;
         }
 
         let submissionResult;
+
+        this.getOption('onBeforeSubmit')(formData, this.formElement);
+
+        this.setCssClass(FORM_SUBMITTING_CSS_CLASS);
 
         try {
             submissionResult = await this.submit(formData);
@@ -213,19 +202,13 @@ export default class Form {
             submissionResult = new SubmissionResult(false);
         }
 
-        this.clearCss(ACTION_SUBMITTING);
-
         this.getOption('onAfterSubmit')(submissionResult, this.formElement);
 
-        if (submissionResult && submissionResult.isSuccess()) {
-            this.addCss(FORM_SUBMIT_SUCCESS_CSS_CLASS);
-
+        if (submissionResult.isSuccess()) {
+            this.setCssClass(FORM_SUBMIT_SUCCESS_CSS_CLASS);
             this.getOption('onAfterSubmitSuccess')(submissionResult.getData(), this.formElement);
-        }
-
-        if (submissionResult && !submissionResult.isSuccess()) {
-            this.addCss(FORM_SUBMIT_ERROR_CSS_CLASS);
-
+        } else {
+            this.setCssClass(FORM_SUBMIT_ERROR_CSS_CLASS);
             this.getOption('onAfterSubmitError')(submissionResult.getData(), this.formElement);
         }
     }
@@ -254,31 +237,15 @@ export default class Form {
         return fields;
     }
 
-    /**
-     * @private
-     *
-     * @param {string} action
-     */
-    clearCss(action) {
-        if (action === ACTION_VALIDATING) {
-            this.formElement.classList.remove(FORM_VALIDATING_CSS_CLASS, FORM_VALID_CSS_CLASS, FORM_INVALID_CSS_CLASS);
-        }
-
-        if (action === ACTION_SUBMITTING) {
-            this.formElement.classList.remove(
-                FORM_SUBMITTING_CSS_CLASS,
-                FORM_SUBMIT_SUCCESS_CSS_CLASS,
-                FORM_SUBMIT_ERROR_CSS_CLASS
-            );
-        }
-    }
-
-    /**
-     * @private
-     *
-     * @param {string} cssClass
-     */
-    addCss(cssClass) {
+    setCssClass(cssClass) {
+        this.formElement.classList.remove(
+            FORM_VALIDATING_CSS_CLASS,
+            FORM_VALID_CSS_CLASS,
+            FORM_INVALID_CSS_CLASS,
+            FORM_SUBMITTING_CSS_CLASS,
+            FORM_SUBMIT_SUCCESS_CSS_CLASS,
+            FORM_SUBMIT_ERROR_CSS_CLASS
+        );
         this.formElement.classList.add(cssClass);
     }
 }

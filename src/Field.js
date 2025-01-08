@@ -111,11 +111,9 @@ export default class Field {
 
         const fieldElement = this.getFieldElement();
 
-        this.clearCss();
-
         this.getOption('onBeforeValidate')(fieldElement, this.formElement);
 
-        this.addCss(FIELD_VALIDATING_CSS_CLASS);
+        this.setCssClass(FIELD_VALIDATING_CSS_CLASS);
 
         this.validationResult = new ValidationResult(true);
         const value = this.getValue();
@@ -131,14 +129,11 @@ export default class Field {
             }
         }
 
-        this.clearCss();
-
         if (!this.validationResult.isValid() && !this.validationResult.hasMessage()) {
             this.validationResult.setMessage(this.getOption('defaultInvalidMessage'));
         }
 
-        const cssClass = this.validationResult.isValid() ? FIELD_VALID_CSS_CLASS : FIELD_INVALID_CSS_CLASS;
-        this.addCss(cssClass);
+        this.setCssClass(this.validationResult.isValid() ? FIELD_VALID_CSS_CLASS : FIELD_INVALID_CSS_CLASS);
 
         this.getOption('onAfterValidate')(this.validationResult, fieldElement, this.formElement);
 
@@ -469,24 +464,6 @@ export default class Field {
         return value === '';
     }
 
-    /**
-     * @private
-     */
-    clearCss() {
-        const element = this.getFieldContainerElement() || this.getFieldElement();
-        element.classList.remove(FIELD_VALIDATING_CSS_CLASS, FIELD_VALID_CSS_CLASS, FIELD_INVALID_CSS_CLASS);
-    }
-
-    /**
-     * @private
-     *
-     * @param {string} cssClass
-     */
-    addCss(cssClass) {
-        const element = this.getFieldContainerElement() || this.getFieldElement();
-        element.classList.add(cssClass);
-    }
-
     getInvalidErrorMessage(invalidErrorMessage) {
         return invalidErrorMessage || this.getOption('defaultInvalidMessage');
     }
@@ -511,5 +488,11 @@ export default class Field {
         virtualFieldsCache[element.dataset.fieldId] = field;
 
         return field;
+    }
+
+    setCssClass(cssClass) {
+        const element = this.getFieldContainerElement() || this.getFieldElement();
+        element.classList.remove(FIELD_VALIDATING_CSS_CLASS, FIELD_VALID_CSS_CLASS, FIELD_INVALID_CSS_CLASS);
+        element.classList.add(cssClass);
     }
 }
