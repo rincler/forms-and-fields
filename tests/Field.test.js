@@ -161,6 +161,24 @@ describe('"validateOnType" and "validateOnChange" options', () => {
 
         expect(field.validate).not.toHaveBeenCalled();
     });
+
+    test('"validate" does not use validation result cache on typing', () => {
+        const onBeforeValidate = jest.fn();
+        const field = new Field('.js-input', '.js-container', ['required'], {
+            validateOnType: true,
+            onBeforeValidate,
+        });
+        field.listen();
+
+        fireEvent.keyUp(input, { key: 'b', code: 'KeyB' });
+        jest.runAllTimers();
+        fireEvent.keyUp(input, { key: 'a', code: 'KeyA' });
+        jest.runAllTimers();
+        fireEvent.keyUp(input, { key: 'r', code: 'KeyR' });
+        jest.runAllTimers();
+
+        expect(onBeforeValidate).toHaveBeenCalledTimes(3);
+    });
 });
 
 describe('validation callback options', () => {
@@ -440,11 +458,11 @@ describe('some validators', () => {
         const field = new Field('.js-input', '.js-container');
 
         input.value = '';
-        validationResult = await field.validate();
+        validationResult = await field.validate(true);
         expect(validationResult.isValid()).toBe(true);
 
         input.value = 'foo';
-        validationResult = await field.validate();
+        validationResult = await field.validate(true);
         expect(validationResult.isValid()).toBe(true);
     });
 
@@ -454,15 +472,15 @@ describe('some validators', () => {
         const field = new Field('.js-input', '.js-container', ['isEmail']);
 
         input.value = '';
-        validationResult = await field.validate();
+        validationResult = await field.validate(true);
         expect(validationResult.isValid()).toBe(true);
 
         input.value = 'foo';
-        validationResult = await field.validate();
+        validationResult = await field.validate(true);
         expect(validationResult.isValid()).toBe(false);
 
         input.value = 'example@example.com';
-        validationResult = await field.validate();
+        validationResult = await field.validate(true);
 
         expect(validationResult.isValid()).toBe(true);
     });
@@ -473,15 +491,15 @@ describe('some validators', () => {
         const field = new Field('.js-input', '.js-container', ['required', 'isEmail']);
 
         input.value = '';
-        validationResult = await field.validate();
+        validationResult = await field.validate(true);
         expect(validationResult.isValid()).toBe(false);
 
         input.value = 'foo';
-        validationResult = await field.validate();
+        validationResult = await field.validate(true);
         expect(validationResult.isValid()).toBe(false);
 
         input.value = 'example@example.com';
-        validationResult = await field.validate();
+        validationResult = await field.validate(true);
         expect(validationResult.isValid()).toBe(true);
     });
 
@@ -495,15 +513,15 @@ describe('some validators', () => {
         ]);
 
         input.value = '';
-        validationResult = await field.validate();
+        validationResult = await field.validate(true);
         expect(validationResult.isValid()).toBe(false);
 
         input.value = 'foo';
-        validationResult = await field.validate();
+        validationResult = await field.validate(true);
         expect(validationResult.isValid()).toBe(false);
 
         input.value = '12345';
-        validationResult = await field.validate();
+        validationResult = await field.validate(true);
         expect(validationResult.isValid()).toBe(true);
     });
 
@@ -519,15 +537,15 @@ describe('some validators', () => {
         const field = new Field('.js-input', '.js-container', [validator]);
 
         input.value = '';
-        validationResult = await field.validate();
+        validationResult = await field.validate(true);
         expect(validationResult.isValid()).toBe(false);
 
         input.value = 'foo';
-        validationResult = await field.validate();
+        validationResult = await field.validate(true);
         expect(validationResult.isValid()).toBe(false);
 
         input.value = '12345';
-        validationResult = await field.validate();
+        validationResult = await field.validate(true);
         expect(validationResult.isValid()).toBe(true);
     });
 
@@ -543,15 +561,15 @@ describe('some validators', () => {
         ]);
 
         input.value = '';
-        validationResult = await field.validate();
+        validationResult = await field.validate(true);
         expect(validationResult.isValid()).toBe(false);
 
         input.value = 'foo';
-        validationResult = await field.validate();
+        validationResult = await field.validate(true);
         expect(validationResult.isValid()).toBe(false);
 
         input.value = '12345';
-        validationResult = await field.validate();
+        validationResult = await field.validate(true);
         expect(validationResult.isValid()).toBe(true);
     });
 
@@ -566,15 +584,15 @@ describe('some validators', () => {
         ]);
 
         input.value = '';
-        validationResult = await field.validate();
+        validationResult = await field.validate(true);
         expect(validationResult.isValid()).toBe(false);
 
         input.value = 'foo';
-        validationResult = await field.validate();
+        validationResult = await field.validate(true);
         expect(validationResult.isValid()).toBe(false);
 
         input.value = '12345';
-        validationResult = await field.validate();
+        validationResult = await field.validate(true);
         expect(validationResult.isValid()).toBe(true);
     });
 
@@ -588,11 +606,11 @@ describe('some validators', () => {
         });
 
         input.value = '23';
-        validationResult = await field.validate();
+        validationResult = await field.validate(true);
         expect(validationResult.isValid()).toBe(false);
 
         input.value = '$23';
-        validationResult = await field.validate();
+        validationResult = await field.validate(true);
         expect(validationResult.isValid()).toBe(true);
     });
 });

@@ -229,7 +229,7 @@ export default class Form {
 
             fields.push(field);
 
-            if (field.isList() && !field.isRadio()) {
+            if (field.isList()) {
                 fields.push(...field.getVirtualFieldsOfList());
             }
         }

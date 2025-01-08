@@ -102,11 +102,19 @@ export default class Field {
     /**
      * @public
      *
+     * @param {boolean} force
+     *
      * @returns {Promise<ValidationResult>}
      */
-    async validate() {
+    async validate(force = false) {
+        if (this.validationResult !== null && !force) {
+            return this.validationResult;
+        }
+
+        this.validationResult = new ValidationResult(true);
+
         if (this.validators.length === 0) {
-            return new ValidationResult(true);
+            return this.validationResult;
         }
 
         const fieldElement = this.getFieldElement();
@@ -115,7 +123,6 @@ export default class Field {
 
         this.setCssClass(FIELD_VALIDATING_CSS_CLASS);
 
-        this.validationResult = new ValidationResult(true);
         const value = this.getValue();
 
         // eslint-disable-next-line no-restricted-syntax
@@ -289,9 +296,9 @@ export default class Field {
     /**
      * @private
      */
-    onChangeListener() {
+    onChangeListener(fieldElement) {
+        this.validationResult = null;
         const value = this.getValue();
-        const fieldElement = this.getFieldElement();
 
         if (this.typingDelayId) {
             clearTimeout(this.typingDelayId);
@@ -313,9 +320,8 @@ export default class Field {
     /**
      * @private
      */
-    async onKeyUpListener() {
+    async onKeyUpListener(fieldElement) {
         const value = this.getValue();
-        const fieldElement = this.getFieldElement();
 
         if (this.typingDelayId) {
             clearTimeout(this.typingDelayId);
@@ -329,7 +335,7 @@ export default class Field {
             this.getOption('onTypingEnd')(value, fieldElement, this.formElement);
 
             if (this.getOption('validateOnType')) {
-                this.validate();
+                this.validate(true);
             }
         }, this.getOption('typingDelay'));
     }
@@ -393,7 +399,7 @@ export default class Field {
      * @returns {boolean}
      */
     isList() {
-        return this.rootElement.querySelectorAll(this.fieldSelector).length > 1;
+        return this.rootElement.querySelectorAll(this.fieldSelector).length > 1 && !this.isRadio();
     }
 
     /**
