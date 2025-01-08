@@ -266,6 +266,24 @@ describe('validation callback options', () => {
         expect(onBeforeValidate).not.toHaveBeenCalled();
     });
 
+    test('"validate" is called', async () => {
+        const validate = () => new ValidationResult(false, 'Invalid form.');
+        const form = new Form('.js-form', [new Field('.js-input', '.js-form', ['required'])], {
+            validate,
+        });
+
+        form.listen();
+
+        const validationResults = await form.validate();
+
+        await waitFor(() => {
+            expect(validationResults).toStrictEqual([
+                new ValidationResult(false, 'Invalid value.'),
+                new ValidationResult(false, 'Invalid form.'),
+            ]);
+        });
+    });
+
     test('"onAfterValidate" is called', async () => {
         const onAfterValidate = jest.fn();
         const form = new Form(
@@ -286,6 +304,7 @@ describe('validation callback options', () => {
         expect(onAfterValidate.mock.calls[0][0]).toStrictEqual([
             new ValidationResult(false, 'Invalid value.'),
             new ValidationResult(false, 'Invalid value.'),
+            new ValidationResult(true),
             new ValidationResult(true),
         ]);
         expect(onAfterValidate.mock.calls[0][1]).toBe(formElement);
@@ -503,6 +522,7 @@ describe('validation', () => {
 
         expect(validateFn).toHaveBeenCalledTimes(5);
         expect(validationResults).toStrictEqual([
+            new ValidationResult(true),
             new ValidationResult(true),
             new ValidationResult(true),
             new ValidationResult(true),

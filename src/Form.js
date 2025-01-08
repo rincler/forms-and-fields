@@ -1,3 +1,4 @@
+import ValidationResult from './ValidationResult';
 import SubmissionResult from './SubmissionResult';
 
 const FORM_VALIDATING_CSS_CLASS = 'f-form-validating';
@@ -15,6 +16,7 @@ const NOOP = () => {};
 
 const DEFAULT_OPTIONS = {
     onBeforeValidate: NOOP,
+    validate: NOOP,
     onAfterValidate: NOOP,
     onBeforeSubmit: NOOP,
     submit: NOOP,
@@ -69,7 +71,18 @@ export default class Form {
      * @returns {any}
      */
     getOption(name) {
-        return this.options[name] !== undefined ? this.options[name] : DEFAULT_OPTIONS[name];
+        return this.hasOption(name) ? this.options[name] : DEFAULT_OPTIONS[name];
+    }
+
+    /**
+     * @private
+     *
+     * @param {string} name
+     *
+     * @returns {boolean}
+     */
+    hasOption(name) {
+        return this.options[name] !== undefined;
     }
 
     /**
@@ -101,6 +114,10 @@ export default class Form {
         this.addCss(FORM_VALIDATING_CSS_CLASS);
 
         const validationResults = await Promise.all(this.getAllFields().map((field) => field.validate()));
+        const formValidationResult = this.hasOption('validate')
+            ? await this.getOption('validate')(new FormData(this.formElement))
+            : new ValidationResult(true);
+        validationResults.push(formValidationResult);
 
         this.clearCss(ACTION_VALIDATING);
 
