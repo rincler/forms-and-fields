@@ -261,7 +261,7 @@ describe('callback options', () => {
         fireEvent.keyUp(input, { key: 'n', code: 'KeyN' });
         fireEvent.change(input, { target: { value: 'Leon' } });
 
-        expect(onTypingEnd).toHaveBeenCalled();
+        expect(onTypingEnd).toHaveBeenCalledTimes(1);
         expect(onTypingEnd.mock.calls[0][0]).toBe('Leon');
         expect(onTypingEnd.mock.calls[0][1]).toBe(input);
         expect(onTypingEnd.mock.calls[0][2]).toBeNull();
@@ -276,7 +276,7 @@ describe('callback options', () => {
         input.value = 'foo';
         fireEvent.change(input, { target: { value: 'bar' } });
 
-        expect(onChange).toHaveBeenCalled();
+        expect(onChange).toHaveBeenCalledTimes(1);
         expect(onChange.mock.calls[0][0]).toBe('bar');
         expect(onChange.mock.calls[0][1]).toBe(input);
         expect(onChange.mock.calls[0][2]).toBeNull();
@@ -297,7 +297,7 @@ describe('callback options', () => {
         dynamicInput.value = 'foo';
         fireEvent.change(dynamicInput, { target: { value: 'bar' } });
 
-        expect(onChange).toHaveBeenCalled();
+        expect(onChange).toHaveBeenCalledTimes(1);
         expect(onChange.mock.calls[0][0]).toBe('bar');
         expect(onChange.mock.calls[0][1]).toBe(dynamicInput);
         expect(onChange.mock.calls[0][2]).toBeNull();
@@ -315,7 +315,7 @@ describe('callback options', () => {
 
         fireEvent.change(listInput, { target: { value: 'bar' } });
 
-        expect(onChange).toHaveBeenCalled();
+        expect(onChange).toHaveBeenCalledTimes(1);
         expect(onChange.mock.calls[0][0]).toBe('bar');
         expect(onChange.mock.calls[0][1]).toBe(listInput);
         expect(onChange.mock.calls[0][2]).toBeNull();
@@ -340,7 +340,7 @@ describe('callback options', () => {
 
         fireEvent.change(dynamicListInput, { target: { value: 'bar' } });
 
-        expect(onChange).toHaveBeenCalled();
+        expect(onChange).toHaveBeenCalledTimes(1);
         expect(onChange.mock.calls[0][0]).toBe('bar');
         expect(onChange.mock.calls[0][1]).toBe(dynamicListInput);
         expect(onChange.mock.calls[0][2]).toBeNull();
@@ -357,7 +357,7 @@ describe('callback options', () => {
 
         fireEvent.click(radio);
 
-        expect(onChange).toHaveBeenCalled();
+        expect(onChange).toHaveBeenCalledTimes(1);
         expect(onChange.mock.calls[0][0]).toBe('2');
         expect(onChange.mock.calls[0][1]).toBe(radio);
         expect(onChange.mock.calls[0][2]).toBeNull();
@@ -380,7 +380,7 @@ describe('callback options', () => {
 
         fireEvent.click(dynamicRadio);
 
-        expect(onChange).toHaveBeenCalled();
+        expect(onChange).toHaveBeenCalledTimes(1);
         expect(onChange.mock.calls[0][0]).toBe('2');
         expect(onChange.mock.calls[0][1]).toBe(dynamicRadio);
         expect(onChange.mock.calls[0][2]).toBeNull();

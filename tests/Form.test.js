@@ -161,7 +161,7 @@ describe('field options', () => {
 
         fireEvent.change(input, { target: { value: 'bar' } });
 
-        expect(onChange).toHaveBeenCalled();
+        expect(onChange).toHaveBeenCalledTimes(1);
         expect(onChange.mock.calls[0][0]).toBe('bar');
         expect(onChange.mock.calls[0][1]).toBe(input);
         expect(onChange.mock.calls[0][2]).toBe(formElement);
@@ -240,7 +240,7 @@ describe('validation callback options', () => {
 
         await form.validate();
 
-        expect(onBeforeValidate).toHaveBeenCalled();
+        expect(onBeforeValidate).toHaveBeenCalledTimes(1);
         expect(onBeforeValidate.mock.calls[0][0]).toBe(formElement);
     });
 
@@ -288,7 +288,7 @@ describe('validation callback options', () => {
 
         await form.validate();
 
-        expect(onAfterValidate).toHaveBeenCalled();
+        expect(onAfterValidate).toHaveBeenCalledTimes(1);
         expect(onAfterValidate.mock.calls[0][0]).toStrictEqual([
             new ValidationResult(false, 'Invalid value.'),
             new ValidationResult(false, 'Invalid value.'),
