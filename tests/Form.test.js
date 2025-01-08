@@ -46,6 +46,9 @@ describe('field options', () => {
         const typingDelay = 3;
         const validatorParams = { foo: [] };
         const trimEnabled = false;
+        const onChange = jest.fn();
+        const onTypingStart = jest.fn();
+        const onTypingEnd = jest.fn();
 
         const inputField = new Field('.js-input', '.js-form');
         const checkboxField = new Field('.js-checkbox', '.js-form');
@@ -59,6 +62,9 @@ describe('field options', () => {
             validateOnChange,
             validateOnType,
             validatorParams,
+            onChange,
+            onTypingStart,
+            onTypingEnd,
         });
 
         expect(inputField.getOption('invalidMessages')).toBe(invalidMessages);
@@ -81,6 +87,15 @@ describe('field options', () => {
 
         expect(inputField.getOption('validatorParams')).toBe(validatorParams);
         expect(checkboxField.getOption('validatorParams')).toBe(validatorParams);
+
+        expect(inputField.getOption('onChange')).toBe(onChange);
+        expect(checkboxField.getOption('onChange')).toBe(onChange);
+
+        expect(inputField.getOption('onTypingStart')).toBe(onTypingStart);
+        expect(checkboxField.getOption('onTypingStart')).toBe(onTypingStart);
+
+        expect(inputField.getOption('onTypingEnd')).toBe(onTypingEnd);
+        expect(checkboxField.getOption('onTypingEnd')).toBe(onTypingEnd);
     });
 
     test('form options do not override field options', () => {
@@ -91,6 +106,9 @@ describe('field options', () => {
         const validateOnChange = true;
         const validateOnType = true;
         const validatorParams = { bar: [] };
+        const onChange = jest.fn();
+        const onTypingStart = jest.fn();
+        const onTypingEnd = jest.fn();
 
         const inputField = new Field('.js-input', '.js-form', [], {
             invalidMessages,
@@ -100,20 +118,23 @@ describe('field options', () => {
             validateOnChange,
             validateOnType,
             validatorParams,
+            onChange,
+            onTypingStart,
+            onTypingEnd,
         });
 
         // eslint-disable-next-line no-new
         new Form('.js-form', [inputField], {
             invalidMessages: { required: 'this is required' },
             defaultInvalidMessage: 'some default invalid message',
+            trimEnabled: false,
+            typingDelay: 3,
             validateOnChange: false,
             validateOnType: false,
-            typingDelay: 3,
+            validatorParams: { foo: [] },
+            onChange: jest.fn(),
             onTypingStart: jest.fn(),
             onTypingEnd: jest.fn(),
-            onChange: jest.fn(),
-            validatorParams: { foo: [] },
-            trimEnabled: false,
         });
 
         expect(inputField.getOption('invalidMessages')).toBe(invalidMessages);
@@ -123,114 +144,26 @@ describe('field options', () => {
         expect(inputField.getOption('validateOnChange')).toBe(validateOnChange);
         expect(inputField.getOption('validateOnType')).toBe(validateOnType);
         expect(inputField.getOption('validatorParams')).toBe(validatorParams);
+        expect(inputField.getOption('onChange')).toBe(onChange);
+        expect(inputField.getOption('onTypingStart')).toBe(onTypingStart);
+        expect(inputField.getOption('onTypingEnd')).toBe(onTypingEnd);
     });
 
     test('"onChange" is called on text input change', () => {
         const onChange = jest.fn();
-        const form = new Form(
-            '.js-form',
-            [
-                new Field('.js-input', '.js-form', [], {
-                    onChange,
-                }),
-            ],
-            {
-                onChangeField: onChange,
-            }
-        );
+        const form = new Form('.js-form', [new Field('.js-input', '.js-form', [])], {
+            onChange,
+        });
         form.listen();
 
         input.value = 'foo';
 
         fireEvent.change(input, { target: { value: 'bar' } });
 
-        expect(onChange).toHaveBeenCalledTimes(2);
+        expect(onChange).toHaveBeenCalled();
         expect(onChange.mock.calls[0][0]).toBe('bar');
         expect(onChange.mock.calls[0][1]).toBe(input);
         expect(onChange.mock.calls[0][2]).toBe(formElement);
-        expect(onChange.mock.calls[1][0]).toBe('bar');
-        expect(onChange.mock.calls[1][1]).toBe(input);
-        expect(onChange.mock.calls[1][2]).toBe(formElement);
-    });
-
-    test('"onChangeField" is called on text input (one of the list) change', () => {
-        const onChangeField = jest.fn();
-        const form = new Form('.js-form', [new Field('.js-list-input', '.js-form')], {
-            onChangeField,
-        });
-        form.listen();
-
-        const listInput = document.querySelectorAll('.js-list-input');
-        listInput[2].value = 'foo';
-
-        fireEvent.change(listInput[2], { target: { value: 'bar' } });
-
-        expect(onChangeField).toHaveBeenCalled();
-        expect(onChangeField.mock.calls[0][0]).toBe('bar');
-        expect(onChangeField.mock.calls[0][1]).toBe(listInput[2]);
-        expect(onChangeField.mock.calls[0][2]).toBe(formElement);
-    });
-
-    test('"onChangeField" is called on radio input change', () => {
-        const onChangeField = jest.fn();
-        const form = new Form('.js-form', [new Field('.js-radio', '.js-form')], {
-            onChangeField,
-        });
-        form.listen();
-
-        const radio = document.querySelectorAll('.js-radio');
-
-        fireEvent.click(radio[1]);
-
-        expect(onChangeField).toHaveBeenCalled();
-        expect(onChangeField.mock.calls[0][0]).toBe('2');
-        expect(onChangeField.mock.calls[0][1]).toBe(radio[1]);
-        expect(onChangeField.mock.calls[0][2]).toBe(formElement);
-    });
-
-    test('"onTypingStart" is called on text input change', () => {
-        const onTypingStart = jest.fn();
-        const form = new Form(
-            '.js-form',
-            [
-                new Field('.js-input', '.js-form', [], {
-                    onTypingStart,
-                }),
-            ],
-            {
-                onTypingStartField: onTypingStart,
-            }
-        );
-        form.listen();
-
-        fireEvent.keyUp(input, { key: 'b', code: 'KeyB' });
-        fireEvent.keyUp(input, { key: 'a', code: 'KeyA' });
-        fireEvent.keyUp(input, { key: 'r', code: 'KeyR' });
-
-        expect(onTypingStart).toHaveBeenCalledTimes(2);
-    });
-
-    test('"onTypingEnd" is called on text input change', () => {
-        const onTypingEnd = jest.fn();
-        const form = new Form(
-            '.js-form',
-            [
-                new Field('.js-input', '.js-form', [], {
-                    onTypingEnd,
-                }),
-            ],
-            {
-                onTypingEndField: onTypingEnd,
-            }
-        );
-        form.listen();
-
-        fireEvent.keyUp(input, { key: 'b', code: 'KeyB' });
-        fireEvent.keyUp(input, { key: 'a', code: 'KeyA' });
-        fireEvent.keyUp(input, { key: 'r', code: 'KeyR' });
-        jest.runAllTimers();
-
-        expect(onTypingEnd).toHaveBeenCalledTimes(2);
     });
 });
 
@@ -260,32 +193,6 @@ describe('validation callback options', () => {
         expect(onBeforeValidateField.mock.calls[0][1]).toBe(formElement);
     });
 
-    test('"onBeforeValidateField" is not called because of no validators', async () => {
-        const onBeforeValidateField = jest.fn();
-        const form = new Form(
-            '.js-form',
-            [new Field('.js-input', '.js-form', []), new Field('.js-checkbox', '.js-form', [])],
-            {
-                onBeforeValidateField,
-            }
-        );
-
-        await form.validate();
-
-        expect(onBeforeValidateField).not.toHaveBeenCalled();
-    });
-
-    test('"onBeforeValidateField" is not called because of no fields', async () => {
-        const onBeforeValidateField = jest.fn();
-        const form = new Form('.js-form', [], {
-            onBeforeValidateField,
-        });
-
-        await form.validate();
-
-        expect(onBeforeValidateField).not.toHaveBeenCalled();
-    });
-
     test('"onAfterValidateField" is called', async () => {
         const onAfterValidateField = jest.fn();
         const form = new Form(
@@ -313,86 +220,24 @@ describe('validation callback options', () => {
         expect(onAfterValidateField.mock.calls[1][2]).toBe(formElement);
     });
 
-    test('"onAfterValidateField" is not called because of no validators', async () => {
-        const onAfterValidateField = jest.fn();
-        const form = new Form(
-            '.js-form',
-            [new Field('.js-input', '.js-form', []), new Field('.js-checkbox', '.js-form', [])],
-            {
-                onAfterValidateField,
-            }
-        );
-
-        await form.validate();
-
-        expect(onAfterValidateField).not.toHaveBeenCalled();
-    });
-
-    test('"onAfterValidateField" is not called because of no fields', async () => {
-        const onAfterValidateField = jest.fn();
-        const form = new Form('.js-form', [], {
-            onAfterValidateField,
-        });
-
-        await form.validate();
-
-        expect(onAfterValidateField).not.toHaveBeenCalled();
-    });
-
     test('"onBeforeValidate" is called', async () => {
-        const onBeforeValidateForm = jest.fn();
-        const onBeforeValidateField = jest.fn();
+        const onBeforeValidate = jest.fn();
         const form = new Form(
             '.js-form',
             [
-                new Field('.js-input', '.js-form', ['required'], {
-                    onBeforeValidate: onBeforeValidateField,
-                }),
+                new Field('.js-input', '.js-form', ['required']),
                 new Field('.js-checkbox', '.js-form', ['required']),
                 new Field('.js-textarea', '.js-form', []),
             ],
             {
-                onBeforeValidate: onBeforeValidateForm,
+                onBeforeValidate,
             }
         );
 
         await form.validate();
 
-        expect(onBeforeValidateForm).toHaveBeenCalledTimes(1);
-        expect(onBeforeValidateForm.mock.calls[0][0]).toBe(formElement);
-
-        expect(onBeforeValidateField).toHaveBeenCalledTimes(1);
-        expect(onBeforeValidateField.mock.calls[0][0]).toBe(input);
-        expect(onBeforeValidateField.mock.calls[0][1]).toBe(formElement);
-    });
-
-    test('"onBeforeValidate" is called on text input change', async () => {
-        const onBeforeValidateForm = jest.fn();
-        const onBeforeValidateField = jest.fn();
-        const form = new Form(
-            '.js-form',
-            [
-                new Field('.js-input', '.js-form', ['required'], {
-                    onBeforeValidate: onBeforeValidateField,
-                    validateOnChange: true,
-                }),
-                new Field('.js-checkbox', '.js-form', ['required']),
-                new Field('.js-textarea', '.js-form', []),
-            ],
-            {
-                onBeforeValidate: onBeforeValidateForm,
-            }
-        );
-        form.listen();
-
-        fireEvent.change(input, 'foo');
-
-        expect(onBeforeValidateForm).toHaveBeenCalledTimes(1);
-        expect(onBeforeValidateForm.mock.calls[0][0]).toBe(formElement);
-
-        expect(onBeforeValidateField).toHaveBeenCalledTimes(1);
-        expect(onBeforeValidateField.mock.calls[0][0]).toBe(input);
-        expect(onBeforeValidateField.mock.calls[0][1]).toBe(formElement);
+        expect(onBeforeValidate).toHaveBeenCalledTimes(1);
+        expect(onBeforeValidate.mock.calls[0][0]).toBe(formElement);
     });
 
     test('"onBeforeValidate" is not called because of no validators', async () => {
@@ -422,65 +267,24 @@ describe('validation callback options', () => {
     });
 
     test('"onAfterValidate" is called', async () => {
-        const onAfterValidateForm = jest.fn();
-        const onAfterValidateField = jest.fn();
+        const onAfterValidate = jest.fn();
         const form = new Form(
             '.js-form',
             [
-                new Field('.js-input', '.js-form', ['required'], {
-                    onAfterValidate: onAfterValidateField,
-                }),
+                new Field('.js-input', '.js-form', ['required']),
                 new Field('.js-checkbox', '.js-form', ['required']),
                 new Field('.js-textarea', '.js-form', []),
             ],
             {
-                onAfterValidate: onAfterValidateForm,
+                onAfterValidate,
             }
         );
 
         await form.validate();
 
-        expect(onAfterValidateForm).toHaveBeenCalledTimes(1);
-        expect(onAfterValidateForm.mock.calls[0][0]).toBe(false);
-        expect(onAfterValidateForm.mock.calls[0][1]).toBe(formElement);
-
-        expect(onAfterValidateField).toHaveBeenCalledTimes(1);
-        expect(onAfterValidateField.mock.calls[0][0]).toBeInstanceOf(ValidationResult);
-        expect(onAfterValidateField.mock.calls[0][1]).toBe(input);
-        expect(onAfterValidateField.mock.calls[0][2]).toBe(formElement);
-    });
-
-    test('"onAfterValidate" is called on text input change', async () => {
-        const onAfterValidateForm = jest.fn();
-        const onAfterValidateField = jest.fn();
-        const form = new Form(
-            '.js-form',
-            [
-                new Field('.js-input', '.js-form', ['required'], {
-                    onAfterValidate: onAfterValidateField,
-                    validateOnChange: true,
-                }),
-                new Field('.js-checkbox', '.js-form', ['required']),
-                new Field('.js-textarea', '.js-form', []),
-            ],
-            {
-                onAfterValidate: onAfterValidateForm,
-            }
-        );
-        form.listen();
-
-        fireEvent.change(input, 'foo');
-
-        await waitFor(() => {
-            expect(onAfterValidateForm).toHaveBeenCalledTimes(1);
-            expect(onAfterValidateForm.mock.calls[0][0]).toBe(false);
-            expect(onAfterValidateForm.mock.calls[0][1]).toBe(formElement);
-
-            expect(onAfterValidateField).toHaveBeenCalledTimes(1);
-            expect(onAfterValidateField.mock.calls[0][0]).toBeInstanceOf(ValidationResult);
-            expect(onAfterValidateField.mock.calls[0][1]).toBe(input);
-            expect(onAfterValidateField.mock.calls[0][2]).toBe(formElement);
-        });
+        expect(onAfterValidate).toHaveBeenCalledTimes(1);
+        expect(onAfterValidate.mock.calls[0][0]).toBe(false);
+        expect(onAfterValidate.mock.calls[0][1]).toBe(formElement);
     });
 
     test('"onAfterValidate" is not called because of no validators', async () => {
@@ -719,8 +523,6 @@ describe('init form', () => {
 
 describe('special css classes', () => {
     test('validating special css class', async () => {
-        expect.assertions(2);
-
         const field = new Field('.js-input', '.js-form', [
             (value) => {
                 expect(formElement.classList.contains('f-form-validating')).toBe(true);
@@ -733,7 +535,6 @@ describe('special css classes', () => {
         input.value = '1234';
 
         await form.validate();
-        await field.validate();
     });
 
     test('valid special css class', async () => {

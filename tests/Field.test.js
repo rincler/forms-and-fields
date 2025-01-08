@@ -177,6 +177,17 @@ describe('validation callback options', () => {
         expect(onBeforeValidate.mock.calls[0][1]).toBeNull();
     });
 
+    test('"onBeforeValidate" is not called because of no validators', async () => {
+        const onBeforeValidate = jest.fn();
+        const field = new Field('.js-input', '.js-container', [], {
+            onBeforeValidate,
+        });
+
+        await field.validate();
+
+        expect(onBeforeValidate).not.toHaveBeenCalled();
+    });
+
     test('"onAfterValidate" is called', async () => {
         const onAfterValidate = jest.fn();
         const field = new Field('.js-input', '.js-container', ['required'], {
@@ -189,6 +200,17 @@ describe('validation callback options', () => {
         expect(onAfterValidate.mock.calls[0][0]).toBeInstanceOf(ValidationResult);
         expect(onAfterValidate.mock.calls[0][1]).toBe(input);
         expect(onAfterValidate.mock.calls[0][2]).toBeNull();
+    });
+
+    test('"onAfterValidate" is not called because of no validators', async () => {
+        const onAfterValidate = jest.fn();
+        const field = new Field('.js-input', '.js-container', [], {
+            onAfterValidate,
+        });
+
+        await field.validate();
+
+        expect(onAfterValidate).not.toHaveBeenCalled();
     });
 });
 
@@ -850,8 +872,6 @@ describe('"getValue"', () => {
 
 describe('special css classes', () => {
     test('"validating" special css class', async () => {
-        expect.assertions(1);
-
         const field = new Field('.js-input', '.js-container', [
             (value) => {
                 expect(input.classList.contains('f-field-validating')).toBe(true);

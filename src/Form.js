@@ -14,12 +14,7 @@ const ACTION_SUBMITTING = 'action-submitting';
 const NOOP = () => {};
 
 const DEFAULT_OPTIONS = {
-    onChangeField: NOOP,
-    onTypingStartField: NOOP,
-    onTypingEndField: NOOP,
-    onBeforeValidateField: NOOP,
     onBeforeValidate: NOOP,
-    onAfterValidateField: NOOP,
     onAfterValidate: NOOP,
     onBeforeSubmit: NOOP,
     submit: NOOP,
@@ -46,7 +41,6 @@ export default class Form {
         this.formSelector = formSelector;
 
         this.fields = fields;
-        this.validatingAllFields = false;
 
         this.options = {};
         this.setOptions(options);
@@ -112,8 +106,6 @@ export default class Form {
             return;
         }
 
-        this.validatingAllFields = true;
-
         this.clearCss(ACTION_VALIDATING);
 
         this.getOption('onBeforeValidate')(this.formElement);
@@ -130,8 +122,6 @@ export default class Form {
         this.addCss(cssClass);
 
         this.getOption('onAfterValidate')(isValid, this.formElement);
-
-        this.validatingAllFields = false;
     }
 
     /**
@@ -142,11 +132,6 @@ export default class Form {
     setFieldOptions(options) {
         // eslint-disable-next-line no-restricted-syntax
         for (const field of this.fields) {
-            const onChangeField = field.getOption('onChange');
-            const onTypingStartField = field.getOption('onTypingStart');
-            const onTypingEndField = field.getOption('onTypingEnd');
-            const onBeforeValidateField = field.getOption('onBeforeValidate');
-            const onAfterValidateField = field.getOption('onAfterValidate');
             field.setOptions({
                 invalidMessages: field.hasOption('invalidMessages')
                     ? field.getOption('invalidMessages')
@@ -165,49 +150,17 @@ export default class Form {
                 validatorParams: field.hasOption('validatorParams')
                     ? this.getOption('validatorParams')
                     : options.validatorParams,
-                onChange: (value, fieldElement, formElement) => {
-                    onChangeField(value, fieldElement, formElement);
-                    this.getOption('onChangeField')(value, fieldElement, formElement);
-                },
-                onTypingStart: (value, fieldElement, formElement) => {
-                    onTypingStartField(value, fieldElement, formElement);
-                    this.getOption('onTypingStartField')(value, fieldElement, formElement);
-                },
-                onTypingEnd: (value, fieldElement, formElement) => {
-                    onTypingEndField(value, fieldElement, formElement);
-                    this.getOption('onTypingEndField')(value, fieldElement, formElement);
-                },
-                onBeforeValidate: (fieldElement, formElement) => {
-                    onBeforeValidateField(fieldElement, formElement);
-                    this.getOption('onBeforeValidateField')(fieldElement, formElement);
-
-                    if (this.validatingAllFields) {
-                        return;
-                    }
-
-                    this.clearCss(ACTION_VALIDATING);
-
-                    this.getOption('onBeforeValidate')(this.formElement);
-
-                    this.addCss(FORM_VALIDATING_CSS_CLASS);
-                },
-                onAfterValidate: async (validationResult, fieldElement, formElement) => {
-                    onAfterValidateField(validationResult, fieldElement, formElement);
-                    this.getOption('onAfterValidateField')(validationResult, fieldElement, formElement);
-
-                    if (this.validatingAllFields) {
-                        return;
-                    }
-
-                    this.clearCss(ACTION_VALIDATING);
-
-                    const isFormValid = await this.isValid();
-
-                    const cssClass = isFormValid ? FORM_VALID_CSS_CLASS : FORM_INVALID_CSS_CLASS;
-                    this.addCss(cssClass);
-
-                    this.getOption('onAfterValidate')(isFormValid, this.formElement);
-                },
+                onChange: field.hasOption('onChange') ? field.getOption('onChange') : options.onChange,
+                onTypingStart: field.hasOption('onTypingStart')
+                    ? field.getOption('onTypingStart')
+                    : options.onTypingStart,
+                onTypingEnd: field.hasOption('onTypingEnd') ? field.getOption('onTypingEnd') : options.onTypingEnd,
+                onBeforeValidate: field.hasOption('onBeforeValidate')
+                    ? field.getOption('onBeforeValidate')
+                    : options.onBeforeValidateField,
+                onAfterValidate: field.hasOption('onAfterValidate')
+                    ? field.getOption('onAfterValidate')
+                    : options.onAfterValidateField,
             });
         }
     }
