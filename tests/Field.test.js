@@ -414,105 +414,79 @@ describe('validation result', () => {
         await field.validate();
     });
 
-    test('"isValid" is true', async () => {
+    test('"validate" positive', async () => {
         const field = new Field('.js-input', '.js-container', ['required']);
 
         input.value = 'foo';
 
-        const isValid = await field.isValid();
+        const validationResult = await field.validate();
 
-        expect(isValid).toBe(true);
+        expect(validationResult).toStrictEqual(new ValidationResult(true));
     });
 
-    test('"isValid" is false', async () => {
+    test('"validate" negative', async () => {
         const field = new Field('.js-input', '.js-container', ['required']);
 
-        const isValid = await field.isValid();
+        const validationResult = await field.validate();
 
-        expect(isValid).toBe(false);
-    });
-
-    test('"isValid" with state', async () => {
-        const field = new Field('.js-input', '.js-container', ['required']);
-        let isValid;
-
-        field.validationResult = new ValidationResult(true);
-        isValid = await field.isValid();
-        expect(isValid).toBe(true);
-
-        field.validationResult = new ValidationResult(false);
-        isValid = await field.isValid();
-        expect(isValid).toBe(false);
-    });
-
-    test('forced "isValid" with state', async () => {
-        const field = new Field('.js-input', '.js-container', ['required']);
-        let isValid;
-
-        field.validationResult = new ValidationResult(true);
-        isValid = await field.isValid(true);
-        expect(isValid).toBe(false);
-
-        field.validationResult = new ValidationResult(false);
-        input.value = 'foo';
-        isValid = await field.isValid(true);
-        expect(isValid).toBe(true);
+        expect(validationResult).toStrictEqual(new ValidationResult(false, 'Invalid value.'));
     });
 });
 
 describe('some validators', () => {
     test('no validators', async () => {
-        let isValid;
+        let validationResult;
 
         const field = new Field('.js-input', '.js-container');
 
         input.value = '';
-        isValid = await field.isValid(true);
-        expect(isValid).toBe(true);
+        validationResult = await field.validate();
+        expect(validationResult.isValid()).toBe(true);
 
         input.value = 'foo';
-        isValid = await field.isValid(true);
-        expect(isValid).toBe(true);
+        validationResult = await field.validate();
+        expect(validationResult.isValid()).toBe(true);
     });
 
     test('"isEmail" validator', async () => {
-        let isValid;
+        let validationResult;
 
         const field = new Field('.js-input', '.js-container', ['isEmail']);
 
         input.value = '';
-        isValid = await field.isValid(true);
-        expect(isValid).toBe(true);
+        validationResult = await field.validate();
+        expect(validationResult.isValid()).toBe(true);
 
         input.value = 'foo';
-        isValid = await field.isValid(true);
-        expect(isValid).toBe(false);
+        validationResult = await field.validate();
+        expect(validationResult.isValid()).toBe(false);
 
         input.value = 'example@example.com';
-        isValid = await field.isValid(true);
-        expect(isValid).toBe(true);
+        validationResult = await field.validate();
+
+        expect(validationResult.isValid()).toBe(true);
     });
 
     test('"required" and "isEmail"', async () => {
-        let isValid;
+        let validationResult;
 
         const field = new Field('.js-input', '.js-container', ['required', 'isEmail']);
 
         input.value = '';
-        isValid = await field.isValid(true);
-        expect(isValid).toBe(false);
+        validationResult = await field.validate();
+        expect(validationResult.isValid()).toBe(false);
 
         input.value = 'foo';
-        isValid = await field.isValid(true);
-        expect(isValid).toBe(false);
+        validationResult = await field.validate();
+        expect(validationResult.isValid()).toBe(false);
 
         input.value = 'example@example.com';
-        isValid = await field.isValid(true);
-        expect(isValid).toBe(true);
+        validationResult = await field.validate();
+        expect(validationResult.isValid()).toBe(true);
     });
 
     test('custom validator', async () => {
-        let isValid;
+        let validationResult;
 
         const field = new Field('.js-input', '.js-container', [
             (value) => {
@@ -521,20 +495,20 @@ describe('some validators', () => {
         ]);
 
         input.value = '';
-        isValid = await field.isValid(true);
-        expect(isValid).toBe(false);
+        validationResult = await field.validate();
+        expect(validationResult.isValid()).toBe(false);
 
         input.value = 'foo';
-        isValid = await field.isValid(true);
-        expect(isValid).toBe(false);
+        validationResult = await field.validate();
+        expect(validationResult.isValid()).toBe(false);
 
         input.value = '12345';
-        isValid = await field.isValid(true);
-        expect(isValid).toBe(true);
+        validationResult = await field.validate();
+        expect(validationResult.isValid()).toBe(true);
     });
 
     test('custom object validator', async () => {
-        let isValid;
+        let validationResult;
 
         const validator = {
             validate: (value) => {
@@ -545,20 +519,20 @@ describe('some validators', () => {
         const field = new Field('.js-input', '.js-container', [validator]);
 
         input.value = '';
-        isValid = await field.isValid(true);
-        expect(isValid).toBe(false);
+        validationResult = await field.validate();
+        expect(validationResult.isValid()).toBe(false);
 
         input.value = 'foo';
-        isValid = await field.isValid(true);
-        expect(isValid).toBe(false);
+        validationResult = await field.validate();
+        expect(validationResult.isValid()).toBe(false);
 
         input.value = '12345';
-        isValid = await field.isValid(true);
-        expect(isValid).toBe(true);
+        validationResult = await field.validate();
+        expect(validationResult.isValid()).toBe(true);
     });
 
     test('promised custom validator', async () => {
-        let isValid;
+        let validationResult;
 
         const field = new Field('.js-input', '.js-container', [
             (value) => {
@@ -569,20 +543,20 @@ describe('some validators', () => {
         ]);
 
         input.value = '';
-        isValid = await field.isValid(true);
-        expect(isValid).toBe(false);
+        validationResult = await field.validate();
+        expect(validationResult.isValid()).toBe(false);
 
         input.value = 'foo';
-        isValid = await field.isValid(true);
-        expect(isValid).toBe(false);
+        validationResult = await field.validate();
+        expect(validationResult.isValid()).toBe(false);
 
         input.value = '12345';
-        isValid = await field.isValid(true);
-        expect(isValid).toBe(true);
+        validationResult = await field.validate();
+        expect(validationResult.isValid()).toBe(true);
     });
 
     test('"required" and custom validator', async () => {
-        let isValid;
+        let validationResult;
 
         const field = new Field('.js-input', '.js-container', [
             'required',
@@ -592,20 +566,20 @@ describe('some validators', () => {
         ]);
 
         input.value = '';
-        isValid = await field.isValid(true);
-        expect(isValid).toBe(false);
+        validationResult = await field.validate();
+        expect(validationResult.isValid()).toBe(false);
 
         input.value = 'foo';
-        isValid = await field.isValid(true);
-        expect(isValid).toBe(false);
+        validationResult = await field.validate();
+        expect(validationResult.isValid()).toBe(false);
 
         input.value = '12345';
-        isValid = await field.isValid(true);
-        expect(isValid).toBe(true);
+        validationResult = await field.validate();
+        expect(validationResult.isValid()).toBe(true);
     });
 
     test('validator params', async () => {
-        let isValid;
+        let validationResult;
 
         const field = new Field('.js-input', '.js-container', ['isCurrency'], {
             validatorParams: {
@@ -614,12 +588,12 @@ describe('some validators', () => {
         });
 
         input.value = '23';
-        isValid = await field.isValid(true);
-        expect(isValid).toBe(false);
+        validationResult = await field.validate();
+        expect(validationResult.isValid()).toBe(false);
 
         input.value = '$23';
-        isValid = await field.isValid(true);
-        expect(isValid).toBe(true);
+        validationResult = await field.validate();
+        expect(validationResult.isValid()).toBe(true);
     });
 });
 
@@ -645,15 +619,15 @@ describe('file validator', () => {
             },
         });
 
-        await field.validate();
-        expect(field.validationResult.isValid()).toBeTruthy();
+        const validationResult = await field.validate();
+        expect(validationResult.isValid()).toBeTruthy();
     });
 
     test('valid when no file', async () => {
         const field = new Field('.js-file', '.js-container', [newFileValidator()]);
 
-        await field.validate();
-        expect(field.validationResult.isValid()).toBeTruthy();
+        const validationResult = await field.validate();
+        expect(validationResult.isValid()).toBeTruthy();
     });
 
     test.each([
@@ -722,42 +696,12 @@ describe('file validator', () => {
             },
         });
 
-        await field.validate();
-        expect(field.validationResult.isValid()).toBeFalsy();
-        expect(field.validationResult.getMessage()).toBe(expectedErrorMessage);
+        const validationResult = await field.validate();
+        expect(validationResult).toStrictEqual(new ValidationResult(false, expectedErrorMessage));
     });
 });
 
 describe('message options', () => {
-    test('default valid message', async () => {
-        const onAfterValidate = (validationResult) => {
-            expect(validationResult.getMessage()).toBe('');
-        };
-
-        const field = new Field('.js-input', '.js-container', ['required'], {
-            onAfterValidate,
-        });
-
-        input.value = 'foo';
-
-        await field.validate();
-    });
-
-    test('valid message', async () => {
-        const onAfterValidate = (validationResult) => {
-            expect(validationResult.getMessage()).toBe('Field is valid.');
-        };
-
-        const field = new Field('.js-input', '.js-container', ['required'], {
-            onAfterValidate,
-            validMessage: 'Field is valid.',
-        });
-
-        input.value = 'foo';
-
-        await field.validate();
-    });
-
     test('default invalid message', async () => {
         const onAfterValidate = (validationResult) => {
             expect(validationResult.getMessage()).toBe('Invalid value.');

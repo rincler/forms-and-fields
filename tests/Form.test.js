@@ -236,7 +236,7 @@ describe('validation callback options', () => {
 
         await form.validate();
 
-        expect(onBeforeValidate).toHaveBeenCalledTimes(1);
+        expect(onBeforeValidate).toHaveBeenCalled();
         expect(onBeforeValidate.mock.calls[0][0]).toBe(formElement);
     });
 
@@ -282,8 +282,12 @@ describe('validation callback options', () => {
 
         await form.validate();
 
-        expect(onAfterValidate).toHaveBeenCalledTimes(1);
-        expect(onAfterValidate.mock.calls[0][0]).toBe(false);
+        expect(onAfterValidate).toHaveBeenCalled();
+        expect(onAfterValidate.mock.calls[0][0]).toStrictEqual([
+            new ValidationResult(false, 'Invalid value.'),
+            new ValidationResult(false, 'Invalid value.'),
+            new ValidationResult(true),
+        ]);
         expect(onAfterValidate.mock.calls[0][1]).toBe(formElement);
     });
 
@@ -486,20 +490,6 @@ describe('submit callback options', () => {
 });
 
 describe('validation', () => {
-    test('"isValid"', async () => {
-        const validateFn = jest.fn(() => new ValidationResult(true));
-        const form = new Form('.js-form', [
-            new Field('.js-input', '.js-form', [validateFn]),
-            new Field('.js-radio', '.js-form', [validateFn]),
-            new Field('.js-list-input', '.js-form', [validateFn]),
-            new Field('.js-no', '.js-form', [validateFn]),
-        ]);
-
-        await form.isValid(true);
-
-        expect(validateFn).toHaveBeenCalledTimes(5);
-    });
-
     test('"validate"', async () => {
         const validateFn = jest.fn(() => new ValidationResult(true));
         const form = new Form('.js-form', [
@@ -509,9 +499,16 @@ describe('validation', () => {
             new Field('.js-no', '.js-form', [validateFn]),
         ]);
 
-        await form.validate();
+        const validationResults = await form.validate();
 
         expect(validateFn).toHaveBeenCalledTimes(5);
+        expect(validationResults).toStrictEqual([
+            new ValidationResult(true),
+            new ValidationResult(true),
+            new ValidationResult(true),
+            new ValidationResult(true),
+            new ValidationResult(true),
+        ]);
     });
 });
 

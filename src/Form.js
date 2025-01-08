@@ -87,23 +87,11 @@ export default class Form {
     /**
      * @public
      *
-     * @param {boolean} force
-     *
-     * @returns {Promise<boolean>}
-     */
-    async isValid(force = false) {
-        const result = await Promise.all(this.getAllFields().map((field) => field.isValid(force)));
-        return result.every((isValid) => isValid);
-    }
-
-    /**
-     * @public
-     *
-     * @returns {Promise<void>}
+     * @returns {Promise<ValidationResult[]>}
      */
     async validate() {
         if (this.fields.every((field) => field.validators.length === 0)) {
-            return;
+            return [];
         }
 
         this.clearCss(ACTION_VALIDATING);
@@ -112,16 +100,18 @@ export default class Form {
 
         this.addCss(FORM_VALIDATING_CSS_CLASS);
 
-        await Promise.all(this.getAllFields().map((field) => field.validate()));
+        const validationResults = await Promise.all(this.getAllFields().map((field) => field.validate()));
 
         this.clearCss(ACTION_VALIDATING);
 
-        const isValid = await this.isValid();
+        const isValid = validationResults.every((validationResult) => validationResult.isValid());
 
         const cssClass = isValid ? FORM_VALID_CSS_CLASS : FORM_INVALID_CSS_CLASS;
         this.addCss(cssClass);
 
-        this.getOption('onAfterValidate')(isValid, this.formElement);
+        this.getOption('onAfterValidate')(validationResults, this.formElement);
+
+        return validationResults;
     }
 
     /**
@@ -186,9 +176,9 @@ export default class Form {
         this.clearCss(ACTION_SUBMITTING);
         this.addCss(FORM_SUBMITTING_CSS_CLASS);
 
-        await this.validate();
+        const validationResults = await this.validate();
 
-        const isValid = await this.isValid();
+        const isValid = validationResults.every((validationResult) => validationResult.isValid());
 
         if (!isValid) {
             this.clearCss(ACTION_SUBMITTING);

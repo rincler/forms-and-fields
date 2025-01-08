@@ -10,7 +10,6 @@ const FIELD_CONTAINER_CSS_CLASS = 'js-f-field-container';
 const NOOP = () => {};
 
 const DEFAULT_OPTIONS = {
-    validMessage: '',
     invalidMessages: {},
     defaultInvalidMessage: 'Invalid value.',
     trimEnabled: true,
@@ -103,39 +102,11 @@ export default class Field {
     /**
      * @public
      *
-     * @param {boolean} force
-     *
-     * @returns {Promise<boolean>}
-     */
-    async isValid(force = false) {
-        if (!force && this.validationResult !== null) {
-            return this.validationResult.isValid();
-        }
-
-        const value = this.getValue();
-
-        // eslint-disable-next-line no-restricted-syntax
-        for (const validatorItem of this.validators) {
-            const validatorFn = this.getValidatorFnByValidatorItem(validatorItem);
-            // eslint-disable-next-line no-await-in-loop
-            const validationResult = await validatorFn(value);
-
-            if (!validationResult.isValid()) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    /**
-     * @public
-     *
-     * @returns {Promise<void>}
+     * @returns {Promise<ValidationResult>}
      */
     async validate() {
         if (this.validators.length === 0) {
-            return;
+            return new ValidationResult(true);
         }
 
         const fieldElement = this.getFieldElement();
@@ -146,7 +117,7 @@ export default class Field {
 
         this.addCss(FIELD_VALIDATING_CSS_CLASS);
 
-        this.validationResult = new ValidationResult(true, this.getOption('validMessage'));
+        this.validationResult = new ValidationResult(true);
         const value = this.getValue();
 
         // eslint-disable-next-line no-restricted-syntax
@@ -170,6 +141,8 @@ export default class Field {
         this.addCss(cssClass);
 
         this.getOption('onAfterValidate')(this.validationResult, fieldElement, this.formElement);
+
+        return this.validationResult;
     }
 
     /**
@@ -278,9 +251,7 @@ export default class Field {
 
                 return new ValidationResult(
                     isValid,
-                    isValid
-                        ? this.getOption('validMessage')
-                        : this.getInvalidErrorMessage(this.getOption('invalidMessages').required)
+                    isValid ? '' : this.getInvalidErrorMessage(this.getOption('invalidMessages').required)
                 );
             };
         }
@@ -293,9 +264,7 @@ export default class Field {
 
                 return new ValidationResult(
                     isValid,
-                    isValid
-                        ? this.validMessage
-                        : this.getInvalidErrorMessage(this.getOption('invalidMessages')[validatorItem])
+                    isValid ? '' : this.getInvalidErrorMessage(this.getOption('invalidMessages')[validatorItem])
                 );
             };
         }
