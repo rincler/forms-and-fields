@@ -19,7 +19,6 @@ const DEFAULT_OPTIONS = {
     validate: NOOP,
     onAfterValidate: NOOP,
     onBeforeSubmit: NOOP,
-    submit: NOOP,
     onAfterSubmit: NOOP,
     onAfterSubmitSuccess: NOOP,
     onAfterSubmitError: NOOP,
@@ -31,9 +30,10 @@ export default class Form {
      *
      * @param {string} formSelector
      * @param {array} fields
+     * @param {function} submit
      * @param {object} options
      */
-    constructor(formSelector, fields = [], options = {}) {
+    constructor(formSelector, fields, submit, options = {}) {
         this.formElement = document.querySelector(formSelector);
 
         if (!this.formElement) {
@@ -41,7 +41,7 @@ export default class Form {
         }
 
         this.formSelector = formSelector;
-
+        this.submit = submit;
         this.fields = fields;
 
         this.options = {};
@@ -182,8 +182,8 @@ export default class Form {
     async onSubmitForm(e) {
         e.preventDefault();
 
-        if (this.getOption('submit') === NOOP) {
-            return;
+        if (typeof this.submit !== 'function') {
+            throw new Error('"submit" is not a function.');
         }
 
         const formData = new FormData(this.formElement);
@@ -206,7 +206,7 @@ export default class Form {
         let submissionResult;
 
         try {
-            submissionResult = await this.getOption('submit')(formData, this.formElement);
+            submissionResult = await this.submit(formData);
         } catch (error) {
             // eslint-disable-next-line no-console
             console.error(error);

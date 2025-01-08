@@ -24,6 +24,12 @@ const form = new Form(
         new Field('.js-movie', '.js-form', ['required']),
         new Field('.js-file', '.js-form', ['required']),
     ],
+    (formData) => {
+        // eslint-disable-next-line no-console
+        console.log(formData);
+        // here can be AJAX-request
+        return new SubmissionResult(true);
+    },
     {
         onAfterValidateField: (validationResult) => {
             // eslint-disable-next-line no-console
@@ -32,12 +38,6 @@ const form = new Form(
         onChange: (value) => {
             // eslint-disable-next-line no-console
             console.log(value);
-        },
-        submit: (formData) => {
-            // eslint-disable-next-line no-console
-            console.log(formData);
-            // here can be AJAX-request
-            return new SubmissionResult(true);
         },
     }
 );
@@ -88,27 +88,25 @@ const registerForm = new Form(
             },
         ]),
     ],
-    {
-        submit: async (formData) => {
-            const data = {
-                login: formData.get('login'),
-                password: formData.get('password'),
-            };
+    async (formData) => {
+        const data = {
+            login: formData.get('login'),
+            password: formData.get('password'),
+        };
 
-            const url = mapResponseTypeToUrl(formData.get('response'));
+        const url = mapResponseTypeToUrl(formData.get('response'));
 
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(data),
-            });
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data),
+        });
 
-            const result = await response.json();
+        const result = await response.json();
 
-            return new SubmissionResult(result.isSuccess);
-        },
+        return new SubmissionResult(result.isSuccess);
     }
 );
 
@@ -128,10 +126,8 @@ const domainsForm = new Form(
             },
         ]),
     ],
-    {
-        submit: async () => {
-            return new SubmissionResult(true);
-        },
+    () => {
+        return new SubmissionResult(true);
     }
 );
 
@@ -162,10 +158,8 @@ const uploadForm = new Form(
             }
         ),
     ],
-    {
-        submit: async () => {
-            return new SubmissionResult(true);
-        },
+    async () => {
+        return new SubmissionResult(true);
     }
 );
 
