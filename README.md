@@ -3,11 +3,13 @@
 ![NPM Version](https://img.shields.io/npm/v/forms-and-fields)
 ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/rincler/forms-and-fields/ci.yml?branch=master)
 
-A library to validation fields and submission forms.
+A library for validating fields and submitting forms.
 
-For validation you can use `required` validator, 
-one of [validator](https://www.npmjs.com/package/validator) validators (e.g. `isEmail`) 
-or custom validator (including AJAX).
+Field elements are elements like input (of any type), select, and textarea.
+
+For validation, you can use the `required` validator, 
+any validator from the [validator](https://www.npmjs.com/package/validator) library (e.g. `isEmail`), 
+the `FileValidator` or your own custom validators (including AJAX-based validation).
 
 ## Usage
 
@@ -27,47 +29,51 @@ import Form from 'forms-and-fields';
 import Field from 'forms-and-fields';
 import SubmissionResult from 'forms-and-fields';
 
-const form = new Form('.js-form', [
-   new Field('.js-email', ['required', 'isEmail'], {
-        invalidMessages: {
-            required: 'Email is required',
-            isEmail: 'Invalid email'
-        }
-   })
-], {
-    onAfterValidateField: (validationResult) => {
-        console.log(validationResult);
-    },
-    submit: (formData) => {
+const form = new Form(
+    '.js-form',
+    [
+        new Field('.js-email', '.js-form', ['required', 'isEmail'], {
+            invalidMessages: {
+                required: 'Email is required',
+                isEmail: 'Invalid email'
+            }
+        })
+    ], 
+    (formData) => {
         console.log(formData);
-        // here can be AJAX-request
+        // here can be an AJAX-request
         return new SubmissionResult(true);
-    }
+    }, 
+    {
+        onAfterValidateField: (validationResult) => {
+            console.log(validationResult);
+    },
 });
 
 form.listen();
 ```
-**Console:**
 
-When you submit form with empty email:
-```
-ValidationResult {result: false, message: "Email is required"}
-```
+**Console output:**
 
-When you submit form with invalid email:
+When you submit the form with an empty email:
 ```
-ValidationResult {result: false, message: "Invalid email"}
+ValidationResult {result: false, message: "Email is required"}
 ```
 
-When you submit form with valid email:
+When you submit the form with an invalid email:
 ```
-ValidationResult {result: true, message: ""}
-FormData {...}
+ValidationResult {result: false, message: "Invalid email"}
 ```
 
-**Extended example:**
+When you submit the form with a valid email:
+```
+ValidationResult {result: true, message: ""}
+FormData { ... }
+```
 
-See more extended examples in [sandbox](./sandbox.dist) 
+**More examples:**
+
+Find more examples in the [sandbox](./sandbox.dist).
 
 ## Installation
 
@@ -77,109 +83,136 @@ See more extended examples in [sandbox](./sandbox.dist)
 
 ### Common
 
-For validation and submission form you need create `Form` object (with needed `Field` objects) and call `listen` method.
+To validate and submit a form you need to create a `Form` object with required `Field` objects (associated with the field elements), a submit function, and call its `listen` method.
 
-Form validation is all fields validation and form is valid when all fields are valid.
+Form validation involves validating all fields.
+A form is considered valid when all its fields are valid.
 
-For validation separate fields you need create `Field` object and call `listen` method.
+To validate an individual field (outside a form) you need to create a `Field` object and call its `listen` method.
 
-Custom validators must return `ValidationResult` (can return `Promise`, so you can use AJAX).
+A custom validator can be either a function or an object with a `validate` method that returns a `ValidationResult` object. It can be promised, so you can use AJAX.
 
-Form `submit` callback must return `SubmissionResult` (can return `Promise`, so you can use AJAX).
+The `submit` function must return a `SubmissionResult` object. It can be promised, so you can use AJAX.
 
-Validation is triggered when user submits form. Form is not submitting if form is invalid.
+When a user submits a form, validation is performed first. If the form passes validation, submission is then executed.
 
 
 #### `ValidationResult` class
 
-| Method                                                   | Description                                |
-|----------------------------------------------------------|--------------------------------------------|
-| constructor(result: `boolean`, message?: `string` = '')  | Initializes validation result object       |
-| isValid(): `bool`                                        | Returns boolean validation result          |
-| hasMessage(): `bool`                                     | Returns validation result message existing |
-| setMessage(message: `string`): `void`                    | Sets validation result message             |
-| getMessage(): `string`                                   | Returns validation result message          |
+| Method                                                  | Description                         |
+|---------------------------------------------------------|-------------------------------------|
+| constructor(result: `boolean`, message?: `string` = '') | Creates a new validation result.    |
+| isValid(): `bool`                                       | Returns `true` if valid.            |
+| hasMessage(): `bool`                                    | Returns `true` if a message exists. |
+| setMessage(message: `string`): `void`                   | Sets the validation message.        |
+| getMessage(): `string`                                  | Retrieves the validation message.   |
 
 #### `SubmissionResult` class
 
-| Method                                                | Description                                        |
-|-------------------------------------------------------|----------------------------------------------------|
-| constructor(result: `boolean`, data?: ` object` = {}) | Initializes submission result object with any data |
-| isSuccess(): `boolean`                                | Returns boolean submission result                  |
-| getData(): `object`                                   | Returns data                                       |
+| Method                                                | Description                      |
+|-------------------------------------------------------|----------------------------------|
+| constructor(result: `boolean`, data?: ` object` = {}) | Creates a new submission result. |
+| isSuccess(): `boolean`                                | Returns `true` if successful.    |
+| getData(): `object`                                   | Retrieves the submission data.   |
 
 ### Fields
 
 #### `Field` class
 
-| Method                                                                                | Description                                                                                                                                  |
-|---------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------|
-| constructor (fieldSelector: `string`, validators?: `object`, options?: `object` = {}) | Initializes field object with validators (see `Field` validators) and options (see `Field` options) for field with `fieldSelector` selector  |
-| setOptions(options: `object`): `void`                                                 | Sets options (see `Field` options)                                                                                                           |
-| listen(): `void`                                                                      | Starts listening field for triggering validation and trimming (if enabled)                                                                   |
-| isValid(force: `boolean`): `Promise<boolean>`                                         | Returns boolean validation result  (if field not yet validated  or `force` is `true` then field is validated).                               |
-| validate(): `Promise<void>`                                                           | Validates field                                                                                                                              |
+| Method                                                                                                      | Description                                                                                                                                                                                                                                                                                                         |
+|-------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| constructor (fieldSelector: `string`, rootSelector: `string`, validators: `array`, options?: `object` = {}) | -`fieldSelector`: A selector to find the field element.<br/> -`rootSelector`: A selector to find the root element that contains the field element. Typically, this is the form selector.<br/>-`validators`: See the [Field validators](#field-validators).<br/>-`options`: See the [Field options](#field-options). |
+| listen(): `void`                                                                                            | Starts listening to events on the field element. This method must be called if the field is used outside of a form.                                                                                                                                                                                                 |
+
+You must specify a CSS class for the field element and use it when specifying the `fieldSelector`.
+For elements with the same name (e.g., radio buttons or a group of text input elements), use the same CSS class for all elements and a single `Field` object.
+You can find examples in the [sandbox](./sandbox.dist).
+
+You must also specify a CSS class for the root element containing the field element and use it when specifying the `rootSelector`. If the field element is inside a form, the root element should be the form itself.
 
 #### `Field` validators
 
-Array of validators. Each validator can be `string` (name of validator) or `function` (custom validator). 
-Allowed validator names: `required` or one of [validator](https://www.npmjs.com/package/validator) validators (e.g. `isEmail`). 
-It is allowed only `required` validator for checkbox, select, radio and file input elements. 
+An array of validators. Each validator can be: 
+- A `string`: The name of the validator (e.g., `required` or any validator from the validator library, such as `isEmail`). 
+- A `function`: A custom validator function that must return a `ValidationResult` object. Can be promised.
+- An `object` with a `validate` method (that must return a `ValidationResult` object), such as the `FileValidator` (see [Validation of files](#validation-of-files)) or another custom object. Can be promised.
 
 #### `Field` options
 
-| Option                | Type          | Default            | Description                                                                                                                                         |
-|-----------------------|---------------|--------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
-| formElement           | `HTMLElement` | `document`         | Form element that contains field                                                                                                                    |
-| validMessage          | `string`      | `''`               | Message about valid value that passing to `ValidationResult`                                                                                        |
-| invalidMessages       | `object`      | `{}`               | Messages about invalid value for each validator that passing to `ValidationResult`. E.g. `{isEmail: 'Invalid Email'}`                               |
-| defaultInvalidMessage | `string`      | `'Invalid value.'` | Message about invalid value that passing to `ValidationResult` (if not found in `invalidMessages`)                                                  |
-| validateOnChange      | `boolean`     | `false`            | Whether to validate on change field value                                                                                                           |
-| validateOnType        | `boolean`     | `false`            | Whether to validate on typing field value                                                                                                           |
-| typingDelay           | `number`      | 1000               | It is considered that user is typing when time between taps less than this value (ms)                                                               |
-| onTypingStart         | `function`    | `null`             | It is triggered when user has started typing. Passes arguments: `value: string, fieldElement: HTMLElement, formElement: HTMLElement`                |
-| onTypingEnd           | `function`    | `null`             | It is triggered when user has finished typing. Passes arguments: `value: string, fieldElement: HTMLElement, formElement: HTMLElement`               |
-| onChange              | `function`    | `null`             | It is triggered when user has changed field. Passes arguments: `value: string, fieldElement: HTMLElement, formElement: HTMLElement`                 |
-| validatorParams       | `object`      | `{}`               | Params for [validator](https://www.npmjs.com/package/validator). (E.g. `{isEmail: {allow_utf8_local_part: false}}`)                                 |
-| trimEnabled           | `boolean`     | `true`             | Whether to trim field value on validation                                                                                                           |
-| onBeforeValidate      | `function`    | `null`             | It is triggered before field validation. Passes arguments: `fieldElement: HTMLElement, formElement: HTMLElement`                                    |
-| onAfterValidate       | `function`    | `null`             | It is triggered after field validation. Passes arguments: `validationResult: ValidationResult, fieldElement: HTMLElement, formElement: HTMLElement` |
+| Option                | Type       | Default            | Description                                                                                                                             |
+|-----------------------|------------|--------------------|-----------------------------------------------------------------------------------------------------------------------------------------|
+| invalidMessages       | `object`   | `{}`               | Messages for invalid values for each validator. For example: `{isEmail: 'Invalid Email'}`.                                              |
+| defaultInvalidMessage | `string`   | `'Invalid value.'` | A default message for invalid values if no specific message is provided in `invalidMessages`.                                           |
+| trimEnabled           | `boolean`  | `true`             | Specifies whether to trim the input value during validation.                                                                            |
+| typingDelay           | `number`   | 1000               | The delay (in milliseconds) to consider a user as "typing" when the time between keystrokes is less than this value.                    |
+| validateOnChange      | `boolean`  | `false`            | Specifies whether to validate the field when its value changes.                                                                         |
+| validateOnType        | `boolean`  | `false`            | Specifies whether to validate the field during typing.                                                                                  |
+| validatorParams       | `object`   | `{}`               | Parameters for [validator](https://www.npmjs.com/package/validator). For example: `{isEmail: {allow_utf8_local_part: false}}`.          |
+| onChange              | `function` | `NOOP`             | Triggered when the field value changes. Arguments: `value: string, fieldElement: HTMLElement, formElement: HTMLElement`.                |
+| onTypingStart         | `function` | `NOOP`             | Triggered when the user starts typing. Arguments: `value: string, fieldElement: HTMLElement, formElement: HTMLElement`.                 |
+| onTypingEnd           | `function` | `NOOP`             | Triggered when the user stops typing. Arguments: `value: string, fieldElement: HTMLElement, formElement: HTMLElement`.                  |
+| onBeforeValidate      | `function` | `NOOP`             | Triggered before field validation. Arguments: `fieldElement: HTMLElement, formElement: HTMLElement`.                                    |
+| onAfterValidate       | `function` | `NOOP`             | Triggered after field validation. Arguments: `validationResult: ValidationResult, fieldElement: HTMLElement, formElement: HTMLElement`. |
 
 ### Forms
 
 #### `Form` class
 
-| Method                                                                               | Description                                                                                                                     |
-|--------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------|
-| constructor(formSelector: `string`, fields?: `object` = [], options?: `object` = {}) | Initializes form object with fields (see `Field` class) and options (see `Form` options)  for form with `formSelector` selector |
-| listen(): `void`                                                                     | Starts listening form for triggering validation, trimming (if enabled, for each field) and submission                           |
-| isValid(force: `boolean`): `Promise<boolean>`                                        | Returns boolean validation result  (calls `isValid` method for each field)                                                      |
-| validate(): `Promise<void>`                                                          | Validates form (each field)                                                                                                     |
+| Method                                                                                            | Description                                                                                                                                                                                                                                                              |
+|---------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| constructor(formSelector: `string`, fields: `array`, submit: `function`, options?: `object` = {}) | -`formSelector`: A selector to find the form element.<br/> -`fields`: An array of `Field` objects.<br/> - `submit`: A submit function (accepts a `FormData` object and must return a `SubmissionResult` object),<br/> - `options`: See the [Form options](#form-options) |
+| listen(): `void`                                                                                  | Executes the `listen` method for all fields specified in the `Form` constructor and starts listening for the form submission event. This method must be called.                                                                                                          |
+
+You must specify a CSS class for the form element and use it when specifying the `formSelector`.
 
 #### `Form` options
 
-`Form` supports all `Field` options (besides `formElement`) and sets this options to each form field (`Field` options have higher priority). 
+The `Form` class supports all [Field options](#field-options) and applies them to each field specified in the `Form` constructor.  Field-specific options always take priority over form-level options.
 
-Also `Form` supports following options:
+Additionally, the `Form` class supports the following options:
 
-| Option                | Type       | Default | Description                                                                                                                                                                                                                                                                                                                                 |
-|-----------------------|------------|---------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| onBeforeValidate      | `function` | `null`  | It is triggered before form validation. Passes argument `formElement: HTMLElement`                                                                                                                                                                                                                                                          |
-| onAfterValidate       | `function` | `null`  | It is triggered after form validation. Passes arguments: `isValid: boolean, formElement: HTMLElement`                                                                                                                                                                                                                                       |
-| onBeforeSubmit        | `function` | `null`  | It is triggered when user submits form and before validation. Passes `formData: FormData, formElement: HTMLElement`                                                                                                                                                                                                                         |
-| submit                | `function` | `null`  | Submit function. It is triggered when user submits form and after validation. Must return `SubmissionResult` (can return `Promise`, so you can use AJAX). If exception occurred it is  equivalent to `submit` returned  `SubmissionResult` with `false` (error is logged to console). Passes `formData: FormData, formElement: HTMLElement` |
-| onAfterSubmit         | `function` | `null`  | It is triggered after submission.  Passes `submissionResult: SubmissionResult, formElement: HTMLElement`                                                                                                                                                                                                                                    |
-| onAfterSubmitSuccess  | `function` | `null`  | It is triggered after submission and `submit` function returned `SubmissionResult` with `true`. Passes `submissionResultData: object, formElement: HTMLElement`                                                                                                                                                                             |
-| onAfterSubmitError    | `function` | `null`  | It is triggered after submission and `submit` function returned `SubmissionResult` with `false`. Passes `submissionResultData: object, formElement: HTMLElement`                                                                                                                                                                            |
-| onBeforeValidateField | `function` | `null`  | It is triggered before each field validation. Passes arguments: `fieldElement: HTMLElement, formElement: HTMLElement`                                                                                                                                                                                                                       |
-| onAfterValidateField  | `function` | `null`  | It is triggered after each field validation. Passes arguments: `validationResult: ValidationResult, fieldElement: HTMLElement, formElement: HTMLElement`                                                                                                                                                                                    |
+| Option                | Type       | Default | Description                                                                                                                                                                                              |
+|-----------------------|------------|---------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| onBeforeValidate      | `function` | `NOOP`  | Triggered before form validation. Argument: `formElement: HTMLElement`.                                                                                                                                  |
+| validate              | `function` | `NOOP`  | An additional custom validation function (must return a `ValidationResult` object).  Argument: `formData: FormData`. This is executed after field validation when all fields are valid. Can be promised. |
+| onAfterValidate       | `function` | `NOOP`  | Triggered after form validation. Arguments: `validationResults: ValidationReslut[], formElement: HTMLElement`. `validationResults` contains the results for each field and the form itself.              |
+| onBeforeSubmit        | `function` | `NOOP`  | Triggered before form submission. Arguments: `formData: FormData, formElement: HTMLElement`.                                                                                                             |
+| onAfterSubmit         | `function` | `NOOP`  | Triggered after form submission.  Arguments: `submissionResult: SubmissionResult, formElement: HTMLElement`.                                                                                             |
+| onAfterSubmitSuccess  | `function` | `NOOP`  | Triggered after successful submission when the `submit` function returns a `SubmissionResult` object with a `true` value. Arguments: `submissionResultData: object, formElement: HTMLElement`.           |
+| onAfterSubmitError    | `function` | `NOOP`  | Triggered after failed submission when the `submit` function returns a `SubmissionResult` object with a `false` value. Arguments: `submissionResultData: object, formElement: HTMLElement`.              |
+| onBeforeValidateField | `function` | `NOOP`  | Triggered before validating any field specified in the `Form` constructor. Arguments: `fieldElement: HTMLElement, formElement: HTMLElement`.                                                             |
+| onAfterValidateField  | `function` | `NOOP`  | Triggered after validating any field specified in the `Form` constructor. Arguments: `validationResult: ValidationResult, fieldElement: HTMLElement, formElement: HTMLElement`.                          |
 
-To set `onBeforeValidate` or `onAfterValdiate` to each form field use `onBeforeValidateField` or `onAfterValidateField`, 
-because `onBeforeValidate` and `onAfterValidate` are for form.
+#### Important
+
+To apply `onBeforeValidate` or `onAfterValidate` to individual fields, use the `onBeforeValidateField` or `onAfterValidateField` options.
+The `onBeforeValidate` and `onAfterValidate` options are intended for the entire form.
+
+### Validation of files
+
+Use the `FileValidator` for file validation. See an example of usage in the [sandbox](./sandbox.dist).
+
+The `FileValidator` constructor accepts two objects: `rules` and `invalidMessages`.
+
+| Rule               | Example                      | Related option for invalid message | Allowed placeholders                                                                                                                               |
+|--------------------|------------------------------|------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------|
+| maxSize (in bytes) | `1073741824`                 | maxSize                            | `{file}`, `{fileSize}`, `{fileSizeInKib}`, `{fileSizeInMiB}`, `{fileSizeInGiB}`, `{maxSize}`, `{maxSizeInKiB}`, `{maxSizeInMiB}`, `{maxSizeInGiB}` |
+| allowedMimeTypes   | `['image/jpg', 'image/png']` | allowedMimeTypes                   | `{file}`, `{fileMimeType}`, `{allowedMimeTypes}`                                                                                                   |
+| allowedExtensions  | `['.jpg', '.png']`           | allowedExtensions                  | `{file}`, `{allowedExtensions}`                                                                                                                    |
+| maxCount           | `3`                          | maxCount                           | `{maxCount}`                                                                                                                                       |
+
+Example: 
+
+```JS
+new Field('.js-file', '.js-root', [
+    new FileValidator({ maxSize: 536870912, allowedMimeTypes: ['image/jpg'] }, { maxSize: 'The size of {file} must be less than {maxSizeInMiB} MiB.' })
+])
+```
 
 ### CSS classes
 
-Special CSS classes are added dynamically to form and fields on validation and submission:
+Special CSS classes are dynamically added to form and field elements during validation and submission:
+
 - `f-field-validating`
 - `f-field-valid`
 - `f-field-invalid`
@@ -190,8 +223,8 @@ Special CSS classes are added dynamically to form and fields on validation and s
 - `f-form-submit-success`
 - `f-form-submit-error`
 
-You can wrap one field by container element with `js-f-field-container` css class 
-and then special classes will be added to it. This is especially useful for checkboxes and radio elements.
+You can wrap any field element in a container element with the `js-f-field-container` CSS class.
+The special classes will then be applied to the container instead of the field element itself. This is particularly useful for checkboxes and radio buttons.
 
 ## License
 
