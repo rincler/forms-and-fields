@@ -141,10 +141,10 @@ const uploadForm = new Form(
             '.js-upload-form',
             [
                 new FileValidator(
-                    { allowedMimes: ['image/jpeg'], maxSize: 307200, maxCount: 2, allowedExtensions: ['.jpg'] },
+                    { allowedMimeTypes: ['image/jpeg'], maxSize: 307200, maxCount: 2, allowedExtensions: ['.jpg'] },
                     {
-                        allowedMimes:
-                            'The "{file}" file has invalid MIME type. MIME type of file: {fileMimeType}. Allowed MIME types: {allowedMimes}.',
+                        allowedMimeTypes:
+                            'The "{file}" file has invalid MIME type. MIME type of file: {fileMimeType}. Allowed MIME types: {allowedMimeTypes}.',
                         maxSize:
                             'The "{file}" file exceeded the allowed max file size: {maxSizeInKiB} KiB. File size: {fileSizeInKib} KiB.',
                     }

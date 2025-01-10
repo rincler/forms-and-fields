@@ -620,7 +620,7 @@ describe('file validator', () => {
         return new FileValidator(
             {
                 maxCount: 2,
-                allowedMimes: ['image/png', 'image/jpg'],
+                allowedMimeTypes: ['image/png', 'image/jpg'],
                 allowedExtensions: ['.png', '.jpg'],
                 maxSize: 3,
             },
@@ -652,13 +652,13 @@ describe('file validator', () => {
         [
             'MIME type, default error message',
             [new File([], 'example.jpg', { type: 'text/plain' })],
-            { allowedMimes: undefined },
+            { allowedMimeTypes: undefined },
             'example.jpg is invalid.',
         ],
         [
             'MIME type, custom error message',
             [new File([], 'example.jpg', { type: 'text/plain' })],
-            { allowedMimes: '{file} has invalid MIME type.' },
+            { allowedMimeTypes: '{file} has invalid MIME type.' },
             'example.jpg has invalid MIME type.',
         ],
         [

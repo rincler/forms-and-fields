@@ -14,9 +14,9 @@ export default class FileValidator {
         this.invalidMessages.maxCount = this.invalidMessages.maxCount || 'Invalid count.';
 
         const defaultInvalidMessage = '{file} is invalid.';
-        this.invalidMessages.allowedMimes = this.invalidMessages.allowedMimes || defaultInvalidMessage;
-        this.invalidMessages.allowedExtensions = this.invalidMessages.allowedExtensions || defaultInvalidMessage;
         this.invalidMessages.maxSize = this.invalidMessages.maxSize || defaultInvalidMessage;
+        this.invalidMessages.allowedExtensions = this.invalidMessages.allowedExtensions || defaultInvalidMessage;
+        this.invalidMessages.allowedMimeTypes = this.invalidMessages.allowedMimeTypes || defaultInvalidMessage;
     }
 
     /**
@@ -32,8 +32,8 @@ export default class FileValidator {
 
         // eslint-disable-next-line no-restricted-syntax
         for (const file of files) {
-            if (this.rules.allowedMimes && !this.rules.allowedMimes.includes(file.type)) {
-                return new ValidationResult(false, this.prepareMessage(this.invalidMessages.allowedMimes, file));
+            if (this.rules.maxSize && file.size > this.rules.maxSize) {
+                return new ValidationResult(false, this.prepareMessage(this.invalidMessages.maxSize, file));
             }
 
             if (this.rules.allowedExtensions) {
@@ -45,8 +45,8 @@ export default class FileValidator {
                 }
             }
 
-            if (this.rules.maxSize && file.size > this.rules.maxSize) {
-                return new ValidationResult(false, this.prepareMessage(this.invalidMessages.maxSize, file));
+            if (this.rules.allowedMimeTypes && !this.rules.allowedMimeTypes.includes(file.type)) {
+                return new ValidationResult(false, this.prepareMessage(this.invalidMessages.allowedMimeTypes, file));
             }
         }
 
@@ -66,9 +66,9 @@ export default class FileValidator {
 
         preparedMessage = message.replace('{file}', file.name);
 
-        if (this.rules.allowedMimes) {
+        if (this.rules.allowedMimeTypes) {
             preparedMessage = preparedMessage.replace('{fileMimeType}', file.type || 'unknown');
-            preparedMessage = preparedMessage.replace('{allowedMimes}', this.rules.allowedMimes.join(', '));
+            preparedMessage = preparedMessage.replace('{allowedMimeTypes}', this.rules.allowedMimeTypes.join(', '));
         }
 
         if (this.rules.allowedExtensions) {
