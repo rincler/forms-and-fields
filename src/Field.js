@@ -35,7 +35,7 @@ export default class Field {
      * @param {array} validators
      * @param {object} options
      */
-    constructor(fieldSelector, rootSelector, validators = [], options = {}) {
+    constructor(fieldSelector, rootSelector, validators, options = {}) {
         this.rootElement = document.querySelector(rootSelector);
 
         if (!this.rootElement) {

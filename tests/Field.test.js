@@ -455,7 +455,7 @@ describe('some validators', () => {
     test('no validators', async () => {
         let validationResult;
 
-        const field = new Field('.js-input', '.js-container');
+        const field = new Field('.js-input', '.js-container', []);
 
         input.value = '';
         validationResult = await field.validate(true);
