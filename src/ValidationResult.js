@@ -24,6 +24,15 @@ export default class ValidationResult {
      *
      * @returns {boolean}
      */
+    static areValid(validationResults) {
+        return validationResults.every((validationResult) => validationResult.isValid());
+    }
+
+    /**
+     * @public
+     *
+     * @returns {boolean}
+     */
     hasMessage() {
         return this.message !== '';
     }

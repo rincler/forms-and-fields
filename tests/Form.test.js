@@ -293,7 +293,7 @@ describe('validation callback options', () => {
             new ValidationResult(false, 'Invalid value.'),
             new ValidationResult(false, 'Invalid value.'),
             new ValidationResult(true),
-            new ValidationResult(true),
+            new ValidationResult(false),
         ]);
         expect(onAfterValidate.mock.calls[0][1]).toBe(formElement);
     });
@@ -438,49 +438,100 @@ describe('submit callback options', () => {
 });
 
 describe('validation', () => {
-    test('"validate fields"', async () => {
-        const validateFn = jest.fn(() => new ValidationResult(true));
-        const form = new Form(
-            '.js-form',
-            [
-                new Field('.js-input', '.js-form', [validateFn]),
-                new Field('.js-radio', '.js-form', [validateFn]),
-                new Field('.js-list-input', '.js-form', [validateFn]),
-                new Field('.js-no', '.js-form', [validateFn]),
-            ],
-            submit
-        );
+    test.each([
+        ['valid fields', new ValidationResult(true), new ValidationResult(true), new ValidationResult(true)],
+        [
+            'invalid field',
+            new ValidationResult(false, 'Invalid field.'),
+            new ValidationResult(false, 'Invalid field.'),
+            new ValidationResult(false),
+        ],
+    ])(
+        'validate fields - %s',
+        async (_, fieldValidationResult, expectedFieldValidationResult, expectedFormValidationResult) => {
+            const validateFn = jest.fn(() => fieldValidationResult);
+            const form = new Form(
+                '.js-form',
+                [
+                    new Field('.js-input', '.js-form', [validateFn]),
+                    new Field('.js-radio', '.js-form', [validateFn]),
+                    new Field('.js-list-input', '.js-form', [validateFn]),
+                    new Field('.js-no', '.js-form', [validateFn]),
+                ],
+                submit
+            );
 
-        const validationResults = await form.validate();
+            const validationResults = await form.validate();
 
-        expect(validateFn).toHaveBeenCalledTimes(5);
-        expect(validationResults).toStrictEqual([
-            new ValidationResult(true),
-            new ValidationResult(true),
-            new ValidationResult(true),
-            new ValidationResult(true),
-            new ValidationResult(true),
-            new ValidationResult(true),
-        ]);
-    });
-
-    test('validate form', async () => {
-        const validate = () => new ValidationResult(false, 'Invalid form.');
-        const form = new Form('.js-form', [new Field('.js-input', '.js-form', ['required'])], submit, {
-            validate,
-        });
-
-        form.listen();
-
-        const validationResults = await form.validate();
-
-        await waitFor(() => {
+            expect(validateFn).toHaveBeenCalledTimes(5);
             expect(validationResults).toStrictEqual([
-                new ValidationResult(false, 'Invalid value.'),
-                new ValidationResult(false, 'Invalid form.'),
+                expectedFieldValidationResult,
+                expectedFieldValidationResult,
+                expectedFieldValidationResult,
+                expectedFieldValidationResult,
+                expectedFieldValidationResult,
+                expectedFormValidationResult,
             ]);
-        });
-    });
+        }
+    );
+
+    test.each([
+        [
+            'valid field, valid form',
+            new ValidationResult(true),
+            new ValidationResult(true),
+            new ValidationResult(true),
+            new ValidationResult(true),
+        ],
+        [
+            'valid field, invalid form',
+            new ValidationResult(true),
+            new ValidationResult(false, 'Invalid form.'),
+            new ValidationResult(true),
+            new ValidationResult(false, 'Invalid form.'),
+        ],
+        [
+            'invalid field, valid form',
+            new ValidationResult(false, 'Invalid field.'),
+            new ValidationResult(true),
+            new ValidationResult(false, 'Invalid field.'),
+            new ValidationResult(false),
+        ],
+        [
+            'invalid field, invalid form',
+            new ValidationResult(false, 'Invalid field.'),
+            new ValidationResult(false, 'Invalid form'),
+            new ValidationResult(false, 'Invalid field.'),
+            new ValidationResult(false),
+        ],
+    ])(
+        'validate form - %s',
+        async (
+            _,
+            fieldValidationResult,
+            formValidationResult,
+            expectedFieldValidationResult,
+            expectedFormValidationResult
+        ) => {
+            const validate = () => formValidationResult;
+            const form = new Form(
+                '.js-form',
+                [new Field('.js-input', '.js-form', [() => fieldValidationResult])],
+                submit,
+                {
+                    validate,
+                }
+            );
+
+            form.listen();
+
+            const validationResults = await form.validate();
+
+            await waitFor(() => {
+                expect(validationResults).toStrictEqual([expectedFieldValidationResult, expectedFormValidationResult]);
+            });
+        }
+    );
 });
 
 describe('submission', () => {
