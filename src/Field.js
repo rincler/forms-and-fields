@@ -46,7 +46,9 @@ export default class Field {
         this.rootSelector = rootSelector;
 
         this.formElement =
-            this.rootElement.tagName === 'FORM' ? this.rootElement : this.rootElement.querySelector('form');
+            this.rootElement.tagName === 'FORM'
+                ? this.rootElement
+                : this.rootElement.querySelector('form');
 
         this.validators = validators;
         this.validationResult = null;
@@ -95,8 +97,16 @@ export default class Field {
      * @public
      */
     listen() {
-        this.addEventListenerDelegatedToRootElement('change', this.onChangeListener, this.fieldSelector);
-        this.addEventListenerDelegatedToRootElement('keyup', this.onKeyUpListener, this.fieldSelector);
+        this.addEventListenerDelegatedToRootElement(
+            'change',
+            this.onChangeListener,
+            this.fieldSelector
+        );
+        this.addEventListenerDelegatedToRootElement(
+            'keyup',
+            this.onKeyUpListener,
+            this.fieldSelector
+        );
     }
 
     /**
@@ -140,7 +150,9 @@ export default class Field {
             this.validationResult.setMessage(this.getOption('defaultInvalidMessage'));
         }
 
-        this.setCssClass(this.validationResult.isValid() ? FIELD_VALID_CSS_CLASS : FIELD_INVALID_CSS_CLASS);
+        this.setCssClass(
+            this.validationResult.isValid() ? FIELD_VALID_CSS_CLASS : FIELD_INVALID_CSS_CLASS
+        );
 
         this.getOption('onAfterValidate')(this.validationResult, fieldElement, this.formElement);
 
@@ -228,7 +240,9 @@ export default class Field {
                 let field = this;
                 if (this.isList()) {
                     const listElementsExceptFirst = this.getListElementsExceptFirst();
-                    const notFirstListElement = listElementsExceptFirst.find((e) => e.isSameNode(target));
+                    const notFirstListElement = listElementsExceptFirst.find((e) =>
+                        e.isSameNode(target)
+                    );
                     if (notFirstListElement) {
                         field = this.getVirtualFieldForElement(notFirstListElement);
                     }
@@ -251,7 +265,10 @@ export default class Field {
             return (value) => {
                 const isValid = !this.isEmpty(value);
 
-                return new ValidationResult(isValid, isValid ? '' : this.getInvalidErrorMessage('required'));
+                return new ValidationResult(
+                    isValid,
+                    isValid ? '' : this.getInvalidErrorMessage('required')
+                );
             };
         }
 
@@ -261,7 +278,10 @@ export default class Field {
                 const validatorFn = validator[validatorItem];
                 const isValid = value === '' || validatorFn(value, ...params);
 
-                return new ValidationResult(isValid, isValid ? '' : this.getInvalidErrorMessage(validatorItem));
+                return new ValidationResult(
+                    isValid,
+                    isValid ? '' : this.getInvalidErrorMessage(validatorItem)
+                );
             };
         }
 
@@ -349,7 +369,9 @@ export default class Field {
      * @returns {Field[]}
      */
     getVirtualFieldsOfList() {
-        return this.getListElementsExceptFirst().map((listElement) => this.getVirtualFieldForElement(listElement));
+        return this.getListElementsExceptFirst().map((listElement) =>
+            this.getVirtualFieldForElement(listElement)
+        );
     }
 
     /**
@@ -472,7 +494,10 @@ export default class Field {
      * @returns {string}
      */
     getInvalidErrorMessage(validatorName) {
-        return this.getOption('invalidMessages')[validatorName] || this.getOption('defaultInvalidMessage');
+        return (
+            this.getOption('invalidMessages')[validatorName] ||
+            this.getOption('defaultInvalidMessage')
+        );
     }
 
     /**
@@ -499,7 +524,11 @@ export default class Field {
 
     setCssClass(cssClass) {
         const element = this.getFieldContainerElement() || this.getFieldElement();
-        element.classList.remove(FIELD_VALIDATING_CSS_CLASS, FIELD_VALID_CSS_CLASS, FIELD_INVALID_CSS_CLASS);
+        element.classList.remove(
+            FIELD_VALIDATING_CSS_CLASS,
+            FIELD_VALID_CSS_CLASS,
+            FIELD_INVALID_CSS_CLASS
+        );
         element.classList.add(cssClass);
     }
 }

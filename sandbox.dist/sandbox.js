@@ -120,7 +120,9 @@ const domainsForm = new Form(
             (value) => {
                 return new Promise((resolve) => {
                     setTimeout(() => {
-                        resolve(new ValidationResult(!['example.com', 'example.net'].includes(value)));
+                        resolve(
+                            new ValidationResult(!['example.com', 'example.net'].includes(value))
+                        );
                     }, 2000);
                 });
             },
@@ -141,7 +143,12 @@ const uploadForm = new Form(
             '.js-upload-form',
             [
                 new FileValidator(
-                    { allowedMimeTypes: ['image/jpeg'], maxSize: 307200, maxCount: 2, allowedExtensions: ['.jpg'] },
+                    {
+                        allowedMimeTypes: ['image/jpeg'],
+                        maxSize: 307200,
+                        maxCount: 2,
+                        allowedExtensions: ['.jpg'],
+                    },
                     {
                         allowedMimeTypes:
                             'The "{file}" file has invalid MIME type. MIME type of file: {fileMimeType}. Allowed MIME types: {allowedMimeTypes}.',

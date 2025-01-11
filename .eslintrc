@@ -14,7 +14,6 @@
         "sourceType": "module"
     },
     "rules": {
-        "no-continue": ["off"],
-        "max-len": ["error", { "code": 180 }]
+        "no-continue": ["off"]
     }
 }

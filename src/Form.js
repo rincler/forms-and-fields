@@ -108,7 +108,9 @@ export default class Form {
 
         this.setCssClass(FORM_VALIDATING_CSS_CLASS);
 
-        const validationResults = await Promise.all(this.getAllFields().map((field) => field.validate()));
+        const validationResults = await Promise.all(
+            this.getAllFields().map((field) => field.validate())
+        );
         const formValidationResult =
             this.hasOption('validate') && ValidationResult.areValid(validationResults)
                 ? await this.getOption('validate')(new FormData(this.formElement))
@@ -139,8 +141,12 @@ export default class Form {
                 defaultInvalidMessage: field.hasOption('defaultInvalidMessage')
                     ? field.getOption('defaultInvalidMessage')
                     : options.defaultInvalidMessage,
-                trimEnabled: field.hasOption('trimEnabled') ? field.getOption('trimEnabled') : options.trimEnabled,
-                typingDelay: field.hasOption('typingDelay') ? field.getOption('typingDelay') : options.typingDelay,
+                trimEnabled: field.hasOption('trimEnabled')
+                    ? field.getOption('trimEnabled')
+                    : options.trimEnabled,
+                typingDelay: field.hasOption('typingDelay')
+                    ? field.getOption('typingDelay')
+                    : options.typingDelay,
                 validateOnChange: field.hasOption('validateOnChange')
                     ? field.getOption('validateOnChange')
                     : options.validateOnChange,
@@ -150,11 +156,15 @@ export default class Form {
                 validatorParams: field.hasOption('validatorParams')
                     ? this.getOption('validatorParams')
                     : options.validatorParams,
-                onChange: field.hasOption('onChange') ? field.getOption('onChange') : options.onChange,
+                onChange: field.hasOption('onChange')
+                    ? field.getOption('onChange')
+                    : options.onChange,
                 onTypingStart: field.hasOption('onTypingStart')
                     ? field.getOption('onTypingStart')
                     : options.onTypingStart,
-                onTypingEnd: field.hasOption('onTypingEnd') ? field.getOption('onTypingEnd') : options.onTypingEnd,
+                onTypingEnd: field.hasOption('onTypingEnd')
+                    ? field.getOption('onTypingEnd')
+                    : options.onTypingEnd,
                 onBeforeValidate: field.hasOption('onBeforeValidate')
                     ? field.getOption('onBeforeValidate')
                     : options.onBeforeValidateField,

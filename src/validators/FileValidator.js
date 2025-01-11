@@ -15,8 +15,10 @@ export default class FileValidator {
 
         const defaultInvalidMessage = '{file} is invalid.';
         this.invalidMessages.maxSize = this.invalidMessages.maxSize || defaultInvalidMessage;
-        this.invalidMessages.allowedExtensions = this.invalidMessages.allowedExtensions || defaultInvalidMessage;
-        this.invalidMessages.allowedMimeTypes = this.invalidMessages.allowedMimeTypes || defaultInvalidMessage;
+        this.invalidMessages.allowedExtensions =
+            this.invalidMessages.allowedExtensions || defaultInvalidMessage;
+        this.invalidMessages.allowedMimeTypes =
+            this.invalidMessages.allowedMimeTypes || defaultInvalidMessage;
     }
 
     /**
@@ -33,7 +35,10 @@ export default class FileValidator {
         // eslint-disable-next-line no-restricted-syntax
         for (const file of files) {
             if (this.rules.maxSize && file.size > this.rules.maxSize) {
-                return new ValidationResult(false, this.prepareMessage(this.invalidMessages.maxSize, file));
+                return new ValidationResult(
+                    false,
+                    this.prepareMessage(this.invalidMessages.maxSize, file)
+                );
             }
 
             if (this.rules.allowedExtensions) {
@@ -46,7 +51,10 @@ export default class FileValidator {
             }
 
             if (this.rules.allowedMimeTypes && !this.rules.allowedMimeTypes.includes(file.type)) {
-                return new ValidationResult(false, this.prepareMessage(this.invalidMessages.allowedMimeTypes, file));
+                return new ValidationResult(
+                    false,
+                    this.prepareMessage(this.invalidMessages.allowedMimeTypes, file)
+                );
             }
         }
 
@@ -68,23 +76,44 @@ export default class FileValidator {
 
         if (this.rules.allowedMimeTypes) {
             preparedMessage = preparedMessage.replace('{fileMimeType}', file.type || 'unknown');
-            preparedMessage = preparedMessage.replace('{allowedMimeTypes}', this.rules.allowedMimeTypes.join(', '));
+            preparedMessage = preparedMessage.replace(
+                '{allowedMimeTypes}',
+                this.rules.allowedMimeTypes.join(', ')
+            );
         }
 
         if (this.rules.allowedExtensions) {
-            preparedMessage = preparedMessage.replace('{allowedExtensions}', this.rules.allowedExtensions.join(', '));
+            preparedMessage = preparedMessage.replace(
+                '{allowedExtensions}',
+                this.rules.allowedExtensions.join(', ')
+            );
         }
 
         if (this.rules.maxSize) {
             const round = (v) => Math.round(v * 100) / 100;
             preparedMessage = preparedMessage.replace('{fileSize}', file.size);
             preparedMessage = preparedMessage.replace('{fileSizeInKib}', round(file.size / 1024));
-            preparedMessage = preparedMessage.replace('{fileSizeInMiB}', round(file.size / 1024 / 1024));
-            preparedMessage = preparedMessage.replace('{fileSizeInGiB}', round(file.size / 1024 / 1024 / 1024));
+            preparedMessage = preparedMessage.replace(
+                '{fileSizeInMiB}',
+                round(file.size / 1024 / 1024)
+            );
+            preparedMessage = preparedMessage.replace(
+                '{fileSizeInGiB}',
+                round(file.size / 1024 / 1024 / 1024)
+            );
             preparedMessage = preparedMessage.replace('{maxSize}', this.rules.maxSize);
-            preparedMessage = preparedMessage.replace('{maxSizeInKiB}', round(this.rules.maxSize / 1024));
-            preparedMessage = preparedMessage.replace('{maxSizeInMiB}', round(this.rules.maxSize / 1024 / 1024));
-            preparedMessage = preparedMessage.replace('{maxSizeInGiB}', round(this.rules.maxSize / 1024 / 1024 / 1024));
+            preparedMessage = preparedMessage.replace(
+                '{maxSizeInKiB}',
+                round(this.rules.maxSize / 1024)
+            );
+            preparedMessage = preparedMessage.replace(
+                '{maxSizeInMiB}',
+                round(this.rules.maxSize / 1024 / 1024)
+            );
+            preparedMessage = preparedMessage.replace(
+                '{maxSizeInGiB}',
+                round(this.rules.maxSize / 1024 / 1024 / 1024)
+            );
         }
 
         return preparedMessage;

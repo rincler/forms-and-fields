@@ -42,46 +42,52 @@ describe('"validateOnType" and "validateOnChange" options', () => {
         [false, true, 1],
         [true, false, 1],
         [true, true, 2],
-    ])('Type and change. validateOnType=%s, validateOnChange=%s', (validateOnType, validateOnChange, times) => {
-        const field = new Field('.js-input', '.js-container', ['required'], {
-            validateOnType,
-            validateOnChange,
-        });
-        field.validate = jest.fn();
-        field.listen();
+    ])(
+        'Type and change. validateOnType=%s, validateOnChange=%s',
+        (validateOnType, validateOnChange, times) => {
+            const field = new Field('.js-input', '.js-container', ['required'], {
+                validateOnType,
+                validateOnChange,
+            });
+            field.validate = jest.fn();
+            field.listen();
 
-        fireEvent.keyUp(input, { key: 'b', code: 'KeyB' });
-        fireEvent.keyUp(input, { key: 'a', code: 'KeyA' });
-        fireEvent.keyUp(input, { key: 'r', code: 'KeyR' });
-        jest.runAllTimers();
-        fireEvent.change(input, { target: { value: 'bar' } });
+            fireEvent.keyUp(input, { key: 'b', code: 'KeyB' });
+            fireEvent.keyUp(input, { key: 'a', code: 'KeyA' });
+            fireEvent.keyUp(input, { key: 'r', code: 'KeyR' });
+            jest.runAllTimers();
+            fireEvent.change(input, { target: { value: 'bar' } });
 
-        expect(field.validate).toHaveBeenCalledTimes(times);
-    });
+            expect(field.validate).toHaveBeenCalledTimes(times);
+        }
+    );
 
     test.each([
         [false, false, 0],
         [false, true, 1],
         [true, false, 3],
         [true, true, 4],
-    ])('Type slowly and change. validateOnType=%s, validateOnChange=%s', (validateOnType, validateOnChange, times) => {
-        const field = new Field('.js-input', '.js-container', ['required'], {
-            validateOnType,
-            validateOnChange,
-        });
-        field.validate = jest.fn();
-        field.listen();
+    ])(
+        'Type slowly and change. validateOnType=%s, validateOnChange=%s',
+        (validateOnType, validateOnChange, times) => {
+            const field = new Field('.js-input', '.js-container', ['required'], {
+                validateOnType,
+                validateOnChange,
+            });
+            field.validate = jest.fn();
+            field.listen();
 
-        fireEvent.keyUp(input, { key: 'b', code: 'KeyB' });
-        jest.runAllTimers();
-        fireEvent.keyUp(input, { key: 'a', code: 'KeyA' });
-        jest.runAllTimers();
-        fireEvent.keyUp(input, { key: 'r', code: 'KeyR' });
-        jest.runAllTimers();
-        fireEvent.change(input, { target: { value: 'bar' } });
+            fireEvent.keyUp(input, { key: 'b', code: 'KeyB' });
+            jest.runAllTimers();
+            fireEvent.keyUp(input, { key: 'a', code: 'KeyA' });
+            jest.runAllTimers();
+            fireEvent.keyUp(input, { key: 'r', code: 'KeyR' });
+            jest.runAllTimers();
+            fireEvent.change(input, { target: { value: 'bar' } });
 
-        expect(field.validate).toHaveBeenCalledTimes(times);
-    });
+            expect(field.validate).toHaveBeenCalledTimes(times);
+        }
+    );
 
     test.each([
         [false, false, 0],
@@ -309,7 +315,10 @@ describe('callback options', () => {
 
         document
             .querySelector('.js-container')
-            .insertAdjacentHTML('beforeend', '<input class="js-dynamic-input" name="dynamic-input-name" />');
+            .insertAdjacentHTML(
+                'beforeend',
+                '<input class="js-dynamic-input" name="dynamic-input-name" />'
+            );
 
         const dynamicInput = document.querySelector('.js-dynamic-input');
         dynamicInput.value = 'foo';

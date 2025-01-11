@@ -346,9 +346,14 @@ describe('submit callback options', () => {
 
     test('"onBeforeSubmit" is not called because of invalid form', async () => {
         const onBeforeSubmit = jest.fn();
-        const form = new Form('.js-form', [new Field('.js-input', '.js-form', ['required'])], submit, {
-            onBeforeSubmit,
-        });
+        const form = new Form(
+            '.js-form',
+            [new Field('.js-input', '.js-form', ['required'])],
+            submit,
+            {
+                onBeforeSubmit,
+            }
+        );
 
         form.listen();
 
@@ -380,7 +385,10 @@ describe('submit callback options', () => {
         const onAfterSubmit = jest.fn();
         const form = new Form(
             '.js-form',
-            [new Field('.js-input', '.js-form', ['required']), new Field('.js-checkbox', '.js-form', ['required'])],
+            [
+                new Field('.js-input', '.js-form', ['required']),
+                new Field('.js-checkbox', '.js-form', ['required']),
+            ],
             submit,
             {
                 onAfterSubmit,
@@ -439,7 +447,12 @@ describe('submit callback options', () => {
 
 describe('validation', () => {
     test.each([
-        ['valid fields', new ValidationResult(true), new ValidationResult(true), new ValidationResult(true)],
+        [
+            'valid fields',
+            new ValidationResult(true),
+            new ValidationResult(true),
+            new ValidationResult(true),
+        ],
         [
             'invalid field',
             new ValidationResult(false, 'Invalid field.'),
@@ -448,7 +461,12 @@ describe('validation', () => {
         ],
     ])(
         'validate fields - %s',
-        async (_, fieldValidationResult, expectedFieldValidationResult, expectedFormValidationResult) => {
+        async (
+            _,
+            fieldValidationResult,
+            expectedFieldValidationResult,
+            expectedFormValidationResult
+        ) => {
             const validateFn = jest.fn(() => fieldValidationResult);
             const form = new Form(
                 '.js-form',
@@ -528,7 +546,10 @@ describe('validation', () => {
             const validationResults = await form.validate();
 
             await waitFor(() => {
-                expect(validationResults).toStrictEqual([expectedFieldValidationResult, expectedFormValidationResult]);
+                expect(validationResults).toStrictEqual([
+                    expectedFieldValidationResult,
+                    expectedFormValidationResult,
+                ]);
             });
         }
     );
@@ -539,7 +560,10 @@ describe('submission', () => {
         const submitMock = jest.fn(() => new SubmissionResult(true));
         const form = new Form(
             '.js-form',
-            [new Field('.js-input', '.js-form', ['required']), new Field('.js-checkbox', '.js-form', ['required'])],
+            [
+                new Field('.js-input', '.js-form', ['required']),
+                new Field('.js-checkbox', '.js-form', ['required']),
+            ],
             submitMock
         );
 
@@ -562,7 +586,10 @@ describe('submission', () => {
         const submitMock = jest.fn(() => new SubmissionResult(true));
         const form = new Form(
             '.js-form',
-            [new Field('.js-input', '.js-form', ['required']), new Field('.js-checkbox', '.js-form', ['required'])],
+            [
+                new Field('.js-input', '.js-form', ['required']),
+                new Field('.js-checkbox', '.js-form', ['required']),
+            ],
             submitMock
         );
 
@@ -616,7 +643,10 @@ describe('special css classes', () => {
     test('valid special css class', async () => {
         const form = new Form(
             '.js-form',
-            [new Field('.js-input', '.js-form', ['required']), new Field('.js-checkbox', '.js-form', ['required'])],
+            [
+                new Field('.js-input', '.js-form', ['required']),
+                new Field('.js-checkbox', '.js-form', ['required']),
+            ],
             submit
         );
 
@@ -631,7 +661,10 @@ describe('special css classes', () => {
     test('invalid special css class', async () => {
         const form = new Form(
             '.js-form',
-            [new Field('.js-input', '.js-form', ['required']), new Field('.js-checkbox', '.js-form', ['required'])],
+            [
+                new Field('.js-input', '.js-form', ['required']),
+                new Field('.js-checkbox', '.js-form', ['required']),
+            ],
             submit
         );
 
