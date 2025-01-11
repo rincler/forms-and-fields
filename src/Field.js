@@ -251,10 +251,7 @@ export default class Field {
             return (value) => {
                 const isValid = !this.isEmpty(value);
 
-                return new ValidationResult(
-                    isValid,
-                    isValid ? '' : this.getInvalidErrorMessage(this.getOption('invalidMessages').required)
-                );
+                return new ValidationResult(isValid, isValid ? '' : this.getInvalidErrorMessage('required'));
             };
         }
 
@@ -264,10 +261,7 @@ export default class Field {
                 const validatorFn = validator[validatorItem];
                 const isValid = value === '' || validatorFn(value, ...params);
 
-                return new ValidationResult(
-                    isValid,
-                    isValid ? '' : this.getInvalidErrorMessage(this.getOption('invalidMessages')[validatorItem])
-                );
+                return new ValidationResult(isValid, isValid ? '' : this.getInvalidErrorMessage(validatorItem));
             };
         }
 
@@ -470,8 +464,15 @@ export default class Field {
         return value === '';
     }
 
-    getInvalidErrorMessage(invalidErrorMessage) {
-        return invalidErrorMessage || this.getOption('defaultInvalidMessage');
+    /**
+     * @private
+     *
+     * @param {string} validatorName
+     *
+     * @returns {string}
+     */
+    getInvalidErrorMessage(validatorName) {
+        return this.getOption('invalidMessages')[validatorName] || this.getOption('defaultInvalidMessage');
     }
 
     /**
