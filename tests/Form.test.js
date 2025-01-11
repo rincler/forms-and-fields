@@ -181,7 +181,7 @@ describe('validation callback options', () => {
             submit,
             {
                 onBeforeValidateField,
-            }
+            },
         );
 
         await form.validate();
@@ -207,7 +207,7 @@ describe('validation callback options', () => {
             submit,
             {
                 onAfterValidateField,
-            }
+            },
         );
 
         await form.validate();
@@ -235,7 +235,7 @@ describe('validation callback options', () => {
             submit,
             {
                 onBeforeValidate,
-            }
+            },
         );
 
         await form.validate();
@@ -252,7 +252,7 @@ describe('validation callback options', () => {
             submit,
             {
                 onBeforeValidate,
-            }
+            },
         );
 
         await form.validate();
@@ -283,7 +283,7 @@ describe('validation callback options', () => {
             submit,
             {
                 onAfterValidate,
-            }
+            },
         );
 
         await form.validate();
@@ -306,7 +306,7 @@ describe('validation callback options', () => {
             submit,
             {
                 onAfterValidate,
-            }
+            },
         );
 
         await form.validate();
@@ -352,7 +352,7 @@ describe('submit callback options', () => {
             submit,
             {
                 onBeforeSubmit,
-            }
+            },
         );
 
         form.listen();
@@ -392,7 +392,7 @@ describe('submit callback options', () => {
             submit,
             {
                 onAfterSubmit,
-            }
+            },
         );
 
         form.listen();
@@ -465,7 +465,7 @@ describe('validation', () => {
             _,
             fieldValidationResult,
             expectedFieldValidationResult,
-            expectedFormValidationResult
+            expectedFormValidationResult,
         ) => {
             const validateFn = jest.fn(() => fieldValidationResult);
             const form = new Form(
@@ -476,7 +476,7 @@ describe('validation', () => {
                     new Field('.js-list-input', '.js-form', [validateFn]),
                     new Field('.js-no', '.js-form', [validateFn]),
                 ],
-                submit
+                submit,
             );
 
             const validationResults = await form.validate();
@@ -490,7 +490,7 @@ describe('validation', () => {
                 expectedFieldValidationResult,
                 expectedFormValidationResult,
             ]);
-        }
+        },
     );
 
     test.each([
@@ -529,7 +529,7 @@ describe('validation', () => {
             fieldValidationResult,
             formValidationResult,
             expectedFieldValidationResult,
-            expectedFormValidationResult
+            expectedFormValidationResult,
         ) => {
             const validate = () => formValidationResult;
             const form = new Form(
@@ -538,7 +538,7 @@ describe('validation', () => {
                 submit,
                 {
                     validate,
-                }
+                },
             );
 
             form.listen();
@@ -551,7 +551,7 @@ describe('validation', () => {
                     expectedFormValidationResult,
                 ]);
             });
-        }
+        },
     );
 });
 
@@ -564,7 +564,7 @@ describe('submission', () => {
                 new Field('.js-input', '.js-form', ['required']),
                 new Field('.js-checkbox', '.js-form', ['required']),
             ],
-            submitMock
+            submitMock,
         );
 
         form.listen();
@@ -590,7 +590,7 @@ describe('submission', () => {
                 new Field('.js-input', '.js-form', ['required']),
                 new Field('.js-checkbox', '.js-form', ['required']),
             ],
-            submitMock
+            submitMock,
         );
 
         form.listen();
@@ -647,7 +647,7 @@ describe('special css classes', () => {
                 new Field('.js-input', '.js-form', ['required']),
                 new Field('.js-checkbox', '.js-form', ['required']),
             ],
-            submit
+            submit,
         );
 
         input.value = 'foo';
@@ -665,7 +665,7 @@ describe('special css classes', () => {
                 new Field('.js-input', '.js-form', ['required']),
                 new Field('.js-checkbox', '.js-form', ['required']),
             ],
-            submit
+            submit,
         );
 
         input.value = 'foo';

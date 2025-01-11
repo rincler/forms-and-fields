@@ -109,7 +109,7 @@ export default class Form {
         this.setCssClass(FORM_VALIDATING_CSS_CLASS);
 
         const validationResults = await Promise.all(
-            this.getAllFields().map((field) => field.validate())
+            this.getAllFields().map((field) => field.validate()),
         );
         const formValidationResult =
             this.hasOption('validate') && ValidationResult.areValid(validationResults)
@@ -255,7 +255,7 @@ export default class Form {
             FORM_INVALID_CSS_CLASS,
             FORM_SUBMITTING_CSS_CLASS,
             FORM_SUBMIT_SUCCESS_CSS_CLASS,
-            FORM_SUBMIT_ERROR_CSS_CLASS
+            FORM_SUBMIT_ERROR_CSS_CLASS,
         );
         this.formElement.classList.add(cssClass);
     }

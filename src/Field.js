@@ -100,12 +100,12 @@ export default class Field {
         this.addEventListenerDelegatedToRootElement(
             'change',
             this.onChangeListener,
-            this.fieldSelector
+            this.fieldSelector,
         );
         this.addEventListenerDelegatedToRootElement(
             'keyup',
             this.onKeyUpListener,
-            this.fieldSelector
+            this.fieldSelector,
         );
     }
 
@@ -151,7 +151,7 @@ export default class Field {
         }
 
         this.setCssClass(
-            this.validationResult.isValid() ? FIELD_VALID_CSS_CLASS : FIELD_INVALID_CSS_CLASS
+            this.validationResult.isValid() ? FIELD_VALID_CSS_CLASS : FIELD_INVALID_CSS_CLASS,
         );
 
         this.getOption('onAfterValidate')(this.validationResult, fieldElement, this.formElement);
@@ -241,7 +241,7 @@ export default class Field {
                 if (this.isList()) {
                     const listElementsExceptFirst = this.getListElementsExceptFirst();
                     const notFirstListElement = listElementsExceptFirst.find((e) =>
-                        e.isSameNode(target)
+                        e.isSameNode(target),
                     );
                     if (notFirstListElement) {
                         field = this.getVirtualFieldForElement(notFirstListElement);
@@ -267,7 +267,7 @@ export default class Field {
 
                 return new ValidationResult(
                     isValid,
-                    isValid ? '' : this.getInvalidErrorMessage('required')
+                    isValid ? '' : this.getInvalidErrorMessage('required'),
                 );
             };
         }
@@ -280,7 +280,7 @@ export default class Field {
 
                 return new ValidationResult(
                     isValid,
-                    isValid ? '' : this.getInvalidErrorMessage(validatorItem)
+                    isValid ? '' : this.getInvalidErrorMessage(validatorItem),
                 );
             };
         }
@@ -370,7 +370,7 @@ export default class Field {
      */
     getVirtualFieldsOfList() {
         return this.getListElementsExceptFirst().map((listElement) =>
-            this.getVirtualFieldForElement(listElement)
+            this.getVirtualFieldForElement(listElement),
         );
     }
 
@@ -515,7 +515,7 @@ export default class Field {
             `${this.fieldSelector}[data-field-id="${fieldId}"]`,
             this.rootSelector,
             this.validators,
-            this.options
+            this.options,
         );
         virtualFieldsCache[element.dataset.fieldId] = field;
 
@@ -527,7 +527,7 @@ export default class Field {
         element.classList.remove(
             FIELD_VALIDATING_CSS_CLASS,
             FIELD_VALID_CSS_CLASS,
-            FIELD_INVALID_CSS_CLASS
+            FIELD_INVALID_CSS_CLASS,
         );
         element.classList.add(cssClass);
     }

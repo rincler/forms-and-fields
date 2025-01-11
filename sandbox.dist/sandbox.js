@@ -39,7 +39,7 @@ const form = new Form(
             // eslint-disable-next-line no-console
             console.log(value);
         },
-    }
+    },
 );
 
 form.listen();
@@ -107,7 +107,7 @@ const registerForm = new Form(
         const result = await response.json();
 
         return new SubmissionResult(result.isSuccess);
-    }
+    },
 );
 
 registerForm.listen();
@@ -121,7 +121,7 @@ const domainsForm = new Form(
                 return new Promise((resolve) => {
                     setTimeout(() => {
                         resolve(
-                            new ValidationResult(!['example.com', 'example.net'].includes(value))
+                            new ValidationResult(!['example.com', 'example.net'].includes(value)),
                         );
                     }, 2000);
                 });
@@ -130,7 +130,7 @@ const domainsForm = new Form(
     ],
     () => {
         return new SubmissionResult(true);
-    }
+    },
 );
 
 domainsForm.listen();
@@ -154,7 +154,7 @@ const uploadForm = new Form(
                             'The "{file}" file has invalid MIME type. MIME type of file: {fileMimeType}. Allowed MIME types: {allowedMimeTypes}.',
                         maxSize:
                             'The "{file}" file exceeded the allowed max file size: {maxSizeInKiB} KiB. File size: {fileSizeInKib} KiB.',
-                    }
+                    },
                 ),
             ],
             {
@@ -162,12 +162,12 @@ const uploadForm = new Form(
                     // eslint-disable-next-line no-console
                     console.log(validationResult);
                 },
-            }
+            },
         ),
     ],
     async () => {
         return new SubmissionResult(true);
-    }
+    },
 );
 
 uploadForm.listen();

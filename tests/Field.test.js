@@ -59,7 +59,7 @@ describe('"validateOnType" and "validateOnChange" options', () => {
             fireEvent.change(input, { target: { value: 'bar' } });
 
             expect(field.validate).toHaveBeenCalledTimes(times);
-        }
+        },
     );
 
     test.each([
@@ -86,7 +86,7 @@ describe('"validateOnType" and "validateOnChange" options', () => {
             fireEvent.change(input, { target: { value: 'bar' } });
 
             expect(field.validate).toHaveBeenCalledTimes(times);
-        }
+        },
     );
 
     test.each([
@@ -111,7 +111,7 @@ describe('"validateOnType" and "validateOnChange" options', () => {
             jest.runAllTimers();
 
             expect(field.validate).toHaveBeenCalledTimes(times);
-        }
+        },
     );
 
     test.each([
@@ -138,7 +138,7 @@ describe('"validateOnType" and "validateOnChange" options', () => {
             jest.runAllTimers();
 
             expect(field.validate).toHaveBeenCalledTimes(times);
-        }
+        },
     );
 
     test('"validate" is not called on type when "validateOnChange" is true', () => {
@@ -317,7 +317,7 @@ describe('callback options', () => {
             .querySelector('.js-container')
             .insertAdjacentHTML(
                 'beforeend',
-                '<input class="js-dynamic-input" name="dynamic-input-name" />'
+                '<input class="js-dynamic-input" name="dynamic-input-name" />',
             );
 
         const dynamicInput = document.querySelector('.js-dynamic-input');
@@ -359,7 +359,7 @@ describe('callback options', () => {
             .querySelector('.js-container')
             .insertAdjacentHTML(
                 'beforeend',
-                `<input class="js-list-input js-dynamic-input-x" name="list-input-name[x]" />`
+                `<input class="js-list-input js-dynamic-input-x" name="list-input-name[x]" />`,
             );
 
         const dynamicListInput = document.querySelector('.js-dynamic-input-x');
@@ -400,7 +400,7 @@ describe('callback options', () => {
         document.querySelector('.js-container').insertAdjacentHTML(
             'beforeend',
             `<input class="js-dynamic-radio js-dynamic-radio-1" type="radio" name="dynamic-radio-name" value="1" />
-             <input class="js-dynamic-radio js-dynamic-radio-2" type="radio" name="dynamic-radio-name" value="2" />`
+             <input class="js-dynamic-radio js-dynamic-radio-2" type="radio" name="dynamic-radio-name" value="2" />`,
         );
 
         const dynamicRadio = document.querySelector('.js-dynamic-radio-2');
@@ -633,7 +633,7 @@ describe('file validator', () => {
                 allowedExtensions: ['.png', '.jpg'],
                 maxSize: 3,
             },
-            invalidMessages
+            invalidMessages,
         );
     };
 
