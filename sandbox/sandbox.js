@@ -4,15 +4,14 @@ import SubmissionResult from '../src/SubmissionResult';
 import ValidationResult from '../src/ValidationResult';
 import FileValidator from '../src/validators/FileValidator';
 
+const clearErrors = (fieldElement) => {
+    fieldElement.parentNode.querySelectorAll('.error').forEach(e => e.remove());
+};
+
 const form = new Form(
     '.js-form',
     [
-        new Field('.js-email', '.js-form', ['required', 'isEmail'], {
-            invalidMessages: {
-                required: 'Email is required',
-                isEmail: 'Invalid email',
-            },
-        }),
+        new Field('.js-email', '.js-form', ['required', 'isEmail']),
         new Field('.js-secret-word', '.js-form', ['equals'], {
             validatorParams: {
                 equals: ['sun'],
@@ -26,47 +25,59 @@ const form = new Form(
     ],
     (formData) => {
         // eslint-disable-next-line no-console
-        console.log(formData);
+        console.log(Object.fromEntries(formData));
         // here can be AJAX-request
         return new SubmissionResult(true);
-    },
-    {
-        onAfterValidateField: (validationResult) => {
-            // eslint-disable-next-line no-console
-            console.log(validationResult);
-        },
-        onChange: (value) => {
-            // eslint-disable-next-line no-console
-            console.log(value);
-        },
     },
 );
 
 form.listen();
 
-const fqdnField = new Field('.js-fqdn', '.js-container', ['required', 'isFQDN'], {
+const domainField = new Field('.js-domain', '.js-container', ['required', 'isFQDN', async (value) => {
+    const response = await fetch(`/check-domain?domain=${encodeURIComponent(value)}`);
+    const result = await response.json();
+
+    return new ValidationResult(result.isValid, result.isValid ? '' : 'The domain must be in the .com zone.');
+}], {
+    invalidMessages: {
+        required: 'Domain is required.',
+        isFQDN: 'Domain is not valid.',
+    },
     validateOnType: true,
+    onBeforeValidate: (fieldElement) => {
+        clearErrors(fieldElement);
+    },
+    onAfterValidate: (validationResult, fieldElement) => {
+        clearErrors(fieldElement);
+        if (validationResult.isValid()) {
+            return;
+        }
+        fieldElement.insertAdjacentHTML(
+            'afterend',
+            `<div class="error">${validationResult.getMessage()}</div>`,
+        );
+    },
 });
 
-fqdnField.listen();
+domainField.listen();
 
 const mapResponseTypeToUrl = (value) => {
     if (value === 'success') {
-        return '/submit-with-success-response';
+        return '/response-with-success';
     }
 
     if (value === 'error') {
-        return '/submit-with-error-response';
+        return '/response-with-error';
     }
 
     if (value === 'http-error') {
-        return '/submit-with-http-error-response';
+        return '/response-with-http-error';
     }
 
     throw new Error('Invalid argument.');
 };
 
-const registerForm = new Form(
+const registrationForm = new Form(
     '.js-register-form',
     [
         new Field('.js-login', '.js-register-form', [
@@ -110,57 +121,56 @@ const registerForm = new Form(
     },
 );
 
-registerForm.listen();
+registrationForm.listen();
 
-const domainsForm = new Form(
-    '.js-domains-form',
+const emailListForm = new Form(
+    '.js-email-list-form',
     [
-        new Field('.js-domain', '.js-domains-form', [
-            'isFQDN',
-            (value) => {
-                return new Promise((resolve) => {
-                    setTimeout(() => {
-                        resolve(
-                            new ValidationResult(!['example.com', 'example.net'].includes(value)),
-                        );
-                    }, 2000);
-                });
-            },
-        ]),
+        new Field('.js-email', '.js-email-list-form', ['required', 'isEmail']),
     ],
     () => {
         return new SubmissionResult(true);
     },
 );
 
-domainsForm.listen();
+emailListForm.listen();
 
 const uploadForm = new Form(
-    '.js-upload-form',
+    '.js-upload-file-form',
     [
         new Field(
-            '.js-upload',
-            '.js-upload-form',
+            '.js-upload-file',
+            '.js-upload-file-form',
             [
                 new FileValidator(
                     {
-                        allowedMimeTypes: ['image/jpeg'],
+                        allowedMimeTypes: ['image/jpg', 'image/jpeg'],
                         maxSize: 307200,
                         maxCount: 2,
                         allowedExtensions: ['.jpg'],
                     },
                     {
                         allowedMimeTypes:
-                            'The "{file}" file has invalid MIME type. MIME type of file: {fileMimeType}. Allowed MIME types: {allowedMimeTypes}.',
+                            'The "{file}" file has an invalid MIME type. The MIME type of the file: {fileMimeType}. The allowed MIME types are: {allowedMimeTypes}.',
+                        allowedExtensions: '"{file}" file has invalid extension.',
                         maxSize:
-                            'The "{file}" file exceeded the allowed max file size: {maxSizeInKiB} KiB. File size: {fileSizeInKib} KiB.',
+                            'The "{file}" file exceeded the allowed maximum file size: {maxSizeInKiB} KiB. The file size is {fileSizeInKib} KiB.',
                     },
                 ),
             ],
             {
-                onAfterValidate: (validationResult) => {
-                    // eslint-disable-next-line no-console
-                    console.log(validationResult);
+                onBeforeValidate: (fieldElement) => {
+                    clearErrors(fieldElement);
+                },
+                onAfterValidate: (validationResult, fieldElement) => {
+                    clearErrors(fieldElement);
+                    if (validationResult.isValid()) {
+                        return;
+                    }
+                    fieldElement.insertAdjacentHTML(
+                        'afterend',
+                        `<div class="error">${validationResult.getMessage()}</div>`,
+                    );
                 },
             },
         ),

@@ -11,6 +11,11 @@ const sleep = (ms) =>
         setTimeout(resolve, ms);
     });
 
+app.get('/check-domain', async (req, res) => {
+    await sleep(SERVER_DELAY);
+    res.json({ isValid: req.query.domain.endsWith('.com') });
+});
+
 app.get('/check-login', async (req, res) => {
     await sleep(SERVER_DELAY);
     const regexp = /^[a-z0-9]+$/;
@@ -18,17 +23,17 @@ app.get('/check-login', async (req, res) => {
     res.json({ isValid });
 });
 
-app.post('/submit-with-success-response', async (req, res) => {
+app.post('/response-with-success', async (req, res) => {
     await sleep(SERVER_DELAY);
     res.json({ isSuccess: true });
 });
 
-app.post('/submit-with-error-response', async (req, res) => {
+app.post('/response-with-error', async (req, res) => {
     await sleep(SERVER_DELAY);
     res.json({ isSuccess: false });
 });
 
-app.post('/submit-with-http-error-response', async (req, res) => {
+app.post('/response-with-http-error', async (req, res) => {
     await sleep(SERVER_DELAY);
     res.status(403).end();
 });

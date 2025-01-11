@@ -73,7 +73,7 @@ FormData { ... }
 
 **More examples:**
 
-Find more examples in the [sandbox](./sandbox.dist).
+Find more examples in the [sandbox](./sandbox).
 
 ## Installation
 
@@ -126,7 +126,7 @@ When a user submits a form, validation is performed first. If the form passes va
 
 You must specify a CSS class for the field element and use it when specifying the `fieldSelector`.
 For elements with the same name (e.g., radio buttons or a group of text input elements), use the same CSS class for all elements and a single `Field` object.
-You can find examples in the [sandbox](./sandbox.dist).
+You can find examples in the [sandbox](./sandbox).
 
 You must also specify a CSS class for the root element containing the field element and use it when specifying the `rootSelector`. If the field element is inside a form, the root element should be the form itself.
 
@@ -190,7 +190,7 @@ The `onBeforeValidate` and `onAfterValidate` options are intended for the entire
 
 ### Validation of files
 
-Use the `FileValidator` for file validation. See an example of usage in the [sandbox](./sandbox.dist).
+Use the `FileValidator` for file validation. See an example of usage in the [sandbox](./sandbox).
 
 The `FileValidator` constructor accepts two objects: `rules` and `invalidMessages`.
 

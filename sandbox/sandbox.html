@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sandbox</title>
+    <link rel="stylesheet" type="text/css" href="styles.css">
+</head>
+<body>
+
+Legend:
+<br /><br />
+<div>
+    <span class="f-field-valid">valid field</span>
+    <span class="f-field-invalid">invalid field</span>
+    <span class="f-field-validating">validating field</span>
+    <span class="f-form-valid">valid form</span>
+    <span class="f-form-invalid">invalid form</span>
+    <span class="f-form-validating">validating form</span>
+    <span class="f-form-submit-success">success submit result form</span>
+    <span class="f-form-submit-error">error submit result form</span>
+    <span class="f-form-submitting">submitting form</span>
+</div>
+
+<hr />
+
+<h2>A form with all possible fields</h2>
+
+<form class="form js-form">
+    <div>
+        <label for="email">Email</label>
+        <br />
+        <input id="email" type="text" name="email" class="js-email" />
+    </div>
+    <div>
+        <label for="comment">Secret word ("sun")</label>
+        <br />
+        <textarea id="comment" name="comment" class="js-secret-word"></textarea>
+    </div>
+    <div>
+        <div class="field-container js-f-field-container">
+            <input id="sex-man" type="radio" name="sex" class="js-sex" value="man" />
+            <label for="sex-man">Man</label>
+            <input id="sex-woman" type="radio" name="sex" class="js-sex" value="woman" />
+            <label for="sex-woman">Woman</label>
+        </div>
+    </div>
+    <div class="field-container js-f-field-container">
+        <input id="agree" type="checkbox" name="agree" class="js-agree" />
+        <label for="agree">I agree with the rules</label>
+    </div>
+    <div>
+        <label for="city">City</label>
+        <br />
+        <select id="city" name="city" class="js-city">
+            <option value=""></option>
+            <option value="los-angeles">Los Angeles</option>
+            <option value="paris">Paris</option>
+            <option value="singapore">Singapore</option>
+        </select>
+    </div>
+    <div>
+        <label for="movie">Favorite Movie</label>
+        <br />
+        <select id="movie" name="movie" multiple class="js-movie">
+            <option value=""></option>
+            <option value="interstellar">Interstellar</option>
+            <option value="the-prestige">The Prestige</option>
+            <option value="the-dark-knight">The Dark Knight</option>
+        </select>
+    </div>
+    <br />
+    <div>
+        <input type="file" name="attach" class="js-file" />
+    </div>
+    <br />
+    <button type="submit">Submit</button>
+</form>
+
+<hr />
+
+<h2>An individual field</h2>
+
+<div class="js-container js-f-field-container">
+    <label for="domain">Domain</label>
+    <br />
+    <input id="domain" type="text" class="js-domain" />
+</div>
+
+<hr />
+
+<h2>A form with submission</h2>
+
+<form class="form js-register-form">
+    <div>
+        <label for="login">Login</label>
+        <br />
+        <input id="login" type="text" name="login" class="js-login" />
+    </div>
+    <div>
+        <label for="password">Password</label>
+        <br />
+        <input id="password" type="password" name="password" class="js-password" />
+    </div>
+    <div>
+        <label for="confirm-password">Confirm Password</label>
+        <br />
+        <input id="confirm-password" type="password" class="js-confirm-password" />
+    </div>
+    <div>
+        <input id="response-success" type="radio" name="response" value="success" checked />
+        <label for="response-success">Response with success</label>
+        <br />
+        <input id="response-error" type="radio" name="response" value="error" />
+        <label for="response-error">Response with error</label>
+        <br />
+        <input id="response-http-error" type="radio" name="response" value="http-error" />
+        <label for="response-http-error">Response with HTTP-error</label>
+    </div>
+    <br /><br />
+    <button type="submit">Register</button>
+</form>
+
+<hr />
+
+<h2>A form with a group of text input elements</h2>
+
+<form class="form js-email-list-form">
+    <div>
+        <label for="email-1">Email #1</label>
+        <br />
+        <input id="email-1" type="text" name="email[]" class="js-email" />
+    </div>
+    <div>
+        <label for="email-2">Email #2</label>
+        <br />
+        <input id="email-2" type="text" name="email[]" class="js-email" />
+    </div>
+    <div>
+        <label for="email-3">Email #3</label>
+        <br />
+        <input id="email-3" type="text" name="email[]" class="js-email" />
+    </div>
+    <br /><br />
+    <button type="submit">Submit</button>
+</form>
+
+<hr />
+
+<h2>A form with a file input element</h2>
+
+<form class="form js-upload-file-form">
+    <div>
+        <input type="file" name="upload" class="js-upload-file" multiple />
+    </div>
+    <br />
+    <button type="submit">Upload</button>
+</form>
+
+<br /><br />
+
+<script src="bundle.js"></script>
+</body>
+</html>
