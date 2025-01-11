@@ -54,7 +54,7 @@
     "scripts": {
         "build": "babel src --out-dir lib",
         "prepack": "npm run build",
-        "analyze": "eslint .",
+        "lint": "eslint .",
         "sandbox:create": "rm -rf sandbox && cp -r sandbox.dist sandbox && npm run sandbox:build && npm run sandbox:start",
         "sandbox:build": "browserify sandbox/sandbox.js -o sandbox/bundle.js -t babelify --debug",
         "sandbox:start": "node sandbox/server.js",
