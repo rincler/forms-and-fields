@@ -454,13 +454,13 @@ describe('validation', () => {
             new ValidationResult(true),
         ],
         [
-            'invalid field',
+            'invalid fields',
             new ValidationResult(false, 'Invalid field.'),
             new ValidationResult(false, 'Invalid field.'),
             new ValidationResult(false),
         ],
     ])(
-        'validate fields - %s',
+        '"validate" is not specified - %s',
         async (
             _,
             fieldValidationResult,
@@ -523,7 +523,7 @@ describe('validation', () => {
             new ValidationResult(false),
         ],
     ])(
-        'validate form - %s',
+        '"validate" is specified - %s',
         async (
             _,
             fieldValidationResult,
@@ -553,6 +553,17 @@ describe('validation', () => {
             });
         },
     );
+
+    test('"validate" is called when no fields', async () => {
+        const validate = jest.fn(() => new ValidationResult(true));
+        const form = new Form('.js-form', [], submit, {
+            validate,
+        });
+
+        await form.validate();
+
+        expect(validate).toHaveBeenCalledTimes(1);
+    });
 });
 
 describe('submission', () => {

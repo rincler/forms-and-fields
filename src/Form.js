@@ -100,7 +100,10 @@ export default class Form {
      * @returns {Promise<ValidationResult[]>}
      */
     async validate() {
-        if (this.fields.every((field) => field.validators.length === 0)) {
+        if (
+            this.fields.every((field) => field.validators.length === 0) &&
+            !this.hasOption('validate')
+        ) {
             return [];
         }
 
