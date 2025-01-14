@@ -148,11 +148,11 @@ An array of validators. Each validator can be:
 | validateOnChange      | `boolean`  | `false`            | Specifies whether to validate the field when its value changes.                                                                         |
 | validateOnType        | `boolean`  | `false`            | Specifies whether to validate the field during typing.                                                                                  |
 | validatorParams       | `object`   | `{}`               | Parameters for [validator](https://www.npmjs.com/package/validator). For example: `{isEmail: {allow_utf8_local_part: false}}`.          |
-| onChange              | `function` | `NOOP`             | Triggered when the field value changes. Arguments: `value: string, fieldElement: HTMLElement, formElement: HTMLElement`.                |
-| onTypingStart         | `function` | `NOOP`             | Triggered when the user starts typing. Arguments: `value: string, fieldElement: HTMLElement, formElement: HTMLElement`.                 |
-| onTypingEnd           | `function` | `NOOP`             | Triggered when the user stops typing. Arguments: `value: string, fieldElement: HTMLElement, formElement: HTMLElement`.                  |
-| onBeforeValidate      | `function` | `NOOP`             | Triggered before field validation. Arguments: `fieldElement: HTMLElement, formElement: HTMLElement`.                                    |
-| onAfterValidate       | `function` | `NOOP`             | Triggered after field validation. Arguments: `validationResult: ValidationResult, fieldElement: HTMLElement, formElement: HTMLElement`. |
+| onChange              | `function` | `NOOP`             | Triggered when the field value changes. Arguments: `value: string, fieldElement: HTMLElement, rootElement: HTMLElement`.                |
+| onTypingStart         | `function` | `NOOP`             | Triggered when the user starts typing. Arguments: `value: string, fieldElement: HTMLElement, rootElement: HTMLElement`.                 |
+| onTypingEnd           | `function` | `NOOP`             | Triggered when the user stops typing. Arguments: `value: string, fieldElement: HTMLElement, rootElement: HTMLElement`.                  |
+| onBeforeValidate      | `function` | `NOOP`             | Triggered before field validation. Arguments: `fieldElement: HTMLElement, rootElement: HTMLElement`.                                    |
+| onAfterValidate       | `function` | `NOOP`             | Triggered after field validation. Arguments: `validationResult: ValidationResult, fieldElement: HTMLElement, rootElement: HTMLElement`. |
 
 ### Forms
 

@@ -8,6 +8,7 @@ import ValidationResult from '../src/ValidationResult';
 import FileValidator from '../src/validators/FileValidator';
 
 let input = null;
+let container = null;
 jest.useFakeTimers();
 
 beforeEach(() => {
@@ -34,6 +35,7 @@ beforeEach(() => {
     `;
 
     input = document.querySelector('.js-input');
+    container = document.querySelector('.js-container');
 });
 
 describe('"validateOnType" and "validateOnChange" options', () => {
@@ -198,7 +200,7 @@ describe('validation callback options', () => {
 
         expect(onBeforeValidate).toHaveBeenCalledTimes(1);
         expect(onBeforeValidate.mock.calls[0][0]).toBe(input);
-        expect(onBeforeValidate.mock.calls[0][1]).toBeNull();
+        expect(onBeforeValidate.mock.calls[0][1]).toBe(container);
     });
 
     test('"onBeforeValidate" is not called because of no validators', async () => {
@@ -223,7 +225,7 @@ describe('validation callback options', () => {
         expect(onAfterValidate).toHaveBeenCalledTimes(1);
         expect(onAfterValidate.mock.calls[0][0]).toBeInstanceOf(ValidationResult);
         expect(onAfterValidate.mock.calls[0][1]).toBe(input);
-        expect(onAfterValidate.mock.calls[0][2]).toBeNull();
+        expect(onAfterValidate.mock.calls[0][2]).toBe(container);
     });
 
     test('"onAfterValidate" is not called because of no validators', async () => {
@@ -252,7 +254,7 @@ describe('callback options', () => {
 
         expect(onTypingStart).toHaveBeenCalledTimes(1);
         expect(onTypingStart.mock.calls[0][1]).toBe(input);
-        expect(onTypingStart.mock.calls[0][2]).toBeNull();
+        expect(onTypingStart.mock.calls[0][2]).toBe(container);
     });
 
     test('"onTypingEnd" is called  on key up', () => {
@@ -272,7 +274,7 @@ describe('callback options', () => {
 
         expect(onTypingEnd).toHaveBeenCalledTimes(1);
         expect(onTypingEnd.mock.calls[0][1]).toBe(input);
-        expect(onTypingEnd.mock.calls[0][2]).toBeNull();
+        expect(onTypingEnd.mock.calls[0][2]).toBe(container);
     });
 
     test('"onTypingEnd" is called on change', () => {
@@ -288,7 +290,7 @@ describe('callback options', () => {
         expect(onTypingEnd).toHaveBeenCalledTimes(1);
         expect(onTypingEnd.mock.calls[0][0]).toBe('Leon');
         expect(onTypingEnd.mock.calls[0][1]).toBe(input);
-        expect(onTypingEnd.mock.calls[0][2]).toBeNull();
+        expect(onTypingEnd.mock.calls[0][2]).toBe(container);
     });
 
     test('"onChange" is called on text input change', () => {
@@ -303,7 +305,7 @@ describe('callback options', () => {
         expect(onChange).toHaveBeenCalledTimes(1);
         expect(onChange.mock.calls[0][0]).toBe('bar');
         expect(onChange.mock.calls[0][1]).toBe(input);
-        expect(onChange.mock.calls[0][2]).toBeNull();
+        expect(onChange.mock.calls[0][2]).toBe(container);
     });
 
     test('"onChange" is called on text input (which is added programmatically) change', () => {
@@ -327,7 +329,7 @@ describe('callback options', () => {
         expect(onChange).toHaveBeenCalledTimes(1);
         expect(onChange.mock.calls[0][0]).toBe('bar');
         expect(onChange.mock.calls[0][1]).toBe(dynamicInput);
-        expect(onChange.mock.calls[0][2]).toBeNull();
+        expect(onChange.mock.calls[0][2]).toBe(container);
     });
 
     test('"onChange" is called on text input (which is one of the list) change', () => {
@@ -345,7 +347,7 @@ describe('callback options', () => {
         expect(onChange).toHaveBeenCalledTimes(1);
         expect(onChange.mock.calls[0][0]).toBe('bar');
         expect(onChange.mock.calls[0][1]).toBe(listInput);
-        expect(onChange.mock.calls[0][2]).toBeNull();
+        expect(onChange.mock.calls[0][2]).toBe(container);
     });
 
     test('"onChange" is called on text input (which is one of the list and added programmatically) change', () => {
@@ -370,7 +372,7 @@ describe('callback options', () => {
         expect(onChange).toHaveBeenCalledTimes(1);
         expect(onChange.mock.calls[0][0]).toBe('bar');
         expect(onChange.mock.calls[0][1]).toBe(dynamicListInput);
-        expect(onChange.mock.calls[0][2]).toBeNull();
+        expect(onChange.mock.calls[0][2]).toBe(container);
     });
 
     test('"onChange" is called on radio input change', () => {
@@ -387,7 +389,7 @@ describe('callback options', () => {
         expect(onChange).toHaveBeenCalledTimes(1);
         expect(onChange.mock.calls[0][0]).toBe('2');
         expect(onChange.mock.calls[0][1]).toBe(radio);
-        expect(onChange.mock.calls[0][2]).toBeNull();
+        expect(onChange.mock.calls[0][2]).toBe(container);
     });
 
     test('"onChange" is called on radio input (which is added programmatically) change', () => {
@@ -410,7 +412,7 @@ describe('callback options', () => {
         expect(onChange).toHaveBeenCalledTimes(1);
         expect(onChange.mock.calls[0][0]).toBe('2');
         expect(onChange.mock.calls[0][1]).toBe(dynamicRadio);
-        expect(onChange.mock.calls[0][2]).toBeNull();
+        expect(onChange.mock.calls[0][2]).toBe(container);
     });
 });
 

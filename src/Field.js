@@ -45,11 +45,6 @@ export default class Field {
         this.fieldSelector = fieldSelector;
         this.rootSelector = rootSelector;
 
-        this.formElement =
-            this.rootElement.tagName === 'FORM'
-                ? this.rootElement
-                : this.rootElement.querySelector('form');
-
         this.validators = validators;
         this.validationResult = null;
 
@@ -129,7 +124,7 @@ export default class Field {
 
         const fieldElement = this.getFieldElement();
 
-        this.getOption('onBeforeValidate')(fieldElement, this.formElement);
+        this.getOption('onBeforeValidate')(fieldElement, this.rootElement);
 
         this.setCssClass(FIELD_VALIDATING_CSS_CLASS);
 
@@ -154,7 +149,7 @@ export default class Field {
             this.validationResult.isValid() ? FIELD_VALID_CSS_CLASS : FIELD_INVALID_CSS_CLASS,
         );
 
-        this.getOption('onAfterValidate')(this.validationResult, fieldElement, this.formElement);
+        this.getOption('onAfterValidate')(this.validationResult, fieldElement, this.rootElement);
 
         return this.validationResult;
     }
@@ -317,15 +312,15 @@ export default class Field {
         if (this.typingDelayId) {
             clearTimeout(this.typingDelayId);
             this.typingDelayId = null;
-            this.getOption('onTypingEnd')(value, fieldElement, this.formElement);
-            this.getOption('onChange')(value, fieldElement, this.formElement);
+            this.getOption('onTypingEnd')(value, fieldElement, this.rootElement);
+            this.getOption('onChange')(value, fieldElement, this.rootElement);
             if (this.getOption('validateOnType') || this.getOption('validateOnChange')) {
                 this.validate();
             }
             return;
         }
 
-        this.getOption('onChange')(value, fieldElement, this.formElement);
+        this.getOption('onChange')(value, fieldElement, this.rootElement);
         if (this.getOption('validateOnChange')) {
             this.validate();
         }
@@ -340,13 +335,13 @@ export default class Field {
         if (this.typingDelayId) {
             clearTimeout(this.typingDelayId);
         } else {
-            this.getOption('onTypingStart')(value, fieldElement, this.formElement);
+            this.getOption('onTypingStart')(value, fieldElement, this.rootElement);
         }
 
         this.typingDelayId = setTimeout(() => {
             this.typingDelayId = null;
 
-            this.getOption('onTypingEnd')(value, fieldElement, this.formElement);
+            this.getOption('onTypingEnd')(value, fieldElement, this.rootElement);
 
             if (this.getOption('validateOnType')) {
                 this.validate(true);
