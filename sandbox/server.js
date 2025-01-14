@@ -23,6 +23,16 @@ app.get('/check-login', async (req, res) => {
     res.json({ isValid });
 });
 
+app.get('/check-zip-code', async (req, res) => {
+    await sleep(SERVER_DELAY);
+    const regexp = /^\d+$/;
+    if (!regexp.test(req.query['zip-code'])) {
+        res.status(400).end();
+        return;
+    }
+    res.json({ isValid: true });
+});
+
 app.post('/response-with-success', async (req, res) => {
     await sleep(SERVER_DELAY);
     res.json({ isSuccess: true });
@@ -35,7 +45,7 @@ app.post('/response-with-error', async (req, res) => {
 
 app.post('/response-with-http-error', async (req, res) => {
     await sleep(SERVER_DELAY);
-    res.status(403).end();
+    res.status(400).end();
 });
 
 app.listen(3000, () => {

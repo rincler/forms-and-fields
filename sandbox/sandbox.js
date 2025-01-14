@@ -4,8 +4,35 @@ import SubmissionResult from '../src/SubmissionResult';
 import ValidationResult from '../src/ValidationResult';
 import FileValidator from '../src/validators/FileValidator';
 
-const clearErrors = (fieldElement) => {
+const fetchOk = async (input, init) => {
+    const response = await fetch(input, init);
+    if (!response.ok) {
+        throw new Error(`The request "${input}" returned with an HTTP status code: ${response.status}.`);
+    }
+    return response;
+}
+
+const setFieldError = (fieldElement, error) => {
+    fieldElement.insertAdjacentHTML(
+        'afterend',
+        `<div class="error">${error}</div>`,
+    );
+}
+
+const clearFieldErrors = (fieldElement) => {
     fieldElement.parentNode.querySelectorAll('.error').forEach(e => e.remove());
+};
+
+const setFormError = (formElement, error) => {
+    const submitButton = formElement.querySelector(['button[type="submit"]']);
+    submitButton.insertAdjacentHTML(
+        'beforebegin',
+        `<div class="form-error">${error}<br /><br /></div>`,
+    );
+}
+
+const clearFormErrors = (formElement) => {
+    formElement.querySelectorAll('.form-error').forEach(e => e.remove());
 };
 
 const form = new Form(
@@ -34,7 +61,7 @@ const form = new Form(
 form.listen();
 
 const domainField = new Field('.js-domain', '.js-container', ['required', 'isFQDN', async (value) => {
-    const response = await fetch(`/check-domain?domain=${encodeURIComponent(value)}`);
+    const response = await fetchOk(`/check-domain?domain=${encodeURIComponent(value)}`);
     const result = await response.json();
 
     return new ValidationResult(result.isValid, result.isValid ? '' : 'The domain must be in the .com zone.');
@@ -45,17 +72,13 @@ const domainField = new Field('.js-domain', '.js-container', ['required', 'isFQD
     },
     validateOnType: true,
     onBeforeValidate: (fieldElement) => {
-        clearErrors(fieldElement);
+        clearFieldErrors(fieldElement);
     },
     onAfterValidate: (validationResult, fieldElement) => {
-        clearErrors(fieldElement);
-        if (validationResult.isValid()) {
-            return;
+        clearFieldErrors(fieldElement);
+        if (!validationResult.isValid()) {
+            setFieldError(fieldElement, validationResult.getMessage());
         }
-        fieldElement.insertAdjacentHTML(
-            'afterend',
-            `<div class="error">${validationResult.getMessage()}</div>`,
-        );
     },
 });
 
@@ -83,7 +106,7 @@ const registrationForm = new Form(
         new Field('.js-login', '.js-register-form', [
             'required',
             async (value) => {
-                const response = await fetch(`/check-login?login=${encodeURIComponent(value)}`);
+                const response = await fetchOk(`/check-login?login=${encodeURIComponent(value)}`);
                 const result = await response.json();
 
                 return new ValidationResult(result.isValid);
@@ -107,7 +130,7 @@ const registrationForm = new Form(
 
         const url = mapResponseTypeToUrl(formData.get('response'));
 
-        const response = await fetch(url, {
+        const response = await fetchOk(url, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -160,17 +183,13 @@ const uploadForm = new Form(
             ],
             {
                 onBeforeValidate: (fieldElement) => {
-                    clearErrors(fieldElement);
+                    clearFieldErrors(fieldElement);
                 },
                 onAfterValidate: (validationResult, fieldElement) => {
-                    clearErrors(fieldElement);
-                    if (validationResult.isValid()) {
-                        return;
+                    clearFieldErrors(fieldElement);
+                    if (!validationResult.isValid()) {
+                        setFieldError(fieldElement, validationResult.getMessage());
                     }
-                    fieldElement.insertAdjacentHTML(
-                        'afterend',
-                        `<div class="error">${validationResult.getMessage()}</div>`,
-                    );
                 },
             },
         ),
@@ -181,3 +200,47 @@ const uploadForm = new Form(
 );
 
 uploadForm.listen();
+
+const addressForm = new Form('.js-address-form', [
+    new Field('.js-zip-code', '.js-address-form', [async (value) => {
+        await fetchOk(`/check-zip-code?zip-code=${encodeURIComponent(value)}`);
+        return new ValidationResult(true);
+    }], {
+        validateOnChange: true,
+        onBeforeValidate: (fieldElement) => {
+            clearFieldErrors(fieldElement);
+        },
+        onValidationError: (error, fieldElement) => {
+            clearFieldErrors(fieldElement);
+            setFieldError(fieldElement, error)
+        },
+    }),
+    new Field('.js-address', '.js-address-form', ['required']),
+], async (formData) => {
+    const url = mapResponseTypeToUrl(formData.get('response'));
+
+    const response = await fetchOk(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    });
+
+    const result = await response.json();
+
+    return new SubmissionResult(result.isSuccess);
+}, {
+    onBeforeValidate: (formElement) => {
+        clearFormErrors(formElement);
+    },
+    onValidationError: (error, formElement) => {
+        clearFormErrors(formElement);
+        setFormError(formElement, error);
+    },
+    onSubmissionError: (error, formElement) => {
+        clearFormErrors(formElement);
+        setFormError(formElement, error);
+    }
+});
+
+addressForm.listen();

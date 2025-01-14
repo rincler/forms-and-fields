@@ -50,7 +50,7 @@ hr {
     border: 1px dashed yellow;
 }
 
-.error {
+.error, .form-error {
     color: red;
     font-size: 12px;
 }

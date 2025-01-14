@@ -153,6 +153,7 @@ An array of validators. Each validator can be:
 | onTypingEnd           | `function` | `NOOP`             | Triggered when the user stops typing. Arguments: `value: string, fieldElement: HTMLElement, rootElement: HTMLElement`.                  |
 | onBeforeValidate      | `function` | `NOOP`             | Triggered before field validation. Arguments: `fieldElement: HTMLElement, rootElement: HTMLElement`.                                    |
 | onAfterValidate       | `function` | `NOOP`             | Triggered after field validation. Arguments: `validationResult: ValidationResult, fieldElement: HTMLElement, rootElement: HTMLElement`. |
+| onValidationError     | `function` | `NOOP`             | Triggered when an error occurs during validation. Arguments: `error: Error, fieldElement: HTMLElement, rootElement: HTMLElement`.       |
 
 ### Forms
 
@@ -171,22 +172,24 @@ The `Form` class supports all [Field options](#field-options) and applies them t
 
 Additionally, the `Form` class supports the following options:
 
-| Option                | Type       | Default | Description                                                                                                                                                                                              |
-|-----------------------|------------|---------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| onBeforeValidate      | `function` | `NOOP`  | Triggered before form validation. Argument: `formElement: HTMLElement`.                                                                                                                                  |
-| validate              | `function` | `NOOP`  | An additional custom validation function (must return a `ValidationResult` object).  Argument: `formData: FormData`. This is executed after field validation when all fields are valid. Can be promised. |
-| onAfterValidate       | `function` | `NOOP`  | Triggered after form validation. Arguments: `validationResults: ValidationReslut[], formElement: HTMLElement`. `validationResults` contains the results for each field and the form itself.              |
-| onBeforeSubmit        | `function` | `NOOP`  | Triggered before form submission. Arguments: `formData: FormData, formElement: HTMLElement`.                                                                                                             |
-| onAfterSubmit         | `function` | `NOOP`  | Triggered after form submission.  Arguments: `submissionResult: SubmissionResult, formElement: HTMLElement`.                                                                                             |
-| onAfterSubmitSuccess  | `function` | `NOOP`  | Triggered after successful submission when the `submit` function returns a `SubmissionResult` object with a `true` value. Arguments: `submissionResultData: object, formElement: HTMLElement`.           |
-| onAfterSubmitError    | `function` | `NOOP`  | Triggered after failed submission when the `submit` function returns a `SubmissionResult` object with a `false` value. Arguments: `submissionResultData: object, formElement: HTMLElement`.              |
-| onBeforeValidateField | `function` | `NOOP`  | Triggered before validating any field specified in the `Form` constructor. Arguments: `fieldElement: HTMLElement, formElement: HTMLElement`.                                                             |
-| onAfterValidateField  | `function` | `NOOP`  | Triggered after validating any field specified in the `Form` constructor. Arguments: `validationResult: ValidationResult, fieldElement: HTMLElement, formElement: HTMLElement`.                          |
+| Option                 | Type       | Default | Description                                                                                                                                                                                              |
+|------------------------|------------|---------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| onBeforeValidate       | `function` | `NOOP`  | Triggered before form validation. Argument: `formElement: HTMLElement`.                                                                                                                                  |
+| validate               | `function` | `NOOP`  | An additional custom validation function (must return a `ValidationResult` object).  Argument: `formData: FormData`. This is executed after field validation when all fields are valid. Can be promised. |
+| onAfterValidate        | `function` | `NOOP`  | Triggered after form validation. Arguments: `validationResults: ValidationReslut[], formElement: HTMLElement`. `validationResults` contains the results for each field and the form itself.              |
+| onValidationError      | `function` | `NOOP`  | Triggered when an error occurs during validation. Arguments: `error: Error, formElement: HTMLElement`.                                                                                                   |
+| onBeforeSubmit         | `function` | `NOOP`  | Triggered before form submission. Arguments: `formData: FormData, formElement: HTMLElement`.                                                                                                             |
+| onAfterSubmit          | `function` | `NOOP`  | Triggered after form submission.  Arguments: `submissionResult: SubmissionResult, formElement: HTMLElement`.                                                                                             |
+| onAfterSubmitSuccess   | `function` | `NOOP`  | Triggered after successful submission when the `submit` function returns a `SubmissionResult` object with a `true` value. Arguments: `submissionResultData: object, formElement: HTMLElement`.           |
+| onAfterSubmitError     | `function` | `NOOP`  | Triggered after failed submission when the `submit` function returns a `SubmissionResult` object with a `false` value. Arguments: `submissionResultData: object, formElement: HTMLElement`.              |
+| onBeforeValidateField  | `function` | `NOOP`  | Triggered before validating any field specified in the `Form` constructor. Arguments: `fieldElement: HTMLElement, rootElement: HTMLElement`.                                                             |
+| onAfterValidateField   | `function` | `NOOP`  | Triggered after validating any field specified in the `Form` constructor. Arguments: `validationResult: ValidationResult, fieldElement: HTMLElement, rootElement: HTMLElement`.                          |
+| onFieldValidationError | `function` | `NOOP`  | Triggered when an error occurs during the validation of any field specified in the `Form` constructor. Arguments: `error: Error, fieldElement: HTMLElement, rootElement: HTMLElement`.                   |                                                                                                                                                                                                          |
 
 #### Important
 
-To apply `onBeforeValidate` or `onAfterValidate` to individual fields, use the `onBeforeValidateField` or `onAfterValidateField` options.
-The `onBeforeValidate` and `onAfterValidate` options are intended for the entire form.
+To apply `onBeforeValidate`, `onAfterValidate` and `onValidationError` to individual fields, use the `onBeforeValidateField`, `onAfterValidateField` and `onFieldValidationError` options respectively.
+The `onBeforeValidate`, `onAfterValidate` and `onValidationError` options are intended for the entire form.
 
 ### Validation of files
 

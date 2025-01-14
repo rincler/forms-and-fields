@@ -156,6 +156,32 @@ Legend:
     <button type="submit">Upload</button>
 </form>
 
+<hr />
+
+<h2>A form with error handlers</h2>
+
+<form class="form js-address-form">
+    <div>
+        <label for="zip-code">ZIP-code</label>
+        <br />
+        <input id="zip-code" type="text" name="zip" class="js-zip-code" />
+    </div>
+    <div>
+        <label for="address">Address</label>
+        <br />
+        <input id="address" type="text" name="zip" class="js-address" />
+    </div>
+    <div>
+        <input id="address-form-response-success" type="radio" name="response" value="success" checked />
+        <label for="address-form-response-success">Response with success</label>
+        <br />
+        <input id="address-form-response-http-error" type="radio" name="response" value="http-error" />
+        <label for="address-form-response-http-error">Response with HTTP-error</label>
+    </div>
+    <br />
+    <button type="submit">Submit</button>
+</form>
+
 <br /><br />
 
 <script src="bundle.js"></script>

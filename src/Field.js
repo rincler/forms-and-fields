@@ -22,6 +22,7 @@ const DEFAULT_OPTIONS = {
     onTypingEnd: NOOP,
     onBeforeValidate: NOOP,
     onAfterValidate: NOOP,
+    onValidationError: NOOP,
 };
 
 const virtualFieldsCache = {};
@@ -116,10 +117,9 @@ export default class Field {
             return this.validationResult;
         }
 
-        this.validationResult = new ValidationResult(true);
-
         if (this.validators.length === 0) {
-            return this.validationResult;
+            this.validationResult = new ValidationResult(true);
+            return new ValidationResult(true);
         }
 
         const fieldElement = this.getFieldElement();
@@ -133,8 +133,14 @@ export default class Field {
         // eslint-disable-next-line no-restricted-syntax
         for (const validatorItem of this.validators) {
             const validatorFn = this.getValidatorFnByValidatorItem(validatorItem);
-            // eslint-disable-next-line no-await-in-loop
-            this.validationResult = await validatorFn(value);
+            try {
+                // eslint-disable-next-line no-await-in-loop
+                this.validationResult = await validatorFn(value);
+            } catch (error) {
+                this.setCssClass('');
+                this.getOption('onValidationError')(error, fieldElement, this.rootElement);
+                throw error;
+            }
 
             if (!this.validationResult.isValid()) {
                 break;
@@ -524,6 +530,8 @@ export default class Field {
             FIELD_VALID_CSS_CLASS,
             FIELD_INVALID_CSS_CLASS,
         );
-        element.classList.add(cssClass);
+        if (cssClass !== '') {
+            element.classList.add(cssClass);
+        }
     }
 }

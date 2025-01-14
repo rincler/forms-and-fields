@@ -1,5 +1,4 @@
 import ValidationResult from './ValidationResult';
-import SubmissionResult from './SubmissionResult';
 
 const FORM_VALIDATING_CSS_CLASS = 'f-form-validating';
 const FORM_VALID_CSS_CLASS = 'f-form-valid';
@@ -19,6 +18,8 @@ const DEFAULT_OPTIONS = {
     onAfterSubmit: NOOP,
     onAfterSubmitSuccess: NOOP,
     onAfterSubmitError: NOOP,
+    onValidationError: NOOP,
+    onSubmissionError: NOOP,
 };
 
 export default class Form {
@@ -83,53 +84,6 @@ export default class Form {
     }
 
     /**
-     * @public
-     */
-    listen() {
-        this.formElement.addEventListener('submit', this.onSubmitForm.bind(this));
-
-        // eslint-disable-next-line no-restricted-syntax
-        for (const field of this.fields) {
-            field.listen();
-        }
-    }
-
-    /**
-     * @public
-     *
-     * @returns {Promise<ValidationResult[]>}
-     */
-    async validate() {
-        if (
-            this.fields.every((field) => field.validators.length === 0) &&
-            !this.hasOption('validate')
-        ) {
-            return [];
-        }
-
-        this.getOption('onBeforeValidate')(this.formElement);
-
-        this.setCssClass(FORM_VALIDATING_CSS_CLASS);
-
-        const validationResults = await Promise.all(
-            this.getAllFields().map((field) => field.validate()),
-        );
-        const formValidationResult =
-            this.hasOption('validate') && ValidationResult.areValid(validationResults)
-                ? await this.getOption('validate')(new FormData(this.formElement))
-                : new ValidationResult(ValidationResult.areValid(validationResults));
-        validationResults.push(formValidationResult);
-
-        const isValid = ValidationResult.areValid(validationResults);
-
-        this.setCssClass(isValid ? FORM_VALID_CSS_CLASS : FORM_INVALID_CSS_CLASS);
-
-        this.getOption('onAfterValidate')(validationResults, this.formElement);
-
-        return validationResults;
-    }
-
-    /**
      * @private
      *
      * @param {object} options
@@ -174,7 +128,22 @@ export default class Form {
                 onAfterValidate: field.hasOption('onAfterValidate')
                     ? field.getOption('onAfterValidate')
                     : options.onAfterValidateField,
+                onValidationError: field.hasOption('onValidationError')
+                    ? field.getOption('onValidationError')
+                    : options.onFieldValidationError,
             });
+        }
+    }
+
+    /**
+     * @public
+     */
+    listen() {
+        this.formElement.addEventListener('submit', this.onSubmitForm.bind(this));
+
+        // eslint-disable-next-line no-restricted-syntax
+        for (const field of this.fields) {
+            field.listen();
         }
     }
 
@@ -188,12 +157,6 @@ export default class Form {
     async onSubmitForm(e) {
         e.preventDefault();
 
-        if (typeof this.submit !== 'function') {
-            throw new Error('"submit" is not a function.');
-        }
-
-        const formData = new FormData(this.formElement);
-
         const validationResults = await this.validate();
 
         const isValid = ValidationResult.areValid(validationResults);
@@ -202,18 +165,75 @@ export default class Form {
             return;
         }
 
-        let submissionResult;
+        await this.runSubmitProcess();
+    }
+
+    /**
+     * @public
+     *
+     * @returns {Promise<ValidationResult[]>}
+     */
+    async validate() {
+        if (
+            this.fields.every((field) => field.validators.length === 0) &&
+            !this.hasOption('validate')
+        ) {
+            return [];
+        }
+
+        this.getOption('onBeforeValidate')(this.formElement);
+
+        this.setCssClass(FORM_VALIDATING_CSS_CLASS);
+
+        const validationResults = await Promise.all(
+            this.getAllFields().map((field) => field.validate()),
+        ).catch((error) => {
+            this.setCssClass('');
+            this.getOption('onValidationError')(error, this.formElement);
+            throw error;
+        });
+
+        try {
+            const formValidationResult =
+                this.hasOption('validate') && ValidationResult.areValid(validationResults)
+                    ? await this.getOption('validate')(new FormData(this.formElement))
+                    : new ValidationResult(ValidationResult.areValid(validationResults));
+            validationResults.push(formValidationResult);
+        } catch (error) {
+            this.setCssClass('');
+            this.getOption('onValidationError')(error, this.formElement);
+            throw error;
+        }
+
+        const isValid = ValidationResult.areValid(validationResults);
+
+        this.setCssClass(isValid ? FORM_VALID_CSS_CLASS : FORM_INVALID_CSS_CLASS);
+
+        this.getOption('onAfterValidate')(validationResults, this.formElement);
+
+        return validationResults;
+    }
+
+    /**
+     * @private
+     *
+     * @returns {Promise<void>}
+     */
+    async runSubmitProcess() {
+        const formData = new FormData(this.formElement);
 
         this.getOption('onBeforeSubmit')(formData, this.formElement);
 
         this.setCssClass(FORM_SUBMITTING_CSS_CLASS);
 
+        let submissionResult;
+
         try {
             submissionResult = await this.submit(formData);
         } catch (error) {
-            // eslint-disable-next-line no-console
-            console.error(error);
-            submissionResult = new SubmissionResult(false);
+            this.setCssClass(FORM_VALID_CSS_CLASS);
+            this.getOption('onSubmissionError')(error, this.formElement);
+            throw error;
         }
 
         this.getOption('onAfterSubmit')(submissionResult, this.formElement);
@@ -260,6 +280,8 @@ export default class Form {
             FORM_SUBMIT_SUCCESS_CSS_CLASS,
             FORM_SUBMIT_ERROR_CSS_CLASS,
         );
-        this.formElement.classList.add(cssClass);
+        if (cssClass !== '') {
+            this.formElement.classList.add(cssClass);
+        }
     }
 }

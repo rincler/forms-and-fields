@@ -238,6 +238,29 @@ describe('validation callback options', () => {
 
         expect(onAfterValidate).not.toHaveBeenCalled();
     });
+
+    test('"onValidationError" is called', async () => {
+        const onValidationError = jest.fn();
+        const error = new Error('foo');
+        const field = new Field(
+            '.js-input',
+            '.js-container',
+            [
+                () => {
+                    throw error;
+                },
+            ],
+            {
+                onValidationError,
+            },
+        );
+
+        await expect(field.validate()).rejects.toThrow(error);
+        expect(onValidationError).toHaveBeenCalledTimes(1);
+        expect(onValidationError.mock.calls[0][0]).toBe(error);
+        expect(onValidationError.mock.calls[0][1]).toBe(input);
+        expect(onValidationError.mock.calls[0][2]).toBe(container);
+    });
 });
 
 describe('callback options', () => {
@@ -880,5 +903,18 @@ describe('special css classes', () => {
         const wrapped = document.querySelector('.js-wrapped');
         await field.validate();
         expect(wrapped.classList.contains('f-field-invalid')).toBe(true);
+    });
+
+    test('no special css classes when error', async () => {
+        const field = new Field('.js-input', '.js-container', [
+            () => {
+                throw new Error('foo');
+            },
+        ]);
+
+        await field.validate().catch(() => {});
+
+        expect(input.classList.contains('f-field-invalid')).toBe(false);
+        expect(input.classList.contains('f-field-valid')).toBe(false);
     });
 });
