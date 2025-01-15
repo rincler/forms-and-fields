@@ -1,11 +1,11 @@
 import validator from 'validator';
 import ValidationResult from './ValidationResult';
 
-const FIELD_VALIDATING_CSS_CLASS = 'f-field-validating';
-const FIELD_VALID_CSS_CLASS = 'f-field-valid';
-const FIELD_INVALID_CSS_CLASS = 'f-field-invalid';
+const FIELD_VALIDATING_CSS_CLASS = 'ff-field-validating';
+const FIELD_VALID_CSS_CLASS = 'ff-field-valid';
+const FIELD_INVALID_CSS_CLASS = 'ff-field-invalid';
 
-const FIELD_CONTAINER_CSS_CLASS = 'js-f-field-container';
+const FIELD_CONTAINER_CSS_CLASS = 'js-ff-field-container';
 
 const NOOP = () => {};
 

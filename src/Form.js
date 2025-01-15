@@ -1,12 +1,12 @@
 import ValidationResult from './ValidationResult';
 
-const FORM_VALIDATING_CSS_CLASS = 'f-form-validating';
-const FORM_VALID_CSS_CLASS = 'f-form-valid';
-const FORM_INVALID_CSS_CLASS = 'f-form-invalid';
+const FORM_VALIDATING_CSS_CLASS = 'ff-form-validating';
+const FORM_VALID_CSS_CLASS = 'ff-form-valid';
+const FORM_INVALID_CSS_CLASS = 'ff-form-invalid';
 
-const FORM_SUBMITTING_CSS_CLASS = 'f-form-submitting';
-const FORM_SUBMIT_SUCCESS_CSS_CLASS = 'f-form-submit-success';
-const FORM_SUBMIT_ERROR_CSS_CLASS = 'f-form-submit-error';
+const FORM_SUBMITTING_CSS_CLASS = 'ff-form-submitting';
+const FORM_POSITIVE_SUBMIT_CSS_CLASS = 'ff-form-positive-submit';
+const FORM_NEGATIVE_SUBMIT_CSS_CLASS = 'ff-form-negative-submit';
 
 const NOOP = () => {};
 
@@ -16,8 +16,8 @@ const DEFAULT_OPTIONS = {
     onAfterValidate: NOOP,
     onBeforeSubmit: NOOP,
     onAfterSubmit: NOOP,
-    onAfterSubmitSuccess: NOOP,
-    onAfterSubmitError: NOOP,
+    onAfterPositiveSubmit: NOOP,
+    onAfterNegativeSubmit: NOOP,
     onValidationError: NOOP,
     onSubmissionError: NOOP,
 };
@@ -238,12 +238,12 @@ export default class Form {
 
         this.getOption('onAfterSubmit')(submissionResult, this.formElement);
 
-        if (submissionResult.isSuccess()) {
-            this.setCssClass(FORM_SUBMIT_SUCCESS_CSS_CLASS);
-            this.getOption('onAfterSubmitSuccess')(submissionResult.getData(), this.formElement);
+        if (submissionResult.isPositive()) {
+            this.setCssClass(FORM_POSITIVE_SUBMIT_CSS_CLASS);
+            this.getOption('onAfterPositiveSubmit')(submissionResult.getData(), this.formElement);
         } else {
-            this.setCssClass(FORM_SUBMIT_ERROR_CSS_CLASS);
-            this.getOption('onAfterSubmitError')(submissionResult.getData(), this.formElement);
+            this.setCssClass(FORM_NEGATIVE_SUBMIT_CSS_CLASS);
+            this.getOption('onAfterNegativeSubmit')(submissionResult.getData(), this.formElement);
         }
     }
 
@@ -277,8 +277,8 @@ export default class Form {
             FORM_VALID_CSS_CLASS,
             FORM_INVALID_CSS_CLASS,
             FORM_SUBMITTING_CSS_CLASS,
-            FORM_SUBMIT_SUCCESS_CSS_CLASS,
-            FORM_SUBMIT_ERROR_CSS_CLASS,
+            FORM_POSITIVE_SUBMIT_CSS_CLASS,
+            FORM_NEGATIVE_SUBMIT_CSS_CLASS,
         );
         if (cssClass !== '') {
             this.formElement.classList.add(cssClass);

@@ -33,12 +33,12 @@ app.get('/check-zip-code', async (req, res) => {
     res.json({ isValid: true });
 });
 
-app.post('/response-with-success', async (req, res) => {
+app.post('/positive-response', async (req, res) => {
     await sleep(SERVER_DELAY);
     res.json({ isSuccess: true });
 });
 
-app.post('/response-with-error', async (req, res) => {
+app.post('/negative-response', async (req, res) => {
     await sleep(SERVER_DELAY);
     res.json({ isSuccess: false });
 });

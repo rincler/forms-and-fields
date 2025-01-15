@@ -866,11 +866,11 @@ describe('"getValue"', () => {
     });
 });
 
-describe('special css classes', () => {
-    test('"validating" special css class', async () => {
+describe('special CSS classes', () => {
+    test('validating', async () => {
         const field = new Field('.js-input', '.js-container', [
             (value) => {
-                expect(input.classList.contains('f-field-validating')).toBe(true);
+                expect(input.classList.contains('ff-field-validating')).toBe(true);
                 return new ValidationResult(value === 'bar');
             },
         ]);
@@ -880,32 +880,32 @@ describe('special css classes', () => {
         await field.validate();
     });
 
-    test('"valid" special css class', async () => {
+    test('valid', async () => {
         const field = new Field('.js-input', '.js-container', ['required']);
         input.value = 'foo';
         await field.validate();
-        expect(input.classList.contains('f-field-valid')).toBe(true);
+        expect(input.classList.contains('ff-field-valid')).toBe(true);
     });
 
-    test('"invalid" special css class', async () => {
+    test('invalid', async () => {
         const field = new Field('.js-input', '.js-container', ['required']);
         await field.validate();
-        expect(input.classList.contains('f-field-invalid')).toBe(true);
+        expect(input.classList.contains('ff-field-invalid')).toBe(true);
     });
 
-    test('"invalid" special css class using container', async () => {
+    test('using container', async () => {
         document.body.innerHTML = `
-            <div class="js-wrapped js-f-field-container">
+            <div class="js-wrapped js-ff-field-container">
                 <input class="js-radio" type="radio" name="radio" value="1" />
                 <input class="js-radio" type="radio" name="radio" value="2" />
             </div>`;
-        const field = new Field('.js-radio', '.js-f-field-container', ['required']);
+        const field = new Field('.js-radio', '.js-ff-field-container', ['required']);
         const wrapped = document.querySelector('.js-wrapped');
         await field.validate();
-        expect(wrapped.classList.contains('f-field-invalid')).toBe(true);
+        expect(wrapped.classList.contains('ff-field-invalid')).toBe(true);
     });
 
-    test('no special css classes when error', async () => {
+    test('no special CSS classes when error', async () => {
         const field = new Field('.js-input', '.js-container', [
             () => {
                 throw new Error('foo');
@@ -914,7 +914,7 @@ describe('special css classes', () => {
 
         await field.validate().catch(() => {});
 
-        expect(input.classList.contains('f-field-invalid')).toBe(false);
-        expect(input.classList.contains('f-field-valid')).toBe(false);
+        expect(input.classList.contains('ff-field-invalid')).toBe(false);
+        expect(input.classList.contains('ff-field-valid')).toBe(false);
     });
 });

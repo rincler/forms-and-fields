@@ -109,11 +109,11 @@ When a user submits a form, validation is performed first. If the form passes va
 
 #### `SubmissionResult` class
 
-| Method                                                | Description                      |
-|-------------------------------------------------------|----------------------------------|
-| constructor(result: `boolean`, data?: ` object` = {}) | Creates a new submission result. |
-| isSuccess(): `boolean`                                | Returns `true` if successful.    |
-| getData(): `object`                                   | Retrieves the submission data.   |
+| Method                                                | Description                                      |
+|-------------------------------------------------------|--------------------------------------------------|
+| constructor(result: `boolean`, data?: ` object` = {}) | Creates a new submission result.                 |
+| isPositive(): `boolean`                               | Returns `true` if submission result is positive. |
+| getData(): `object`                                   | Retrieves the submission data.                   |
 
 ### Fields
 
@@ -180,8 +180,8 @@ Additionally, the `Form` class supports the following options:
 | onValidationError      | `function` | `NOOP`  | Triggered when an error occurs during validation. Arguments: `error: Error, formElement: HTMLElement`.                                                                                                   |
 | onBeforeSubmit         | `function` | `NOOP`  | Triggered before form submission. Arguments: `formData: FormData, formElement: HTMLElement`.                                                                                                             |
 | onAfterSubmit          | `function` | `NOOP`  | Triggered after form submission.  Arguments: `submissionResult: SubmissionResult, formElement: HTMLElement`.                                                                                             |
-| onAfterSubmitSuccess   | `function` | `NOOP`  | Triggered after successful submission when the `submit` function returns a `SubmissionResult` object with a `true` value. Arguments: `submissionResultData: object, formElement: HTMLElement`.           |
-| onAfterSubmitError     | `function` | `NOOP`  | Triggered after failed submission when the `submit` function returns a `SubmissionResult` object with a `false` value. Arguments: `submissionResultData: object, formElement: HTMLElement`.              |
+| onAfterPositiveSubmit  | `function` | `NOOP`  | Triggered after positive submission when the `submit` function returns a `SubmissionResult` object with a `true` value. Arguments: `submissionResultData: object, formElement: HTMLElement`.             |
+| onAfterNegativeSubmit  | `function` | `NOOP`  | Triggered after negative submission when the `submit` function returns a `SubmissionResult` object with a `false` value. Arguments: `submissionResultData: object, formElement: HTMLElement`.            |
 | onBeforeValidateField  | `function` | `NOOP`  | Triggered before validating any field specified in the `Form` constructor. Arguments: `fieldElement: HTMLElement, rootElement: HTMLElement`.                                                             |
 | onAfterValidateField   | `function` | `NOOP`  | Triggered after validating any field specified in the `Form` constructor. Arguments: `validationResult: ValidationResult, fieldElement: HTMLElement, rootElement: HTMLElement`.                          |
 | onFieldValidationError | `function` | `NOOP`  | Triggered when an error occurs during the validation of any field specified in the `Form` constructor. Arguments: `error: Error, fieldElement: HTMLElement, rootElement: HTMLElement`.                   |                                                                                                                                                                                                          |
@@ -216,17 +216,17 @@ new Field('.js-file', '.js-root', [
 
 Special CSS classes are dynamically added to form and field elements during validation and submission:
 
-- `f-field-validating`
-- `f-field-valid`
-- `f-field-invalid`
-- `f-form-validating`
-- `f-form-valid`
-- `f-form-invalid`
-- `f-form-submitting`
-- `f-form-submit-success`
-- `f-form-submit-error`
+- `ff-field-validating`
+- `ff-field-valid`
+- `ff-field-invalid`
+- `ff-form-validating`
+- `ff-form-valid`
+- `ff-form-invalid`
+- `ff-form-submitting`
+- `ff-form-positive-submit`
+- `ff-form-negative-submit`
 
-You can wrap any field element in a container element with the `js-f-field-container` CSS class.
+You can wrap any field element in a container element with the `js-ff-field-container` CSS class.
 The special classes will then be applied to the container instead of the field element itself. This is particularly useful for checkboxes and radio buttons.
 
 ## License

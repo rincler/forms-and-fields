@@ -15,7 +15,7 @@ export default class SubmissionResult {
      *
      * @returns {boolean}
      */
-    isSuccess() {
+    isPositive() {
         return this.result;
     }
 

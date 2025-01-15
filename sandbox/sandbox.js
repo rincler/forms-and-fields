@@ -85,12 +85,12 @@ const domainField = new Field('.js-domain', '.js-container', ['required', 'isFQD
 domainField.listen();
 
 const mapResponseTypeToUrl = (value) => {
-    if (value === 'success') {
-        return '/response-with-success';
+    if (value === 'positive') {
+        return '/positive-response';
     }
 
-    if (value === 'error') {
-        return '/response-with-error';
+    if (value === 'negative') {
+        return '/negative-response';
     }
 
     if (value === 'http-error') {

@@ -10,15 +10,15 @@
 Legend:
 <br /><br />
 <div>
-    <span class="f-field-valid">valid field</span>
-    <span class="f-field-invalid">invalid field</span>
-    <span class="f-field-validating">validating field</span>
-    <span class="f-form-valid">valid form</span>
-    <span class="f-form-invalid">invalid form</span>
-    <span class="f-form-validating">validating form</span>
-    <span class="f-form-submit-success">success submit result form</span>
-    <span class="f-form-submit-error">error submit result form</span>
-    <span class="f-form-submitting">submitting form</span>
+    <span class="ff-field-valid">valid field</span>
+    <span class="ff-field-invalid">invalid field</span>
+    <span class="ff-field-validating">validating field</span>
+    <span class="ff-form-valid">valid form</span>
+    <span class="ff-form-invalid">invalid form</span>
+    <span class="ff-form-validating">validating form</span>
+    <span class="ff-form-positive-submit">success submit result form</span>
+    <span class="ff-form-negative-submit">error submit result form</span>
+    <span class="ff-form-submitting">submitting form</span>
 </div>
 
 <hr />
@@ -37,14 +37,14 @@ Legend:
         <textarea id="comment" name="comment" class="js-secret-word"></textarea>
     </div>
     <div>
-        <div class="field-container js-f-field-container">
+        <div class="field-container js-ff-field-container">
             <input id="sex-man" type="radio" name="sex" class="js-sex" value="man" />
             <label for="sex-man">Man</label>
             <input id="sex-woman" type="radio" name="sex" class="js-sex" value="woman" />
             <label for="sex-woman">Woman</label>
         </div>
     </div>
-    <div class="field-container js-f-field-container">
+    <div class="field-container js-ff-field-container">
         <input id="agree" type="checkbox" name="agree" class="js-agree" />
         <label for="agree">I agree with the rules</label>
     </div>
@@ -80,7 +80,7 @@ Legend:
 
 <h2>An individual field</h2>
 
-<div class="js-container js-f-field-container">
+<div class="js-container js-ff-field-container">
     <label for="domain">Domain</label>
     <br />
     <input id="domain" type="text" class="js-domain" />
@@ -107,11 +107,11 @@ Legend:
         <input id="confirm-password" type="password" class="js-confirm-password" />
     </div>
     <div>
-        <input id="response-success" type="radio" name="response" value="success" checked />
-        <label for="response-success">Response with success</label>
+        <input id="response-positive" type="radio" name="response" value="positive" checked />
+        <label for="response-positive">Positive response</label>
         <br />
-        <input id="response-error" type="radio" name="response" value="error" />
-        <label for="response-error">Response with error</label>
+        <input id="response-negative" type="radio" name="response" value="negative" />
+        <label for="response-negative">Negative response</label>
         <br />
         <input id="response-http-error" type="radio" name="response" value="http-error" />
         <label for="response-http-error">Response with HTTP-error</label>
@@ -172,8 +172,8 @@ Legend:
         <input id="address" type="text" name="zip" class="js-address" />
     </div>
     <div>
-        <input id="address-form-response-success" type="radio" name="response" value="success" checked />
-        <label for="address-form-response-success">Response with success</label>
+        <input id="address-form-response-positive" type="radio" name="response" value="positive" checked />
+        <label for="address-form-response-positive">Positive response</label>
         <br />
         <input id="address-form-response-http-error" type="radio" name="response" value="http-error" />
         <label for="address-form-response-http-error">Response with HTTP-error</label>

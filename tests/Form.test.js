@@ -491,12 +491,12 @@ describe('submit callback options', () => {
         });
     });
 
-    test('"onAfterSubmitSuccess" is called and "onAfterSubmitError" is not called', async () => {
-        const onAfterSubmitSuccess = jest.fn();
-        const onAfterSubmitError = jest.fn();
+    test('"onAfterPositiveSubmit" is called and "onAfterNegativeSubmit" is not called', async () => {
+        const onAfterPositiveSubmit = jest.fn();
+        const onAfterNegativeSubmit = jest.fn();
         const form = new Form('.js-form', [], () => new SubmissionResult(true, { foo: 'bar' }), {
-            onAfterSubmitSuccess,
-            onAfterSubmitError,
+            onAfterPositiveSubmit,
+            onAfterNegativeSubmit,
         });
 
         form.listen();
@@ -504,19 +504,19 @@ describe('submit callback options', () => {
         fireEvent.submit(formElement);
 
         await waitFor(() => {
-            expect(onAfterSubmitSuccess).toHaveBeenCalledTimes(1);
-            expect(onAfterSubmitSuccess.mock.calls[0][0]).toStrictEqual({ foo: 'bar' });
-            expect(onAfterSubmitSuccess.mock.calls[0][1]).toBe(formElement);
-            expect(onAfterSubmitError).not.toHaveBeenCalled();
+            expect(onAfterPositiveSubmit).toHaveBeenCalledTimes(1);
+            expect(onAfterPositiveSubmit.mock.calls[0][0]).toStrictEqual({ foo: 'bar' });
+            expect(onAfterPositiveSubmit.mock.calls[0][1]).toBe(formElement);
+            expect(onAfterNegativeSubmit).not.toHaveBeenCalled();
         });
     });
 
-    test('"onAfterSubmitSuccess" is not called and "onAfterSubmitError" is called', async () => {
-        const onAfterSubmitSuccess = jest.fn();
-        const onAfterSubmitError = jest.fn();
+    test('"onAfterPositiveSubmit" is not called and "onAfterNegativeSubmit" is called', async () => {
+        const onAfterPositiveSubmit = jest.fn();
+        const onAfterNegativeSubmit = jest.fn();
         const form = new Form('.js-form', [], () => new SubmissionResult(false, { foo: 'bar' }), {
-            onAfterSubmitSuccess,
-            onAfterSubmitError,
+            onAfterPositiveSubmit,
+            onAfterNegativeSubmit,
         });
 
         form.listen();
@@ -524,10 +524,10 @@ describe('submit callback options', () => {
         fireEvent.submit(formElement);
 
         await waitFor(() => {
-            expect(onAfterSubmitSuccess).not.toHaveBeenCalled();
-            expect(onAfterSubmitError).toHaveBeenCalledTimes(1);
-            expect(onAfterSubmitError.mock.calls[0][0]).toStrictEqual({ foo: 'bar' });
-            expect(onAfterSubmitError.mock.calls[0][1]).toBe(formElement);
+            expect(onAfterPositiveSubmit).not.toHaveBeenCalled();
+            expect(onAfterNegativeSubmit).toHaveBeenCalledTimes(1);
+            expect(onAfterNegativeSubmit.mock.calls[0][0]).toStrictEqual({ foo: 'bar' });
+            expect(onAfterNegativeSubmit.mock.calls[0][1]).toBe(formElement);
         });
     });
 
@@ -748,11 +748,11 @@ describe('init form', () => {
     });
 });
 
-describe('special css classes', () => {
-    test('"validating" special css class', async () => {
+describe('special CSS classes', () => {
+    test('validating', async () => {
         const field = new Field('.js-input', '.js-form', [
             () => {
-                expect(formElement.classList.contains('f-form-validating')).toBe(true);
+                expect(formElement.classList.contains('ff-form-validating')).toBe(true);
                 return new ValidationResult(true);
             },
         ]);
@@ -764,7 +764,7 @@ describe('special css classes', () => {
         await form.validate();
     });
 
-    test('"valid" special css class', async () => {
+    test('valid', async () => {
         const form = new Form(
             '.js-form',
             [
@@ -779,10 +779,10 @@ describe('special css classes', () => {
 
         await form.validate();
 
-        expect(formElement.classList.contains('f-form-valid')).toBe(true);
+        expect(formElement.classList.contains('ff-form-valid')).toBe(true);
     });
 
-    test('"invalid" special css class', async () => {
+    test('invalid', async () => {
         const form = new Form(
             '.js-form',
             [
@@ -796,10 +796,10 @@ describe('special css classes', () => {
 
         await form.validate();
 
-        expect(formElement.classList.contains('f-form-invalid')).toBe(true);
+        expect(formElement.classList.contains('ff-form-invalid')).toBe(true);
     });
 
-    test('no special css classes when validation error', async () => {
+    test('no special CSS classes when validation error', async () => {
         const form = new Form(
             '.js-form',
             [
@@ -815,16 +815,16 @@ describe('special css classes', () => {
 
         await form.validate().catch(() => {});
 
-        expect(formElement.classList.contains('f-form-invalid')).toBe(false);
-        expect(formElement.classList.contains('f-form-valid')).toBe(false);
+        expect(formElement.classList.contains('ff-form-invalid')).toBe(false);
+        expect(formElement.classList.contains('ff-form-valid')).toBe(false);
     });
 
-    test('"submitting" special css class', async () => {
+    test('submitting', async () => {
         const form = new Form(
             '.js-form',
             [new Field('.js-input', '.js-form', ['required'])],
             () => {
-                expect(formElement.classList.contains('f-form-submitting')).toBe(true);
+                expect(formElement.classList.contains('ff-form-submitting')).toBe(true);
                 return new SubmissionResult(true);
             },
         );
@@ -835,7 +835,7 @@ describe('special css classes', () => {
         fireEvent.submit(formElement);
     });
 
-    test('"success submit" special css class', async () => {
+    test('positive submit', async () => {
         const form = new Form(
             '.js-form',
             [new Field('.js-input', '.js-form', ['required'])],
@@ -850,11 +850,11 @@ describe('special css classes', () => {
         fireEvent.submit(formElement);
 
         await waitFor(() => {
-            expect(formElement.classList.contains('f-form-submit-success')).toBe(true);
+            expect(formElement.classList.contains('ff-form-positive-submit')).toBe(true);
         });
     });
 
-    test('"error submit" special css class', async () => {
+    test('negative submit', async () => {
         const form = new Form(
             '.js-form',
             [new Field('.js-input', '.js-form', ['required'])],
@@ -869,11 +869,11 @@ describe('special css classes', () => {
         fireEvent.submit(formElement);
 
         await waitFor(() => {
-            expect(formElement.classList.contains('f-form-submit-error')).toBe(true);
+            expect(formElement.classList.contains('ff-form-negative-submit')).toBe(true);
         });
     });
 
-    test('"valid" special css class when submit error', async () => {
+    test('valid when submit error', async () => {
         const form = new Form(
             '.js-form',
             [new Field('.js-input', '.js-form', ['required'])],
@@ -888,9 +888,9 @@ describe('special css classes', () => {
         await form.runSubmitProcess().catch(() => {});
 
         await waitFor(() => {
-            expect(formElement.classList.contains('f-form-submit-success')).toBe(false);
-            expect(formElement.classList.contains('f-form-submit-error')).toBe(false);
-            expect(formElement.classList.contains('f-form-valid')).toBe(true);
+            expect(formElement.classList.contains('ff-form-positive-submit')).toBe(false);
+            expect(formElement.classList.contains('ff-form-negative-submit')).toBe(false);
+            expect(formElement.classList.contains('ff-form-valid')).toBe(true);
         });
     });
 });
