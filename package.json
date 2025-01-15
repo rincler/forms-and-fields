@@ -11,18 +11,15 @@
         "validator",
         "validate"
     ],
-    "main": "lib/index.js",
+    "main": "dist/index.js",
     "files": [
-        "lib",
-        "README.md",
-        "LICENSE",
-        "package.json"
+        "dist"
     ],
     "repository": {
         "type": "git",
         "url": "git+https://github.com/rincler/forms-and-fields.git"
     },
-    "author": "Dmitriy Romashov",
+    "author": "Dmitriy R",
     "license": "MIT",
     "bugs": {
         "url": "https://github.com/rincler/forms-and-fields/issues"
@@ -52,7 +49,7 @@
         "prettier": "3.4.2"
     },
     "scripts": {
-        "build": "babel src --out-dir lib",
+        "build": "babel src --out-dir dist",
         "prepack": "npm run build",
         "lint": "eslint .",
         "sandbox": "npm run sandbox:build && npm run sandbox:start",
