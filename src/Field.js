@@ -17,6 +17,7 @@ const DEFAULT_OPTIONS = {
     validateOnChange: false,
     validateOnType: false,
     validatorParams: {},
+    validationCacheEnabled: true,
     onChange: NOOP,
     onTypingStart: NOOP,
     onTypingEnd: NOOP,
@@ -113,7 +114,7 @@ export default class Field {
      * @returns {Promise<ValidationResult>}
      */
     async validate(force = false) {
-        if (this.validationResult !== null && !force) {
+        if (this.getOption('validationCacheEnabled') && this.validationResult !== null && !force) {
             return this.validationResult;
         }
 

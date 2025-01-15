@@ -2,7 +2,7 @@
  * @jest-environment jsdom
  */
 
-import { fireEvent } from '@testing-library/dom';
+import { fireEvent, waitFor } from '@testing-library/dom';
 import Field from '../src/Field';
 import ValidationResult from '../src/ValidationResult';
 import FileValidator from '../src/validators/FileValidator';
@@ -170,22 +170,33 @@ describe('"validateOnType" and "validateOnChange" options', () => {
         expect(field.validate).not.toHaveBeenCalled();
     });
 
-    test('"validate" does not use validation result cache on typing', () => {
-        const onBeforeValidate = jest.fn();
-        const field = new Field('.js-input', '.js-container', ['required'], {
-            validateOnType: true,
-            onBeforeValidate,
-        });
+    test('"validate" does not use validation result cache on typing', async () => {
+        const field = new Field(
+            '.js-input',
+            '.js-container',
+            [
+                (value) => {
+                    return new ValidationResult(value === 'bar');
+                },
+            ],
+            {
+                validateOnType: true,
+                validationCacheEnabled: true,
+            },
+        );
         field.listen();
 
+        await field.validate();
+
         fireEvent.keyUp(input, { key: 'b', code: 'KeyB' });
-        jest.runAllTimers();
         fireEvent.keyUp(input, { key: 'a', code: 'KeyA' });
-        jest.runAllTimers();
         fireEvent.keyUp(input, { key: 'r', code: 'KeyR' });
+        input.value = 'bar';
         jest.runAllTimers();
 
-        expect(onBeforeValidate).toHaveBeenCalledTimes(3);
+        await waitFor(() => {
+            expect(field.validationResult.isValid()).toBeTruthy();
+        });
     });
 });
 
@@ -436,6 +447,70 @@ describe('callback options', () => {
         expect(onChange.mock.calls[0][0]).toBe('2');
         expect(onChange.mock.calls[0][1]).toBe(dynamicRadio);
         expect(onChange.mock.calls[0][2]).toBe(container);
+    });
+});
+
+describe('message options', () => {
+    test('default invalid message', async () => {
+        const onAfterValidate = (validationResult) => {
+            expect(validationResult.getMessage()).toBe('Invalid value.');
+        };
+
+        const field = new Field('.js-input', '.js-container', ['required'], {
+            onAfterValidate,
+        });
+
+        await field.validate();
+    });
+
+    test('invalid message', async () => {
+        const onAfterValidate = (validationResult) => {
+            expect(validationResult.getMessage()).toBe('This field is required.');
+        };
+
+        const field = new Field('.js-input', '.js-container', ['required'], {
+            onAfterValidate,
+            invalidMessages: {
+                required: 'This field is required.',
+            },
+        });
+
+        await field.validate();
+    });
+});
+
+describe('other options', () => {
+    test.each([
+        [true, false],
+        [false, true],
+    ])('"validationCacheEnabled" is %s', async (validationCacheEnabled, expectedIsValid) => {
+        const field1 = new Field('.js-list-input-1', '.js-container', ['']);
+        const field2 = new Field(
+            '.js-list-input-2',
+            '.js-container',
+            [
+                (value) => {
+                    return new ValidationResult(value === input.value);
+                },
+            ],
+            {
+                validationCacheEnabled,
+            },
+        );
+        field1.listen();
+        field2.listen();
+
+        input.value = 'foo';
+
+        let validationResult = await field2.validate();
+
+        expect(validationResult.isValid()).toBeFalsy();
+
+        fireEvent.change(input, { target: { value: '' } });
+
+        validationResult = await field2.validate();
+
+        expect(validationResult.isValid()).toBe(expectedIsValid);
     });
 });
 
@@ -750,35 +825,6 @@ describe('file validator', () => {
 
         const validationResult = await field.validate();
         expect(validationResult).toStrictEqual(new ValidationResult(false, expectedErrorMessage));
-    });
-});
-
-describe('message options', () => {
-    test('default invalid message', async () => {
-        const onAfterValidate = (validationResult) => {
-            expect(validationResult.getMessage()).toBe('Invalid value.');
-        };
-
-        const field = new Field('.js-input', '.js-container', ['required'], {
-            onAfterValidate,
-        });
-
-        await field.validate();
-    });
-
-    test('invalid message', async () => {
-        const onAfterValidate = (validationResult) => {
-            expect(validationResult.getMessage()).toBe('This field is required.');
-        };
-
-        const field = new Field('.js-input', '.js-container', ['required'], {
-            onAfterValidate,
-            invalidMessages: {
-                required: 'This field is required.',
-            },
-        });
-
-        await field.validate();
     });
 });
 

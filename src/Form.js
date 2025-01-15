@@ -110,6 +110,9 @@ export default class Form {
                 validateOnType: field.hasOption('validateOnType')
                     ? field.getOption('validateOnType')
                     : options.validateOnType,
+                validationCacheEnabled: field.hasOption('validationCacheEnabled')
+                    ? this.getOption('validationCacheEnabled')
+                    : options.validationCacheEnabled,
                 validatorParams: field.hasOption('validatorParams')
                     ? this.getOption('validatorParams')
                     : options.validatorParams,

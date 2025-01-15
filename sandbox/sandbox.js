@@ -120,7 +120,9 @@ const registrationForm = new Form(
 
                 return new ValidationResult(value === password);
             },
-        ]),
+        ], {
+            validationCacheEnabled: false,
+        }),
     ],
     async (formData) => {
         const data = {

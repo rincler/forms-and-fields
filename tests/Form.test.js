@@ -46,6 +46,7 @@ describe('field options', () => {
         const validateOnType = true;
         const typingDelay = 3;
         const validatorParams = { foo: [] };
+        const validationCacheEnabled = false;
         const trimEnabled = false;
         const onChange = jest.fn();
         const onTypingStart = jest.fn();
@@ -63,6 +64,7 @@ describe('field options', () => {
             validateOnChange,
             validateOnType,
             validatorParams,
+            validationCacheEnabled,
             onChange,
             onTypingStart,
             onTypingEnd,
@@ -89,6 +91,9 @@ describe('field options', () => {
         expect(inputField.getOption('validatorParams')).toBe(validatorParams);
         expect(checkboxField.getOption('validatorParams')).toBe(validatorParams);
 
+        expect(inputField.getOption('validationCacheEnabled')).toBe(validationCacheEnabled);
+        expect(checkboxField.getOption('validationCacheEnabled')).toBe(validationCacheEnabled);
+
         expect(inputField.getOption('onChange')).toBe(onChange);
         expect(checkboxField.getOption('onChange')).toBe(onChange);
 
@@ -107,6 +112,7 @@ describe('field options', () => {
         const validateOnChange = true;
         const validateOnType = true;
         const validatorParams = { bar: [] };
+        const validationCacheEnabled = false;
         const onChange = jest.fn();
         const onTypingStart = jest.fn();
         const onTypingEnd = jest.fn();
@@ -119,6 +125,7 @@ describe('field options', () => {
             validateOnChange,
             validateOnType,
             validatorParams,
+            validationCacheEnabled,
             onChange,
             onTypingStart,
             onTypingEnd,
@@ -133,6 +140,7 @@ describe('field options', () => {
             validateOnChange: false,
             validateOnType: false,
             validatorParams: { foo: [] },
+            validationCacheEnabled: true,
             onChange: jest.fn(),
             onTypingStart: jest.fn(),
             onTypingEnd: jest.fn(),
@@ -145,6 +153,7 @@ describe('field options', () => {
         expect(inputField.getOption('validateOnChange')).toBe(validateOnChange);
         expect(inputField.getOption('validateOnType')).toBe(validateOnType);
         expect(inputField.getOption('validatorParams')).toBe(validatorParams);
+        expect(inputField.getOption('validationCacheEnabled')).toBe(validationCacheEnabled);
         expect(inputField.getOption('onChange')).toBe(onChange);
         expect(inputField.getOption('onTypingStart')).toBe(onTypingStart);
         expect(inputField.getOption('onTypingEnd')).toBe(onTypingEnd);
