@@ -200,7 +200,7 @@ export default class Form {
             const formValidationResult =
                 this.hasOption('validate') && ValidationResult.areValid(validationResults)
                     ? await this.getOption('validate')(new FormData(this.formElement))
-                    : new ValidationResult(ValidationResult.areValid(validationResults));
+                    : ValidationResult.make(ValidationResult.areValid(validationResults));
             validationResults.push(formValidationResult);
         } catch (error) {
             this.setCssClass('');

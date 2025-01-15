@@ -176,7 +176,7 @@ describe('"validateOnType" and "validateOnChange" options', () => {
             '.js-container',
             [
                 (value) => {
-                    return new ValidationResult(value === 'bar');
+                    return ValidationResult.make(value === 'bar');
                 },
             ],
             {
@@ -490,7 +490,7 @@ describe('other options', () => {
             '.js-container',
             [
                 (value) => {
-                    return new ValidationResult(value === input.value);
+                    return ValidationResult.make(value === input.value);
                 },
             ],
             {
@@ -548,7 +548,7 @@ describe('validation result', () => {
 
         const validationResult = await field.validate();
 
-        expect(validationResult).toStrictEqual(new ValidationResult(true));
+        expect(validationResult).toStrictEqual(ValidationResult.valid());
     });
 
     test('"validate" negative', async () => {
@@ -556,7 +556,7 @@ describe('validation result', () => {
 
         const validationResult = await field.validate();
 
-        expect(validationResult).toStrictEqual(new ValidationResult(false, 'Invalid value.'));
+        expect(validationResult).toStrictEqual(ValidationResult.invalid('Invalid value.'));
     });
 });
 
@@ -617,7 +617,7 @@ describe('some validators', () => {
 
         const field = new Field('.js-input', '.js-container', [
             (value) => {
-                return new ValidationResult(value === '12345');
+                return ValidationResult.make(value === '12345');
             },
         ]);
 
@@ -639,7 +639,7 @@ describe('some validators', () => {
 
         const validator = {
             validate: (value) => {
-                return new ValidationResult(value === '12345');
+                return ValidationResult.make(value === '12345');
             },
         };
 
@@ -663,9 +663,7 @@ describe('some validators', () => {
 
         const field = new Field('.js-input', '.js-container', [
             (value) => {
-                return new Promise((resolve) => {
-                    resolve(new ValidationResult(value === '12345'));
-                });
+                return Promise.resolve(ValidationResult.make(value === '12345'));
             },
         ]);
 
@@ -688,7 +686,7 @@ describe('some validators', () => {
         const field = new Field('.js-input', '.js-container', [
             'required',
             (value) => {
-                return new ValidationResult(value === '12345');
+                return ValidationResult.make(value === '12345');
             },
         ]);
 
@@ -824,7 +822,7 @@ describe('file validator', () => {
         });
 
         const validationResult = await field.validate();
-        expect(validationResult).toStrictEqual(new ValidationResult(false, expectedErrorMessage));
+        expect(validationResult).toStrictEqual(ValidationResult.invalid(expectedErrorMessage));
     });
 });
 
@@ -917,7 +915,7 @@ describe('special CSS classes', () => {
         const field = new Field('.js-input', '.js-container', [
             (value) => {
                 expect(input.classList.contains('ff-field-validating')).toBe(true);
-                return new ValidationResult(value === 'bar');
+                return ValidationResult.make(value === 'bar');
             },
         ]);
 

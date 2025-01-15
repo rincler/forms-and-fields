@@ -337,10 +337,10 @@ describe('validation callback options', () => {
 
         expect(onAfterValidate).toHaveBeenCalledTimes(1);
         expect(onAfterValidate.mock.calls[0][0]).toStrictEqual([
-            new ValidationResult(false, 'Invalid value.'),
-            new ValidationResult(false, 'Invalid value.'),
-            new ValidationResult(true),
-            new ValidationResult(false),
+            ValidationResult.invalid('Invalid value.'),
+            ValidationResult.invalid('Invalid value.'),
+            ValidationResult.valid(),
+            ValidationResult.invalid(),
         ]);
         expect(onAfterValidate.mock.calls[0][1]).toBe(formElement);
     });
@@ -571,15 +571,15 @@ describe('validation', () => {
     test.each([
         [
             'valid fields',
-            new ValidationResult(true),
-            new ValidationResult(true),
-            new ValidationResult(true),
+            ValidationResult.valid(),
+            ValidationResult.valid(),
+            ValidationResult.valid(),
         ],
         [
             'invalid fields',
-            new ValidationResult(false, 'Invalid field.'),
-            new ValidationResult(false, 'Invalid field.'),
-            new ValidationResult(false),
+            ValidationResult.invalid('Invalid field.'),
+            ValidationResult.invalid('Invalid field.'),
+            ValidationResult.invalid(),
         ],
     ])(
         '"validate" is not specified - %s',
@@ -618,31 +618,31 @@ describe('validation', () => {
     test.each([
         [
             'valid field, valid form',
-            new ValidationResult(true),
-            new ValidationResult(true),
-            new ValidationResult(true),
-            new ValidationResult(true),
+            ValidationResult.valid(),
+            ValidationResult.valid(),
+            ValidationResult.valid(),
+            ValidationResult.valid(),
         ],
         [
             'valid field, invalid form',
-            new ValidationResult(true),
-            new ValidationResult(false, 'Invalid form.'),
-            new ValidationResult(true),
-            new ValidationResult(false, 'Invalid form.'),
+            ValidationResult.valid(),
+            ValidationResult.invalid('Invalid form.'),
+            ValidationResult.valid(),
+            ValidationResult.invalid('Invalid form.'),
         ],
         [
             'invalid field, valid form',
-            new ValidationResult(false, 'Invalid field.'),
-            new ValidationResult(true),
-            new ValidationResult(false, 'Invalid field.'),
-            new ValidationResult(false),
+            ValidationResult.invalid('Invalid field.'),
+            ValidationResult.valid(),
+            ValidationResult.invalid('Invalid field.'),
+            ValidationResult.invalid(),
         ],
         [
             'invalid field, invalid form',
-            new ValidationResult(false, 'Invalid field.'),
-            new ValidationResult(false, 'Invalid form'),
-            new ValidationResult(false, 'Invalid field.'),
-            new ValidationResult(false),
+            ValidationResult.invalid('Invalid field.'),
+            ValidationResult.invalid('Invalid form'),
+            ValidationResult.invalid('Invalid field.'),
+            ValidationResult.invalid(),
         ],
     ])(
         '"validate" is specified - %s',
@@ -677,7 +677,7 @@ describe('validation', () => {
     );
 
     test('"validate" is called when no fields', async () => {
-        const validate = jest.fn(() => new ValidationResult(true));
+        const validate = jest.fn(() => ValidationResult.valid());
         const form = new Form('.js-form', [], submit, {
             validate,
         });
@@ -738,7 +738,7 @@ describe('submission', () => {
     test('submit invalid form (invalid form)', async () => {
         const submitMock = jest.fn(() => new SubmissionResult(true));
         const form = new Form('.js-form', [], submitMock, {
-            validate: () => new ValidationResult(false),
+            validate: () => ValidationResult.invalid(),
         });
 
         form.listen();
@@ -762,7 +762,7 @@ describe('special CSS classes', () => {
         const field = new Field('.js-input', '.js-form', [
             () => {
                 expect(formElement.classList.contains('ff-form-validating')).toBe(true);
-                return new ValidationResult(true);
+                return ValidationResult.valid();
             },
         ]);
 

@@ -29,36 +29,33 @@ export default class FileValidator {
      */
     validate(files) {
         if (this.rules.maxCount && files.length > this.rules.maxCount) {
-            return new ValidationResult(false, this.prepareMessage(this.invalidMessages.maxCount));
+            return ValidationResult.invalid(this.prepareMessage(this.invalidMessages.maxCount));
         }
 
         // eslint-disable-next-line no-restricted-syntax
         for (const file of files) {
             if (this.rules.maxSize && file.size > this.rules.maxSize) {
-                return new ValidationResult(
-                    false,
-                    this.prepareMessage(this.invalidMessages.maxSize, file),
+                return ValidationResult.invalid(
+                    this.prepareMessage(this.prepareMessage(this.invalidMessages.maxSize, file)),
                 );
             }
 
             if (this.rules.allowedExtensions) {
                 if (!this.rules.allowedExtensions.some((e) => file.name.endsWith(e))) {
-                    return new ValidationResult(
-                        false,
+                    return ValidationResult.invalid(
                         this.prepareMessage(this.invalidMessages.allowedExtensions, file),
                     );
                 }
             }
 
             if (this.rules.allowedMimeTypes && !this.rules.allowedMimeTypes.includes(file.type)) {
-                return new ValidationResult(
-                    false,
+                return ValidationResult.invalid(
                     this.prepareMessage(this.invalidMessages.allowedMimeTypes, file),
                 );
             }
         }
 
-        return new ValidationResult(true);
+        return ValidationResult.valid();
     }
 
     prepareMessage(message, file = undefined) {

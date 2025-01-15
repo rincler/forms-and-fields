@@ -119,8 +119,8 @@ export default class Field {
         }
 
         if (this.validators.length === 0) {
-            this.validationResult = new ValidationResult(true);
-            return new ValidationResult(true);
+            this.validationResult = ValidationResult.valid();
+            return ValidationResult.valid();
         }
 
         const fieldElement = this.getFieldElement();
@@ -149,7 +149,9 @@ export default class Field {
         }
 
         if (!this.validationResult.isValid() && !this.validationResult.hasMessage()) {
-            this.validationResult.setMessage(this.getOption('defaultInvalidMessage'));
+            this.validationResult = ValidationResult.invalid(
+                this.getOption('defaultInvalidMessage'),
+            );
         }
 
         this.setCssClass(
@@ -267,10 +269,7 @@ export default class Field {
             return (value) => {
                 const isValid = !this.isEmpty(value);
 
-                return new ValidationResult(
-                    isValid,
-                    isValid ? '' : this.getInvalidErrorMessage('required'),
-                );
+                return ValidationResult.make(isValid, this.getInvalidErrorMessage('required'));
             };
         }
 
@@ -280,10 +279,7 @@ export default class Field {
                 const validatorFn = validator[validatorItem];
                 const isValid = value === '' || validatorFn(value, ...params);
 
-                return new ValidationResult(
-                    isValid,
-                    isValid ? '' : this.getInvalidErrorMessage(validatorItem),
-                );
+                return ValidationResult.make(isValid, this.getInvalidErrorMessage(validatorItem));
             };
         }
 

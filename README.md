@@ -99,13 +99,15 @@ When a user submits a form, validation is performed first. If the form passes va
 
 #### `ValidationResult` class
 
-| Method                                                  | Description                         |
-|---------------------------------------------------------|-------------------------------------|
-| constructor(result: `boolean`, message?: `string` = '') | Creates a new validation result.    |
-| isValid(): `bool`                                       | Returns `true` if valid.            |
-| hasMessage(): `bool`                                    | Returns `true` if a message exists. |
-| setMessage(message: `string`): `void`                   | Sets the validation message.        |
-| getMessage(): `string`                                  | Retrieves the validation message.   |
+| Method                                                    | Description                                                                      |
+|-----------------------------------------------------------|----------------------------------------------------------------------------------|
+| valid()                                                   | Static method. Creates a new valid result.                                       |
+| invalid(message?: `string` = '')                          | Static method. Creates a new invalid result with a message.                      |
+| make(result: `boolean`, message?: `string` = '')          | Static method. Creates a new valid or invalid result depending on the `result`.  |
+| isValid(): `bool`                                         | Returns `true` if valid.                                                         |
+| areValid(validationResults: `ValidationResult[]`): `bool` | Static method. Returns `true` if all the specified validation results are valid. |
+| hasMessage(): `bool`                                      | Returns `true` if a message exists.                                              |
+| getMessage(): `string`                                    | Retrieves the validation message.                                                |
 
 #### `SubmissionResult` class
 

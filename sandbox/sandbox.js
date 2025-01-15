@@ -64,7 +64,7 @@ const domainField = new Field('.js-domain', '.js-container', ['required', 'isFQD
     const response = await fetchOk(`/check-domain?domain=${encodeURIComponent(value)}`);
     const result = await response.json();
 
-    return new ValidationResult(result.isValid, result.isValid ? '' : 'The domain must be in the .com zone.');
+    return ValidationResult.make(result.isValid, 'The domain must be in the .com zone.');
 }], {
     invalidMessages: {
         required: 'Domain is required.',
@@ -109,7 +109,7 @@ const registrationForm = new Form(
                 const response = await fetchOk(`/check-login?login=${encodeURIComponent(value)}`);
                 const result = await response.json();
 
-                return new ValidationResult(result.isValid);
+                return ValidationResult.make(result.isValid);
             },
         ]),
         new Field('.js-password', '.js-register-form', ['required']),
@@ -118,7 +118,7 @@ const registrationForm = new Form(
             (value) => {
                 const password = document.querySelector('.js-password').value;
 
-                return new ValidationResult(value === password);
+                return ValidationResult.make(value === password);
             },
         ], {
             validationCacheEnabled: false,
@@ -206,7 +206,7 @@ uploadForm.listen();
 const addressForm = new Form('.js-address-form', [
     new Field('.js-zip-code', '.js-address-form', [async (value) => {
         await fetchOk(`/check-zip-code?zip-code=${encodeURIComponent(value)}`);
-        return new ValidationResult(true);
+        return ValidationResult.valid();
     }], {
         validateOnChange: true,
         onBeforeValidate: (fieldElement) => {

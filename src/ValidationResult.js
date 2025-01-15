@@ -1,6 +1,6 @@
 export default class ValidationResult {
     /**
-     * @public
+     * @private
      *
      * @param {boolean} result
      * @param {string} message
@@ -8,6 +8,32 @@ export default class ValidationResult {
     constructor(result, message = '') {
         this.result = result;
         this.message = message;
+    }
+
+    /**
+     * @public
+     */
+    static valid() {
+        return new ValidationResult(true);
+    }
+
+    /**
+     * @public
+     *
+     * @param {string} message
+     */
+    static invalid(message = '') {
+        return new ValidationResult(false, message);
+    }
+
+    /**
+     * @public
+     *
+     * @param {boolean} result
+     * @param {string} message
+     */
+    static make(result, message = '') {
+        return result ? ValidationResult.valid() : ValidationResult.invalid(message);
     }
 
     /**
@@ -22,6 +48,8 @@ export default class ValidationResult {
     /**
      * @public
      *
+     * @param {ValidationResult[]} validationResults
+     *
      * @returns {boolean}
      */
     static areValid(validationResults) {
@@ -35,15 +63,6 @@ export default class ValidationResult {
      */
     hasMessage() {
         return this.message !== '';
-    }
-
-    /**
-     * @public
-     *
-     * @param message
-     */
-    setMessage(message) {
-        this.message = message;
     }
 
     /**
