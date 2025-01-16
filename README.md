@@ -39,7 +39,8 @@ const form = new Form(
             }
         })
     ], 
-    (formData) => {
+    ({ data, formData }) => {
+        console.log(data);
         console.log(formData);
         // here can be an AJAX-request
         return new SubmissionResult(true);
@@ -68,6 +69,7 @@ ValidationResult {result: false, message: "Invalid email"}
 When you submit the form with a valid email:
 ```
 ValidationResult {result: true, message: ""}
+{ email: 'example@example.com' }
 FormData { ... }
 ```
 
@@ -90,9 +92,9 @@ A form is considered valid when all its fields are valid.
 
 To validate an individual field (outside a form) you need to create a `Field` object and call its `listen` method.
 
-A custom validator can be either a function or an object with a `validate` method that returns a `ValidationResult` object. It can be promised, so you can use AJAX.
+A custom validator can be either a function or an object with a `validate` method, which must return a `ValidationResult` object. A field value is passed as argument. It can be promised, so you can use AJAX.
 
-The `submit` function must return a `SubmissionResult` object. It can be promised, so you can use AJAX.
+The `submit` function must return a `SubmissionResult` object. An object with two keys (`{ data: object, formData: FormData }`) is passed as argument: `data` - an object representing all form fields and their values, and `formData` - an instance of the `FormData` class. It can be promised, so you can use AJAX.
 
 When a user submits a form, validation is performed first. If the form passes validation, submission is then executed.
 
@@ -141,31 +143,31 @@ An array of validators. Each validator can be:
 
 #### `Field` options
 
-| Option                 | Type       | Default            | Description                                                                                                                             |
-|------------------------|------------|--------------------|-----------------------------------------------------------------------------------------------------------------------------------------|
-| invalidMessages        | `object`   | `{}`               | Messages for invalid values for each validator. For example: `{isEmail: 'Invalid Email'}`.                                              |
-| defaultInvalidMessage  | `string`   | `'Invalid value.'` | A default message for invalid values if no specific message is provided in `invalidMessages`.                                           |
-| trimEnabled            | `boolean`  | `true`             | Specifies whether to trim the input value during validation.                                                                            |
-| typingDelay            | `number`   | 1000               | The delay (in milliseconds) to consider a user as "typing" when the time between keystrokes is less than this value.                    |
-| validateOnChange       | `boolean`  | `false`            | Specifies whether to validate the field when its value changes.                                                                         |
-| validateOnType         | `boolean`  | `false`            | Specifies whether to validate the field during typing.                                                                                  |
-| validatorParams        | `object`   | `{}`               | Parameters for [validator](https://www.npmjs.com/package/validator). For example: `{isEmail: {allow_utf8_local_part: false}}`.          |
-| validationCacheEnabled | `boolean`  | `true`             | Specifies whether to cache the validation result until the value changes.                                                               |
-| onChange               | `function` | `NOOP`             | Triggered when the field value changes. Arguments: `value: string, fieldElement: HTMLElement, rootElement: HTMLElement`.                |
-| onTypingStart          | `function` | `NOOP`             | Triggered when the user starts typing. Arguments: `value: string, fieldElement: HTMLElement, rootElement: HTMLElement`.                 |
-| onTypingEnd            | `function` | `NOOP`             | Triggered when the user stops typing. Arguments: `value: string, fieldElement: HTMLElement, rootElement: HTMLElement`.                  |
-| onBeforeValidate       | `function` | `NOOP`             | Triggered before field validation. Arguments: `fieldElement: HTMLElement, rootElement: HTMLElement`.                                    |
-| onAfterValidate        | `function` | `NOOP`             | Triggered after field validation. Arguments: `validationResult: ValidationResult, fieldElement: HTMLElement, rootElement: HTMLElement`. |
-| onValidationError      | `function` | `NOOP`             | Triggered when an error occurs during validation. Arguments: `error: Error, fieldElement: HTMLElement, rootElement: HTMLElement`.       |
+| Option                 | Type       | Default            | Description                                                                                                                                       |
+|------------------------|------------|--------------------|---------------------------------------------------------------------------------------------------------------------------------------------------|
+| invalidMessages        | `object`   | `{}`               | Messages for invalid values for each validator. For example: `{isEmail: 'Invalid Email'}`.                                                        |
+| defaultInvalidMessage  | `string`   | `'Invalid value.'` | A default message for invalid values if no specific message is provided in `invalidMessages`.                                                     |
+| trimEnabled            | `boolean`  | `true`             | Specifies whether to trim the input value during validation.                                                                                      |
+| typingDelay            | `number`   | 1000               | The delay (in milliseconds) to consider a user as "typing" when the time between keystrokes is less than this value.                              |
+| validateOnChange       | `boolean`  | `false`            | Specifies whether to validate the field when its value changes.                                                                                   |
+| validateOnType         | `boolean`  | `false`            | Specifies whether to validate the field during typing.                                                                                            |
+| validatorParams        | `object`   | `{}`               | Parameters for [validator](https://www.npmjs.com/package/validator). For example: `{isEmail: {allow_utf8_local_part: false}}`.                    |
+| validationCacheEnabled | `boolean`  | `true`             | Specifies whether to cache the validation result until the value changes.                                                                         |
+| onChange               | `function` | `NOOP`             | Triggered when the field value changes. Passed as arguments: `value: string, fieldElement: HTMLElement, rootElement: HTMLElement`.                |
+| onTypingStart          | `function` | `NOOP`             | Triggered when the user starts typing. Passed as arguments: `value: string, fieldElement: HTMLElement, rootElement: HTMLElement`.                 |
+| onTypingEnd            | `function` | `NOOP`             | Triggered when the user stops typing. Passed as arguments: `value: string, fieldElement: HTMLElement, rootElement: HTMLElement`.                  |
+| onBeforeValidate       | `function` | `NOOP`             | Triggered before field validation. Passed as arguments: `fieldElement: HTMLElement, rootElement: HTMLElement`.                                    |
+| onAfterValidate        | `function` | `NOOP`             | Triggered after field validation. Passed as arguments: `validationResult: ValidationResult, fieldElement: HTMLElement, rootElement: HTMLElement`. |
+| onValidationError      | `function` | `NOOP`             | Triggered when an error occurs during validation. Passed as arguments: `error: Error, fieldElement: HTMLElement, rootElement: HTMLElement`.       |
 
 ### Forms
 
 #### `Form` class
 
-| Method                                                                                            | Description                                                                                                                                                                                                                                                              |
-|---------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| constructor(formSelector: `string`, fields: `array`, submit: `function`, options?: `object` = {}) | -`formSelector`: A selector to find the form element.<br/> -`fields`: An array of `Field` objects.<br/> - `submit`: A submit function (accepts a `FormData` object and must return a `SubmissionResult` object),<br/> - `options`: See the [Form options](#form-options) |
-| listen(): `void`                                                                                  | Executes the `listen` method for all fields specified in the `Form` constructor and starts listening for the form submission event. This method must be called.                                                                                                          |
+| Method                                                                                            | Description                                                                                                                                                                                                                                                                                             |
+|---------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| constructor(formSelector: `string`, fields: `array`, submit: `function`, options?: `object` = {}) | -`formSelector`: A selector to find the form element.<br/> -`fields`: An array of `Field` objects.<br/> - `submit`: A submit function, (`{ data: object, formData: FormData }` is passed as argument, must return a `SubmissionResult` object),<br/> - `options`: See the [Form options](#form-options) |
+| listen(): `void`                                                                                  | Executes the `listen` method for all fields specified in the `Form` constructor and starts listening for the form submission event. This method must be called.                                                                                                                                         |
 
 You must specify a CSS class for the form element and use it when specifying the `formSelector`.
 
@@ -175,19 +177,19 @@ The `Form` class supports all [Field options](#field-options) and applies them t
 
 Additionally, the `Form` class supports the following options:
 
-| Option                 | Type       | Default | Description                                                                                                                                                                                              |
-|------------------------|------------|---------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| onBeforeValidate       | `function` | `NOOP`  | Triggered before form validation. Argument: `formElement: HTMLElement`.                                                                                                                                  |
-| validate               | `function` | `NOOP`  | An additional custom validation function (must return a `ValidationResult` object).  Argument: `formData: FormData`. This is executed after field validation when all fields are valid. Can be promised. |
-| onAfterValidate        | `function` | `NOOP`  | Triggered after form validation. Arguments: `validationResults: ValidationReslut[], formElement: HTMLElement`. `validationResults` contains the results for each field and the form itself.              |
-| onValidationError      | `function` | `NOOP`  | Triggered when an error occurs during validation. Arguments: `error: Error, formElement: HTMLElement`.                                                                                                   |
-| onBeforeSubmit         | `function` | `NOOP`  | Triggered before form submission. Arguments: `formData: FormData, formElement: HTMLElement`.                                                                                                             |
-| onAfterSubmit          | `function` | `NOOP`  | Triggered after form submission.  Arguments: `submissionResult: SubmissionResult, formElement: HTMLElement`.                                                                                             |
-| onAfterPositiveSubmit  | `function` | `NOOP`  | Triggered after positive submission when the `submit` function returns a `SubmissionResult` object with a `true` value. Arguments: `submissionResultData: object, formElement: HTMLElement`.             |
-| onAfterNegativeSubmit  | `function` | `NOOP`  | Triggered after negative submission when the `submit` function returns a `SubmissionResult` object with a `false` value. Arguments: `submissionResultData: object, formElement: HTMLElement`.            |
-| onBeforeValidateField  | `function` | `NOOP`  | Triggered before validating any field specified in the `Form` constructor. Arguments: `fieldElement: HTMLElement, rootElement: HTMLElement`.                                                             |
-| onAfterValidateField   | `function` | `NOOP`  | Triggered after validating any field specified in the `Form` constructor. Arguments: `validationResult: ValidationResult, fieldElement: HTMLElement, rootElement: HTMLElement`.                          |
-| onFieldValidationError | `function` | `NOOP`  | Triggered when an error occurs during the validation of any field specified in the `Form` constructor. Arguments: `error: Error, fieldElement: HTMLElement, rootElement: HTMLElement`.                   |                                                                                                                                                                                                          |
+| Option                 | Type       | Default | Description                                                                                                                                                                                                                               |
+|------------------------|------------|---------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| onBeforeValidate       | `function` | `NOOP`  | Triggered before form validation. Passed as argument: `formElement: HTMLElement`.                                                                                                                                                         |
+| validate               | `function` | `NOOP`  | An additional custom validation function, which must return a `ValidationResult` object.  Passed as argument: `{ data: object, formData: FormData }`. This is executed after field validation when all fields are valid. Can be promised. |
+| onAfterValidate        | `function` | `NOOP`  | Triggered after form validation. Passed as arguments: `validationResults: ValidationReslut[], formElement: HTMLElement`. `validationResults` contains the results for each field and the form itself.                                     |
+| onValidationError      | `function` | `NOOP`  | Triggered when an error occurs during validation. Passed as arguments: `error: Error, formElement: HTMLElement`.                                                                                                                          |
+| onBeforeSubmit         | `function` | `NOOP`  | Triggered before form submission. Passed as arguments: `{ data: object, formData: FormData }, formElement: HTMLElement`.                                                                                                                  |
+| onAfterSubmit          | `function` | `NOOP`  | Triggered after form submission.  Passed as arguments: `submissionResult: SubmissionResult, formElement: HTMLElement`.                                                                                                                    |
+| onAfterPositiveSubmit  | `function` | `NOOP`  | Triggered after positive submission when the `submit` function returns a `SubmissionResult` object with a `true` value. Passed as arguments: `submissionResultData: object, formElement: HTMLElement`.                                    |
+| onAfterNegativeSubmit  | `function` | `NOOP`  | Triggered after negative submission when the `submit` function returns a `SubmissionResult` object with a `false` value. Passed as arguments: `submissionResultData: object, formElement: HTMLElement`.                                   |
+| onBeforeValidateField  | `function` | `NOOP`  | Triggered before validating any field specified in the `Form` constructor. Passed as arguments: `fieldElement: HTMLElement, rootElement: HTMLElement`.                                                                                    |
+| onAfterValidateField   | `function` | `NOOP`  | Triggered after validating any field specified in the `Form` constructor. Passed as arguments: `validationResult: ValidationResult, fieldElement: HTMLElement, rootElement: HTMLElement`.                                                 |
+| onFieldValidationError | `function` | `NOOP`  | Triggered when an error occurs during the validation of any field specified in the `Form` constructor. Passed as arguments: `error: Error, fieldElement: HTMLElement, rootElement: HTMLElement`.                                          |                                                                                                                                                                                                          |
 
 #### Important
 

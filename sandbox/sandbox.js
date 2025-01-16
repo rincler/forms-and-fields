@@ -45,14 +45,14 @@ const form = new Form(
             },
         }),
         new Field('.js-sex', '.js-form', ['required']),
-        new Field('.js-agree', '.js-form', ['required']),
+        new Field('.js-agree', '.js-form', []),
         new Field('.js-city', '.js-form', ['required']),
         new Field('.js-movie', '.js-form', ['required']),
         new Field('.js-file', '.js-form', ['required']),
     ],
-    (formData) => {
+    ({ data }) => {
         // eslint-disable-next-line no-console
-        console.log(Object.fromEntries(formData));
+        console.log(data);
         // here can be AJAX-request
         return new SubmissionResult(true);
     },
@@ -150,10 +150,10 @@ registrationForm.listen();
 
 const emailListForm = new Form(
     '.js-email-list-form',
-    [
-        new Field('.js-email', '.js-email-list-form', ['required', 'isEmail']),
-    ],
-    () => {
+    [new Field('.js-email', '.js-email-list-form', ['required', 'isEmail'])],
+    ({ data }) => {
+        // eslint-disable-next-line no-console
+        console.log(data);
         return new SubmissionResult(true);
     },
 );

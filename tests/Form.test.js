@@ -425,7 +425,7 @@ describe('validation callback options', () => {
 describe('submit callback options', () => {
     test('"onBeforeSubmit" is called', async () => {
         const onBeforeSubmit = jest.fn();
-        const form = new Form('.js-form', [], submit, {
+        const form = new Form('.js-form', [new Field('.js-input', '.js-form', [])], submit, {
             onBeforeSubmit,
         });
 
@@ -435,7 +435,12 @@ describe('submit callback options', () => {
 
         await waitFor(() => {
             expect(onBeforeSubmit).toHaveBeenCalledTimes(1);
-            expect(onBeforeSubmit.mock.calls[0][0]).toBeInstanceOf(FormData);
+            expect(onBeforeSubmit.mock.calls[0][0]).toMatchObject({
+                data: {
+                    'input-name': '',
+                },
+                formData: new FormData(formElement),
+            });
             expect(onBeforeSubmit.mock.calls[0][1]).toBe(formElement);
         });
     });
@@ -678,13 +683,25 @@ describe('validation', () => {
 
     test('"validate" is called when no fields', async () => {
         const validate = jest.fn(() => ValidationResult.valid());
-        const form = new Form('.js-form', [], submit, {
-            validate,
-        });
+        const form = new Form(
+            '.js-form',
+            [new Field('.js-input', '.js-form', []), new Field('.js-checkbox', '.js-form', [])],
+            submit,
+            {
+                validate,
+            },
+        );
 
         await form.validate();
 
         expect(validate).toHaveBeenCalledTimes(1);
+        expect(validate.mock.calls[0][0]).toMatchObject({
+            data: {
+                'checkbox-name': false,
+                'input-name': '',
+            },
+            formData: new FormData(formElement),
+        });
     });
 });
 
@@ -707,11 +724,15 @@ describe('submission', () => {
 
         fireEvent.submit(formElement);
 
-        const formData = new FormData(formElement);
-
         await waitFor(() => {
             expect(submitMock).toHaveBeenCalledTimes(1);
-            expect(submitMock.mock.calls[0][0]).toStrictEqual(formData);
+            expect(submitMock.mock.calls[0][0]).toMatchObject({
+                data: {
+                    'checkbox-name': true,
+                    'input-name': 'foo',
+                },
+                formData: new FormData(formElement),
+            });
         });
     });
 

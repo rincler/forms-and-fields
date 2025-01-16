@@ -199,7 +199,7 @@ export default class Form {
         try {
             const formValidationResult =
                 this.hasOption('validate') && ValidationResult.areValid(validationResults)
-                    ? await this.getOption('validate')(new FormData(this.formElement))
+                    ? await this.getOption('validate')(this.getData())
                     : ValidationResult.make(ValidationResult.areValid(validationResults));
             validationResults.push(formValidationResult);
         } catch (error) {
@@ -223,16 +223,16 @@ export default class Form {
      * @returns {Promise<void>}
      */
     async runSubmitProcess() {
-        const formData = new FormData(this.formElement);
+        const data = this.getData();
 
-        this.getOption('onBeforeSubmit')(formData, this.formElement);
+        this.getOption('onBeforeSubmit')(data, this.formElement);
 
         this.setCssClass(FORM_SUBMITTING_CSS_CLASS);
 
         let submissionResult;
 
         try {
-            submissionResult = await this.submit(formData);
+            submissionResult = await this.submit(data);
         } catch (error) {
             this.setCssClass(FORM_VALID_CSS_CLASS);
             this.getOption('onSubmissionError')(error, this.formElement);
@@ -248,6 +248,40 @@ export default class Form {
             this.setCssClass(FORM_NEGATIVE_SUBMIT_CSS_CLASS);
             this.getOption('onAfterNegativeSubmit')(submissionResult.getData(), this.formElement);
         }
+    }
+
+    getData() {
+        const data = {};
+
+        const checkboxElements = this.formElement.querySelectorAll('[type="checkbox"]');
+        const checkboxNames = [];
+        // eslint-disable-next-line no-restricted-syntax
+        for (const checkboxElement of checkboxElements) {
+            const name = checkboxElement.name;
+            checkboxNames.push(name);
+            const value = checkboxElement.checked;
+            if (name in data) {
+                data[name] = [].concat(data[name], value);
+            } else {
+                data[name] = value;
+            }
+        }
+
+        const formData = new FormData(this.formElement);
+
+        // eslint-disable-next-line no-restricted-syntax
+        for (const [name, value] of formData.entries()) {
+            if (checkboxNames.includes(name)) {
+                continue;
+            }
+            if (name in data) {
+                data[name] = [].concat(data[name], value);
+            } else {
+                data[name] = value;
+            }
+        }
+
+        return { data, formData };
     }
 
     /**

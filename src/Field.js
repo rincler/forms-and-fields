@@ -238,7 +238,7 @@ export default class Field {
      */
     addEventListenerDelegatedToRootElement(type, listener, selector) {
         this.rootElement.addEventListener(type, (event) => {
-            const { target } = event;
+            const target = event.target;
 
             if (target.classList.contains(selector.substring(1))) {
                 let field = this;
