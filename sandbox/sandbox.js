@@ -150,7 +150,13 @@ registrationForm.listen();
 
 const emailListForm = new Form(
     '.js-email-list-form',
-    [new Field('.js-email', '.js-email-list-form', ['required', 'isEmail'])],
+    [new Field('.js-email', '.js-email-list-form', ['required', 'isEmail', () => {
+        return new Promise((resolve) => {
+            setTimeout(() => {
+                resolve(ValidationResult.valid());
+            }, 2000)
+        })
+    }])],
     ({ data }) => {
         // eslint-disable-next-line no-console
         console.log(data);

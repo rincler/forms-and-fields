@@ -502,15 +502,17 @@ export default class Field {
      * @private
      */
     getVirtualFieldForElement(element) {
-        if (element.dataset.fieldId && virtualFieldsCache[element.dataset.fieldId]) {
+        if (!element.dataset.fieldId) {
+            // eslint-disable-next-line no-param-reassign
+            element.dataset.fieldId = Math.random().toString(36).substring(2);
+        }
+
+        if (virtualFieldsCache[element.dataset.fieldId]) {
             return virtualFieldsCache[element.dataset.fieldId];
         }
 
-        const fieldId = Math.random().toString(36).substring(2);
-        // eslint-disable-next-line no-param-reassign
-        element.dataset.fieldId = fieldId;
         const field = new Field(
-            `${this.fieldSelector}[data-field-id="${fieldId}"]`,
+            `${this.fieldSelector}[data-field-id="${element.dataset.fieldId}"]`,
             this.rootSelector,
             this.validators,
             this.options,
