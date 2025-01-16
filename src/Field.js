@@ -176,6 +176,10 @@ export default class Field {
             fieldElement.value = fieldElement.value.trim();
         }
 
+        if (this.isText() || this.isTextarea()) {
+            return fieldElement.value;
+        }
+
         if (this.isCheckbox()) {
             return fieldElement.checked;
         }
@@ -470,6 +474,10 @@ export default class Field {
      * @returns {boolean}
      */
     isEmpty(value) {
+        if (this.isText() || this.isTextarea()) {
+            return value === '';
+        }
+
         if (this.isCheckbox()) {
             return value === false;
         }
