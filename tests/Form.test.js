@@ -923,4 +923,48 @@ describe('special CSS classes', () => {
             expect(formElement.classList.contains('ff-form-valid')).toBe(true);
         });
     });
+
+    test('custom "setCssClass"', async () => {
+        const setCssClass = jest.fn();
+        const form = new Form(
+            '.js-form',
+            [new Field('.js-input', '.js-form', ['required'])],
+            submit,
+            {
+                setCssClass,
+            },
+        );
+
+        input.value = 'foo';
+
+        await form.validate();
+
+        expect(setCssClass).toHaveBeenCalledTimes(2);
+        expect(setCssClass.mock.calls[0][0]).toBe(formElement);
+        expect(setCssClass.mock.calls[0][1]).toBe('ff-form-validating');
+        expect(setCssClass.mock.calls[1][0]).toBe(formElement);
+        expect(setCssClass.mock.calls[1][1]).toBe('ff-form-valid');
+    });
+
+    test('custom field "setCssClass"', async () => {
+        const setCssClass = jest.fn();
+        const form = new Form(
+            '.js-form',
+            [new Field('.js-input', '.js-form', ['required'])],
+            submit,
+            {
+                setFieldCssClass: setCssClass,
+            },
+        );
+
+        input.value = 'foo';
+
+        await form.validate();
+
+        expect(setCssClass).toHaveBeenCalledTimes(2);
+        expect(setCssClass.mock.calls[0][0]).toBe(input);
+        expect(setCssClass.mock.calls[0][1]).toBe('ff-field-validating');
+        expect(setCssClass.mock.calls[1][0]).toBe(input);
+        expect(setCssClass.mock.calls[1][1]).toBe('ff-field-valid');
+    });
 });

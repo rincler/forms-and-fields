@@ -143,22 +143,23 @@ An array of validators. Each validator can be:
 
 #### `Field` options
 
-| Option                 | Type       | Default            | Description                                                                                                                                       |
-|------------------------|------------|--------------------|---------------------------------------------------------------------------------------------------------------------------------------------------|
-| invalidMessages        | `object`   | `{}`               | Messages for invalid values for each validator. For example: `{isEmail: 'Invalid Email'}`.                                                        |
-| defaultInvalidMessage  | `string`   | `'Invalid value.'` | A default message for invalid values if no specific message is provided in `invalidMessages`.                                                     |
-| trimEnabled            | `boolean`  | `true`             | Specifies whether to trim the input value during validation.                                                                                      |
-| typingDelay            | `number`   | 1000               | The delay (in milliseconds) to consider a user as "typing" when the time between keystrokes is less than this value.                              |
-| validateOnChange       | `boolean`  | `false`            | Specifies whether to validate the field when its value changes.                                                                                   |
-| validateOnType         | `boolean`  | `false`            | Specifies whether to validate the field during typing.                                                                                            |
-| validatorParams        | `object`   | `{}`               | Parameters for [validator](https://www.npmjs.com/package/validator). For example: `{isEmail: {allow_utf8_local_part: false}}`.                    |
-| validationCacheEnabled | `boolean`  | `true`             | Specifies whether to cache the validation result until the value changes.                                                                         |
-| onChange               | `function` | `NOOP`             | Triggered when the field value changes. Passed as arguments: `value: string, fieldElement: HTMLElement, rootElement: HTMLElement`.                |
-| onTypingStart          | `function` | `NOOP`             | Triggered when the user starts typing. Passed as arguments: `value: string, fieldElement: HTMLElement, rootElement: HTMLElement`.                 |
-| onTypingEnd            | `function` | `NOOP`             | Triggered when the user stops typing. Passed as arguments: `value: string, fieldElement: HTMLElement, rootElement: HTMLElement`.                  |
-| onBeforeValidate       | `function` | `NOOP`             | Triggered before field validation. Passed as arguments: `fieldElement: HTMLElement, rootElement: HTMLElement`.                                    |
-| onAfterValidate        | `function` | `NOOP`             | Triggered after field validation. Passed as arguments: `validationResult: ValidationResult, fieldElement: HTMLElement, rootElement: HTMLElement`. |
-| onValidationError      | `function` | `NOOP`             | Triggered when an error occurs during validation. Passed as arguments: `error: Error, fieldElement: HTMLElement, rootElement: HTMLElement`.       |
+| Option                 | Type       | Default            | Description                                                                                                                                                                         |
+|------------------------|------------|--------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| invalidMessages        | `object`   | `{}`               | Messages for invalid values for each validator. For example: `{isEmail: 'Invalid Email'}`.                                                                                          |
+| defaultInvalidMessage  | `string`   | `'Invalid value.'` | A default message for invalid values if no specific message is provided in `invalidMessages`.                                                                                       |
+| trimEnabled            | `boolean`  | `true`             | Specifies whether to trim the input value during validation.                                                                                                                        |
+| typingDelay            | `number`   | 1000               | The delay (in milliseconds) to consider a user as "typing" when the time between keystrokes is less than this value.                                                                |
+| validateOnChange       | `boolean`  | `false`            | Specifies whether to validate the field when its value changes.                                                                                                                     |
+| validateOnType         | `boolean`  | `false`            | Specifies whether to validate the field during typing.                                                                                                                              |
+| validatorParams        | `object`   | `{}`               | Parameters for [validator](https://www.npmjs.com/package/validator). For example: `{isEmail: {allow_utf8_local_part: false}}`.                                                      |
+| validationCacheEnabled | `boolean`  | `true`             | Specifies whether to cache the validation result until the value changes.                                                                                                           |
+| onChange               | `function` | `NOOP`             | Triggered when the field value changes. Passed as arguments: `value: string, fieldElement: HTMLElement, rootElement: HTMLElement`.                                                  |
+| onTypingStart          | `function` | `NOOP`             | Triggered when the user starts typing. Passed as arguments: `value: string, fieldElement: HTMLElement, rootElement: HTMLElement`.                                                   |
+| onTypingEnd            | `function` | `NOOP`             | Triggered when the user stops typing. Passed as arguments: `value: string, fieldElement: HTMLElement, rootElement: HTMLElement`.                                                    |
+| onBeforeValidate       | `function` | `NOOP`             | Triggered before field validation. Passed as arguments: `fieldElement: HTMLElement, rootElement: HTMLElement`.                                                                      |
+| onAfterValidate        | `function` | `NOOP`             | Triggered after field validation. Passed as arguments: `validationResult: ValidationResult, fieldElement: HTMLElement, rootElement: HTMLElement`.                                   |
+| onValidationError      | `function` | `NOOP`             | Triggered when an error occurs during validation. Passed as arguments: `error: Error, fieldElement: HTMLElement, rootElement: HTMLElement`.                                         |
+| setCssClass            | `function` | `NOOP`             | Triggered when a CSS class of the field needs to be changed. This cancels the [default behavior](#css-classes). Passed as arguments: `fieldElement: HTMLElement, cssClass: string`. |
 
 ### Forms
 
@@ -187,9 +188,11 @@ Additionally, the `Form` class supports the following options:
 | onAfterSubmit          | `function` | `NOOP`  | Triggered after form submission.  Passed as arguments: `submissionResult: SubmissionResult, formElement: HTMLElement`.                                                                                                                    |
 | onAfterPositiveSubmit  | `function` | `NOOP`  | Triggered after positive submission when the `submit` function returns a `SubmissionResult` object with a `true` value. Passed as arguments: `submissionResultData: object, formElement: HTMLElement`.                                    |
 | onAfterNegativeSubmit  | `function` | `NOOP`  | Triggered after negative submission when the `submit` function returns a `SubmissionResult` object with a `false` value. Passed as arguments: `submissionResultData: object, formElement: HTMLElement`.                                   |
+| setCssClass            | `function` | `NOOP`  | Triggered when a CSS class of the form needs to be changed. This cancels the [default behavior](#css-classes). Passed as arguments: `formElement: HTMLElement, cssClass: string`.                                                         |
 | onBeforeValidateField  | `function` | `NOOP`  | Triggered before validating any field specified in the `Form` constructor. Passed as arguments: `fieldElement: HTMLElement, rootElement: HTMLElement`.                                                                                    |
 | onAfterValidateField   | `function` | `NOOP`  | Triggered after validating any field specified in the `Form` constructor. Passed as arguments: `validationResult: ValidationResult, fieldElement: HTMLElement, rootElement: HTMLElement`.                                                 |
 | onFieldValidationError | `function` | `NOOP`  | Triggered when an error occurs during the validation of any field specified in the `Form` constructor. Passed as arguments: `error: Error, fieldElement: HTMLElement, rootElement: HTMLElement`.                                          |                                                                                                                                                                                                          |
+| setFieldCssClass       | `function` | `NOOP`  | Triggered when a CSS class of any field specified in the `Form` constructor needs to be changed. This cancels the [default behavior](#css-classes). Passed as arguments: `fieldElement: HTMLElement, cssClass: string`.                   |                                                                                                                                                                                                          |
 
 #### Important
 
@@ -233,6 +236,8 @@ Special CSS classes are dynamically added to form and field elements during vali
 
 You can wrap any field element in a container element with the `js-ff-field-container` CSS class.
 The special classes will then be applied to the container instead of the field element itself. This is particularly useful for checkboxes and radio buttons.
+
+Also, you can use a custom `setCssClass` function by passing it to the `Field` or `Form` options. In this case, special CSS classes will not be added automatically.
 
 ## License
 

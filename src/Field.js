@@ -24,6 +24,7 @@ const DEFAULT_OPTIONS = {
     onBeforeValidate: NOOP,
     onAfterValidate: NOOP,
     onValidationError: NOOP,
+    setCssClass: NOOP,
 };
 
 const virtualFieldsCache = {};
@@ -523,6 +524,11 @@ export default class Field {
     }
 
     setCssClass(cssClass) {
+        if (this.hasOption('setCssClass')) {
+            this.getOption('setCssClass')(this.getFieldElement(), cssClass);
+            return;
+        }
+
         const element = this.getFieldContainerElement() || this.getFieldElement();
         element.classList.remove(
             FIELD_VALIDATING_CSS_CLASS,

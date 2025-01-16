@@ -961,4 +961,19 @@ describe('special CSS classes', () => {
         expect(input.classList.contains('ff-field-invalid')).toBe(false);
         expect(input.classList.contains('ff-field-valid')).toBe(false);
     });
+
+    test('custom "setCssClass"', async () => {
+        const setCssClass = jest.fn();
+        const field = new Field('.js-input', '.js-container', ['required'], {
+            setCssClass,
+        });
+        input.value = 'foo';
+        await field.validate();
+
+        expect(setCssClass).toHaveBeenCalledTimes(2);
+        expect(setCssClass.mock.calls[0][0]).toBe(input);
+        expect(setCssClass.mock.calls[0][1]).toBe('ff-field-validating');
+        expect(setCssClass.mock.calls[1][0]).toBe(input);
+        expect(setCssClass.mock.calls[1][1]).toBe('ff-field-valid');
+    });
 });
