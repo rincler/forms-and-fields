@@ -435,12 +435,7 @@ describe('submit callback options', () => {
 
         await waitFor(() => {
             expect(onBeforeSubmit).toHaveBeenCalledTimes(1);
-            expect(onBeforeSubmit.mock.calls[0][0]).toMatchObject({
-                data: {
-                    'input-name': '',
-                },
-                formData: new FormData(formElement),
-            });
+            expect(onBeforeSubmit.mock.calls[0][0]).toStrictEqual(new FormData(formElement));
             expect(onBeforeSubmit.mock.calls[0][1]).toBe(formElement);
         });
     });
@@ -695,13 +690,7 @@ describe('validation', () => {
         await form.validate();
 
         expect(validate).toHaveBeenCalledTimes(1);
-        expect(validate.mock.calls[0][0]).toMatchObject({
-            data: {
-                'checkbox-name': false,
-                'input-name': '',
-            },
-            formData: new FormData(formElement),
-        });
+        expect(validate.mock.calls[0][0]).toStrictEqual(new FormData(formElement));
     });
 });
 
@@ -726,13 +715,7 @@ describe('submission', () => {
 
         await waitFor(() => {
             expect(submitMock).toHaveBeenCalledTimes(1);
-            expect(submitMock.mock.calls[0][0]).toMatchObject({
-                data: {
-                    'checkbox-name': true,
-                    'input-name': 'foo',
-                },
-                formData: new FormData(formElement),
-            });
+            expect(submitMock.mock.calls[0][0]).toStrictEqual(new FormData(formElement));
         });
     });
 

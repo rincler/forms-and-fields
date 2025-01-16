@@ -45,14 +45,14 @@ const form = new Form(
             },
         }),
         new Field('.js-sex', '.js-form', ['required']),
-        new Field('.js-agree', '.js-form', []),
+        new Field('.js-agree', '.js-form', ['required']),
         new Field('.js-city', '.js-form', ['required']),
         new Field('.js-movie', '.js-form', ['required']),
         new Field('.js-file', '.js-form', ['required']),
     ],
-    ({ data }) => {
+    (formData) => {
         // eslint-disable-next-line no-console
-        console.log(data);
+        console.log(formData);
         // here can be AJAX-request
         return new SubmissionResult(true);
     },
@@ -157,9 +157,9 @@ const emailListForm = new Form(
             }, 2000)
         })
     }])],
-    ({ data }) => {
+    (formData) => {
         // eslint-disable-next-line no-console
-        console.log(data);
+        console.log(formData);
         return new SubmissionResult(true);
     },
 );
@@ -203,6 +203,8 @@ const uploadForm = new Form(
         ),
     ],
     async () => {
+        // eslint-disable-next-line no-console
+        console.log(formData);
         return new SubmissionResult(true);
     },
 );

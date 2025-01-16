@@ -255,37 +255,7 @@ export default class Form {
     }
 
     getData() {
-        const data = {};
-
-        const checkboxElements = this.formElement.querySelectorAll('[type="checkbox"]');
-        const checkboxNames = [];
-        // eslint-disable-next-line no-restricted-syntax
-        for (const checkboxElement of checkboxElements) {
-            const name = checkboxElement.name;
-            checkboxNames.push(name);
-            const value = checkboxElement.checked;
-            if (name in data) {
-                data[name] = [].concat(data[name], value);
-            } else {
-                data[name] = value;
-            }
-        }
-
-        const formData = new FormData(this.formElement);
-
-        // eslint-disable-next-line no-restricted-syntax
-        for (const [name, value] of formData.entries()) {
-            if (checkboxNames.includes(name)) {
-                continue;
-            }
-            if (name in data) {
-                data[name] = [].concat(data[name], value);
-            } else {
-                data[name] = value;
-            }
-        }
-
-        return { data, formData };
+        return new FormData(this.formElement);
     }
 
     /**
