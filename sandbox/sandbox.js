@@ -19,8 +19,8 @@ const setFieldError = (fieldElement, error) => {
     );
 }
 
-const clearFieldErrors = (fieldElement) => {
-    fieldElement.parentNode.querySelectorAll('.error').forEach(e => e.remove());
+const clearFieldError = (fieldElement) => {
+    fieldElement.parentNode.querySelector('.error')?.remove();
 };
 
 const setFormError = (formElement, error) => {
@@ -31,8 +31,8 @@ const setFormError = (formElement, error) => {
     );
 }
 
-const clearFormErrors = (formElement) => {
-    formElement.querySelectorAll('.form-error').forEach(e => e.remove());
+const clearFormError = (formElement) => {
+    formElement.querySelector('.form-error')?.remove();
 };
 
 const form = new Form(
@@ -72,10 +72,12 @@ const domainField = new Field('.js-domain', '.js-container', ['required', 'isFQD
     },
     validateOnType: true,
     onTypingStart: (_, fieldElement) => {
-        clearFieldErrors(fieldElement);
+        clearFieldError(fieldElement);
+    },
+    onBeforeValidate: (fieldElement) => {
+        clearFieldError(fieldElement);
     },
     onAfterValidate: (validationResult, fieldElement) => {
-        clearFieldErrors(fieldElement);
         if (!validationResult.isValid()) {
             setFieldError(fieldElement, validationResult.getMessage());
         }
@@ -191,10 +193,9 @@ const uploadForm = new Form(
             ],
             {
                 onChange: (_, fieldElement) => {
-                    clearFieldErrors(fieldElement);
+                    clearFieldError(fieldElement);
                 },
                 onAfterValidate: (validationResult, fieldElement) => {
-                    clearFieldErrors(fieldElement);
                     if (!validationResult.isValid()) {
                         setFieldError(fieldElement, validationResult.getMessage());
                     }
@@ -216,12 +217,14 @@ const addressForm = new Form('.js-address-form', [
         await fetchOk(`/check-zip-code?zip-code=${encodeURIComponent(value)}`);
         return ValidationResult.valid();
     }], {
-        validateOnChange: true,
+        validateOnType: true,
         onTypingStart: (_, fieldElement) => {
-            clearFieldErrors(fieldElement);
+            clearFieldError(fieldElement);
+        },
+        onBeforeValidate: (fieldElement) => {
+            clearFieldError(fieldElement);
         },
         onValidationError: (error, fieldElement) => {
-            clearFieldErrors(fieldElement);
             setFieldError(fieldElement, error)
         },
     }),
@@ -241,14 +244,9 @@ const addressForm = new Form('.js-address-form', [
     return new SubmissionResult(result.isSuccess);
 }, {
     onBeforeValidate: (formElement) => {
-        clearFormErrors(formElement);
-    },
-    onValidationError: (error, formElement) => {
-        clearFormErrors(formElement);
-        setFormError(formElement, error);
+        clearFormError(formElement);
     },
     onSubmissionError: (error, formElement) => {
-        clearFormErrors(formElement);
         setFormError(formElement, error);
     }
 });

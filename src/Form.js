@@ -1,4 +1,5 @@
 import ValidationResult from './ValidationResult';
+import { ignoreRejects, startAction, finishAction } from './Reject';
 
 const FORM_VALIDATING_CSS_CLASS = 'ff-form-validating';
 const FORM_VALID_CSS_CLASS = 'ff-form-valid';
@@ -39,7 +40,6 @@ export default class Form {
             throw new Error(`Form element with the "${formSelector}" selector not found.`);
         }
 
-        this.formSelector = formSelector;
         this.submit = submit;
         this.fields = fields;
 
@@ -170,15 +170,17 @@ export default class Form {
     async onSubmitForm(e) {
         e.preventDefault();
 
-        const validationResults = await this.validate();
+        await ignoreRejects(async () => {
+            const validationResults = await this.validate();
 
-        const isValid = ValidationResult.areValid(validationResults);
+            const isValid = ValidationResult.areValid(validationResults);
 
-        if (!isValid) {
-            return;
-        }
+            if (!isValid) {
+                return;
+            }
 
-        await this.runSubmitProcess();
+            await this.runSubmitProcess();
+        });
     }
 
     /**
@@ -198,25 +200,27 @@ export default class Form {
 
         this.setCssClass(FORM_VALIDATING_CSS_CLASS);
 
-        const validationResults = await Promise.all(
-            this.getAllFields().map((field) => field.validate()),
-        ).catch((error) => {
-            this.setCssClass('');
-            this.getOption('onValidationError')(error, this.formElement);
-            throw error;
-        });
+        const actionId = startAction(this);
+
+        let validationResults = [];
 
         try {
+            validationResults = await Promise.all(
+                this.getAllFields().map((field) => field.validate()),
+            );
             const formValidationResult =
                 this.hasOption('validate') && ValidationResult.areValid(validationResults)
                     ? await this.getOption('validate')(this.getData())
                     : ValidationResult.make(ValidationResult.areValid(validationResults));
             validationResults.push(formValidationResult);
         } catch (error) {
+            finishAction(this, actionId);
             this.setCssClass('');
             this.getOption('onValidationError')(error, this.formElement);
             throw error;
         }
+
+        finishAction(this, actionId);
 
         const isValid = ValidationResult.areValid(validationResults);
 
@@ -237,6 +241,8 @@ export default class Form {
 
         this.getOption('onBeforeSubmit')(data, this.formElement);
 
+        const actionId = startAction(this);
+
         this.setCssClass(FORM_SUBMITTING_CSS_CLASS);
 
         let submissionResult;
@@ -244,10 +250,13 @@ export default class Form {
         try {
             submissionResult = await this.submit(data);
         } catch (error) {
+            finishAction(this, actionId);
             this.setCssClass(FORM_VALID_CSS_CLASS);
             this.getOption('onSubmissionError')(error, this.formElement);
             throw error;
         }
+
+        finishAction(this, actionId);
 
         this.getOption('onAfterSubmit')(submissionResult, this.formElement);
 

@@ -977,3 +977,70 @@ describe('special CSS classes', () => {
         expect(setCssClass.mock.calls[0][0]).toBe(formElement, '');
     });
 });
+
+describe('rejection', () => {
+    test('reject validation when new field validation starts', async () => {
+        const onAfterValidate = jest.fn();
+        const field = new Field('.js-input', '.js-form', [() => ValidationResult.valid()]);
+        const form = new Form('.js-form', [field], () => {}, {
+            onAfterValidate,
+        });
+
+        form.validate().catch(() => {});
+        form.validate().catch(() => {});
+        form.validate();
+
+        await waitFor(() => {
+            expect(onAfterValidate).toHaveBeenCalledTimes(1);
+        });
+    });
+
+    test('reject validation when new form validation starts', async () => {
+        const onAfterValidate = jest.fn();
+        const field = new Field('.js-input', '.js-form', []);
+        const form = new Form('.js-form', [field], () => {}, {
+            onAfterValidate,
+            validate: () => ValidationResult.valid(),
+        });
+
+        form.validate().catch(() => {});
+        form.validate().catch(() => {});
+        form.validate();
+
+        await waitFor(() => {
+            expect(onAfterValidate).toHaveBeenCalledTimes(1);
+        });
+    });
+
+    test('reject submission when new validation starts', async () => {
+        const onAfterValidate = jest.fn();
+        const onAfterSubmit = jest.fn();
+        const field = new Field('.js-input', '.js-form', [() => ValidationResult.valid()]);
+        const form = new Form('.js-form', [field], () => new SubmissionResult(true), {
+            onAfterValidate,
+            onAfterSubmit,
+        });
+
+        form.runSubmitProcess().catch(() => {});
+        form.validate();
+
+        await waitFor(() => {
+            expect(onAfterValidate).toHaveBeenCalledTimes(1);
+            expect(onAfterSubmit).toHaveBeenCalledTimes(0);
+        });
+    });
+
+    test('reject submission when new submission starts', async () => {
+        const onAfterSubmit = jest.fn();
+        const form = new Form('.js-form', [], () => new SubmissionResult(true), {
+            onAfterSubmit,
+        });
+
+        form.runSubmitProcess().catch(() => {});
+        form.runSubmitProcess();
+
+        await waitFor(() => {
+            expect(onAfterSubmit).toHaveBeenCalledTimes(1);
+        });
+    });
+});

@@ -1,5 +1,6 @@
 import validator from 'validator';
 import ValidationResult from './ValidationResult';
+import { ignoreRejects, startAction, finishAction } from './Reject';
 
 const FIELD_VALIDATING_CSS_CLASS = 'ff-field-validating';
 const FIELD_VALID_CSS_CLASS = 'ff-field-valid';
@@ -128,26 +129,35 @@ export default class Field {
 
         this.getOption('onBeforeValidate')(fieldElement, this.rootElement);
 
+        const actionId = startAction(this);
+
         this.setCssClass(FIELD_VALIDATING_CSS_CLASS);
 
         const value = this.getValue();
+
+        let validationResult;
 
         // eslint-disable-next-line no-restricted-syntax
         for (const validatorItem of this.validators) {
             const validatorFn = this.getValidatorFnByValidatorItem(validatorItem);
             try {
                 // eslint-disable-next-line no-await-in-loop
-                this.validationResult = await validatorFn(value);
+                validationResult = await validatorFn(value);
             } catch (error) {
+                finishAction(this, actionId);
                 this.setCssClass('');
                 this.getOption('onValidationError')(error, fieldElement, this.rootElement);
                 throw error;
             }
 
-            if (!this.validationResult.isValid()) {
+            if (!validationResult.isValid()) {
                 break;
             }
         }
+
+        finishAction(this, actionId);
+
+        this.validationResult = validationResult;
 
         if (!this.validationResult.isValid() && !this.validationResult.hasMessage()) {
             this.validationResult = ValidationResult.invalid(
@@ -313,7 +323,7 @@ export default class Field {
     /**
      * @private
      */
-    onChangeListener(fieldElement) {
+    async onChangeListener(fieldElement) {
         this.validationResult = null;
         this.setCssClass('');
 
@@ -325,14 +335,18 @@ export default class Field {
             this.getOption('onTypingEnd')(value, fieldElement, this.rootElement);
             this.getOption('onChange')(value, fieldElement, this.rootElement);
             if (this.getOption('validateOnType') || this.getOption('validateOnChange')) {
-                this.validate();
+                await ignoreRejects(async () => {
+                    await this.validate();
+                });
             }
             return;
         }
 
         this.getOption('onChange')(value, fieldElement, this.rootElement);
         if (this.getOption('validateOnChange')) {
-            this.validate();
+            await ignoreRejects(async () => {
+                await this.validate();
+            });
         }
     }
 
@@ -342,6 +356,12 @@ export default class Field {
     async onKeyUpListener(fieldElement) {
         this.validationResult = null;
         this.setCssClass('');
+        if (this.getOption('validateOnType')) {
+            // This fixes the next case:
+            // start typing -> result of the previous validation ->  finish typing -> validate
+            // It will ignore "result of the previous validation".
+            startAction(this);
+        }
 
         const value = this.getValue();
 
@@ -351,13 +371,15 @@ export default class Field {
             this.getOption('onTypingStart')(value, fieldElement, this.rootElement);
         }
 
-        this.typingDelayId = setTimeout(() => {
+        this.typingDelayId = setTimeout(async () => {
             this.typingDelayId = null;
 
             this.getOption('onTypingEnd')(value, fieldElement, this.rootElement);
 
             if (this.getOption('validateOnType')) {
-                this.validate();
+                await ignoreRejects(async () => {
+                    await this.validate();
+                });
             }
         }, this.getOption('typingDelay'));
     }

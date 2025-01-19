@@ -1009,3 +1009,20 @@ describe('special CSS classes', () => {
         expect(field.validationResult).toBeNull();
     });
 });
+
+describe('rejection', () => {
+    test('reject validation when new validation starts', async () => {
+        const onAfterValidate = jest.fn();
+        const field = new Field('.js-input', '.js-container', [() => ValidationResult.valid()], {
+            onAfterValidate,
+        });
+
+        field.validate().catch(() => {});
+        field.validate().catch(() => {});
+        field.validate();
+
+        await waitFor(() => {
+            expect(onAfterValidate).toHaveBeenCalledTimes(1);
+        });
+    });
+});
