@@ -315,6 +315,8 @@ export default class Field {
      */
     onChangeListener(fieldElement) {
         this.validationResult = null;
+        this.setCssClass('');
+
         const value = this.getValue();
 
         if (this.typingDelayId) {
@@ -338,6 +340,9 @@ export default class Field {
      * @private
      */
     async onKeyUpListener(fieldElement) {
+        this.validationResult = null;
+        this.setCssClass('');
+
         const value = this.getValue();
 
         if (this.typingDelayId) {
@@ -352,7 +357,7 @@ export default class Field {
             this.getOption('onTypingEnd')(value, fieldElement, this.rootElement);
 
             if (this.getOption('validateOnType')) {
-                this.validate(true);
+                this.validate();
             }
         }, this.getOption('typingDelay'));
     }

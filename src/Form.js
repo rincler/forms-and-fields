@@ -146,6 +146,12 @@ export default class Form {
      * @public
      */
     listen() {
+        this.formElement.addEventListener('change', () => {
+            this.setCssClass('');
+        });
+        this.formElement.addEventListener('keyup', () => {
+            this.setCssClass('');
+        });
         this.formElement.addEventListener('submit', this.onSubmitForm.bind(this));
 
         // eslint-disable-next-line no-restricted-syntax

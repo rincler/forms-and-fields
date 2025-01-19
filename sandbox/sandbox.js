@@ -71,7 +71,7 @@ const domainField = new Field('.js-domain', '.js-container', ['required', 'isFQD
         isFQDN: 'Domain is not valid.',
     },
     validateOnType: true,
-    onBeforeValidate: (fieldElement) => {
+    onTypingStart: (_, fieldElement) => {
         clearFieldErrors(fieldElement);
     },
     onAfterValidate: (validationResult, fieldElement) => {
@@ -190,7 +190,7 @@ const uploadForm = new Form(
                 ),
             ],
             {
-                onBeforeValidate: (fieldElement) => {
+                onChange: (_, fieldElement) => {
                     clearFieldErrors(fieldElement);
                 },
                 onAfterValidate: (validationResult, fieldElement) => {
@@ -217,7 +217,7 @@ const addressForm = new Form('.js-address-form', [
         return ValidationResult.valid();
     }], {
         validateOnChange: true,
-        onBeforeValidate: (fieldElement) => {
+        onTypingStart: (_, fieldElement) => {
             clearFieldErrors(fieldElement);
         },
         onValidationError: (error, fieldElement) => {

@@ -976,4 +976,36 @@ describe('special CSS classes', () => {
         expect(setCssClass.mock.calls[1][0]).toBe(input);
         expect(setCssClass.mock.calls[1][1]).toBe('ff-field-valid');
     });
+
+    test('special CSS class is reset on change', () => {
+        const setCssClass = jest.fn();
+        const field = new Field('.js-input', '.js-container', [], {
+            setCssClass,
+        });
+        field.listen();
+
+        field.validationResult = ValidationResult.valid();
+
+        fireEvent.change(input, { target: { value: 'bar' } });
+
+        expect(setCssClass).toHaveBeenCalledTimes(1);
+        expect(setCssClass.mock.calls[0][0]).toBe(input, '');
+        expect(field.validationResult).toBeNull();
+    });
+
+    test('special CSS class is reset on type', () => {
+        const setCssClass = jest.fn();
+        const field = new Field('.js-input', '.js-container', [], {
+            setCssClass,
+        });
+        field.listen();
+
+        field.validationResult = ValidationResult.valid();
+
+        fireEvent.keyUp(input, { key: 'b', code: 'KeyB' });
+
+        expect(setCssClass).toHaveBeenCalledTimes(1);
+        expect(setCssClass.mock.calls[0][0]).toBe(input, '');
+        expect(field.validationResult).toBeNull();
+    });
 });
