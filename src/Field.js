@@ -25,6 +25,7 @@ const DEFAULT_OPTIONS = {
     onBeforeValidate: NOOP,
     onAfterValidate: NOOP,
     onValidationError: NOOP,
+    onClear: NOOP,
     setCssClass: NOOP,
 };
 
@@ -559,12 +560,20 @@ export default class Field {
     }
 
     setCssClass(cssClass) {
+        const fieldElement = this.getFieldElement();
+        const containerElement = this.getFieldContainerElement();
+
+        if (cssClass === '') {
+            this.getOption('onClear')(fieldElement, containerElement);
+        }
+
         if (this.hasOption('setCssClass')) {
-            this.getOption('setCssClass')(this.getFieldElement(), cssClass);
+            this.getOption('setCssClass')(fieldElement, cssClass, containerElement);
             return;
         }
 
-        const element = this.getFieldContainerElement() || this.getFieldElement();
+        const element = containerElement || fieldElement;
+
         element.classList.remove(
             FIELD_VALIDATING_CSS_CLASS,
             FIELD_VALID_CSS_CLASS,

@@ -21,6 +21,7 @@ const DEFAULT_OPTIONS = {
     onAfterNegativeSubmit: NOOP,
     onValidationError: NOOP,
     onSubmissionError: NOOP,
+    onClear: NOOP,
     setCssClass: NOOP,
 };
 
@@ -135,6 +136,9 @@ export default class Form {
                 onValidationError: field.hasOption('onValidationError')
                     ? field.getOption('onValidationError')
                     : options.onFieldValidationError,
+                onClear: field.hasOption('onClear')
+                    ? field.getOption('onClear')
+                    : options.onClearField,
                 setCssClass: field.hasOption('setCssClass')
                     ? field.getOption('setCssClass')
                     : options.setFieldCssClass,
@@ -298,6 +302,10 @@ export default class Form {
     }
 
     setCssClass(cssClass) {
+        if (cssClass === '') {
+            this.getOption('onClear')(this.formElement);
+        }
+
         if (this.hasOption('setCssClass')) {
             this.getOption('setCssClass')(this.formElement, cssClass);
             return;

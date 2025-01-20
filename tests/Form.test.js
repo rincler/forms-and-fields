@@ -51,6 +51,11 @@ describe('field options', () => {
         const onChange = jest.fn();
         const onTypingStart = jest.fn();
         const onTypingEnd = jest.fn();
+        const onBeforeValidateField = jest.fn();
+        const onAfterValidateField = jest.fn();
+        const onFieldValidationError = jest.fn();
+        const onClearField = jest.fn();
+        const setFieldCssClass = jest.fn();
 
         const inputField = new Field('.js-input', '.js-form');
         const checkboxField = new Field('.js-checkbox', '.js-form');
@@ -68,6 +73,11 @@ describe('field options', () => {
             onChange,
             onTypingStart,
             onTypingEnd,
+            onBeforeValidateField,
+            onAfterValidateField,
+            onFieldValidationError,
+            onClearField,
+            setFieldCssClass,
         });
 
         expect(inputField.getOption('invalidMessages')).toBe(invalidMessages);
@@ -102,6 +112,21 @@ describe('field options', () => {
 
         expect(inputField.getOption('onTypingEnd')).toBe(onTypingEnd);
         expect(checkboxField.getOption('onTypingEnd')).toBe(onTypingEnd);
+
+        expect(inputField.getOption('onBeforeValidate')).toBe(onBeforeValidateField);
+        expect(checkboxField.getOption('onBeforeValidate')).toBe(onBeforeValidateField);
+
+        expect(inputField.getOption('onAfterValidate')).toBe(onAfterValidateField);
+        expect(checkboxField.getOption('onAfterValidate')).toBe(onAfterValidateField);
+
+        expect(inputField.getOption('onValidationError')).toBe(onFieldValidationError);
+        expect(checkboxField.getOption('onValidationError')).toBe(onFieldValidationError);
+
+        expect(inputField.getOption('onClear')).toBe(onClearField);
+        expect(checkboxField.getOption('onClear')).toBe(onClearField);
+
+        expect(inputField.getOption('setCssClass')).toBe(setFieldCssClass);
+        expect(checkboxField.getOption('setCssClass')).toBe(setFieldCssClass);
     });
 
     test('form options do not override field options', () => {
@@ -116,6 +141,11 @@ describe('field options', () => {
         const onChange = jest.fn();
         const onTypingStart = jest.fn();
         const onTypingEnd = jest.fn();
+        const onBeforeValidate = jest.fn();
+        const onAfterValidate = jest.fn();
+        const onValidationError = jest.fn();
+        const onClear = jest.fn();
+        const setCssClass = jest.fn();
 
         const inputField = new Field('.js-input', '.js-form', [], {
             invalidMessages,
@@ -129,6 +159,11 @@ describe('field options', () => {
             onChange,
             onTypingStart,
             onTypingEnd,
+            onBeforeValidate,
+            onAfterValidate,
+            onValidationError,
+            onClear,
+            setCssClass,
         });
 
         // eslint-disable-next-line no-new
@@ -144,6 +179,11 @@ describe('field options', () => {
             onChange: jest.fn(),
             onTypingStart: jest.fn(),
             onTypingEnd: jest.fn(),
+            onBeforeValidateField: jest.fn(),
+            onAfterValidateField: jest.fn(),
+            onFieldValidationError: jest.fn(),
+            onClearField: jest.fn(),
+            setFieldCssClass: jest.fn(),
         });
 
         expect(inputField.getOption('invalidMessages')).toBe(invalidMessages);
@@ -157,6 +197,11 @@ describe('field options', () => {
         expect(inputField.getOption('onChange')).toBe(onChange);
         expect(inputField.getOption('onTypingStart')).toBe(onTypingStart);
         expect(inputField.getOption('onTypingEnd')).toBe(onTypingEnd);
+        expect(inputField.getOption('onBeforeValidate')).toBe(onBeforeValidate);
+        expect(inputField.getOption('onAfterValidate')).toBe(onAfterValidate);
+        expect(inputField.getOption('onValidationError')).toBe(onValidationError);
+        expect(inputField.getOption('onClear')).toBe(onClear);
+        expect(inputField.getOption('setCssClass')).toBe(setCssClass);
     });
 
     test('"onChange" is called on text input change', () => {
@@ -374,6 +419,7 @@ describe('validation callback options', () => {
 
     test('"onValidationError" is called when validating fields', async () => {
         const onValidationError = jest.fn();
+        const onClear = jest.fn();
         const error = new Error('foo');
         const form = new Form(
             '.js-form',
@@ -394,6 +440,7 @@ describe('validation callback options', () => {
             submit,
             {
                 onValidationError,
+                onClear,
             },
         );
 
@@ -402,16 +449,19 @@ describe('validation callback options', () => {
         expect(onValidationError).toHaveBeenCalledTimes(1);
         expect(onValidationError.mock.calls[0][0]).toBe(error);
         expect(onValidationError.mock.calls[0][1]).toBe(formElement);
+        expect(onClear).toHaveBeenCalledTimes(1);
     });
 
     test('"onValidationError" is called when validating form', async () => {
         const onValidationError = jest.fn();
+        const onClear = jest.fn();
         const error = new Error('foo');
         const form = new Form('.js-form', [], submit, {
             validate: () => {
                 throw error;
             },
             onValidationError,
+            onClear,
         });
 
         await expect(form.validate()).rejects.toThrow(error);
@@ -419,6 +469,7 @@ describe('validation callback options', () => {
         expect(onValidationError).toHaveBeenCalledTimes(1);
         expect(onValidationError.mock.calls[0][0]).toBe(error);
         expect(onValidationError.mock.calls[0][1]).toBe(formElement);
+        expect(onClear).toHaveBeenCalledTimes(1);
     });
 });
 
@@ -953,28 +1004,44 @@ describe('special CSS classes', () => {
 
     test('special CSS class is reset on change', () => {
         const setCssClass = jest.fn();
+        const onClear = jest.fn();
         const form = new Form('.js-form', [new Field('.js-input', '.js-form', [])], submit, {
             setCssClass,
+            onClear,
         });
         form.listen();
 
         fireEvent.change(input, { target: { value: 'bar' } });
 
         expect(setCssClass).toHaveBeenCalledTimes(1);
-        expect(setCssClass.mock.calls[0][0]).toBe(formElement, '');
+        expect(setCssClass.mock.calls[0][0]).toBe(formElement);
+        expect(onClear).toHaveBeenCalledTimes(1);
     });
 
     test('special CSS class is reset on type', () => {
         const setCssClass = jest.fn();
+        const onClear = jest.fn();
         const form = new Form('.js-form', [new Field('.js-input', '.js-form', [])], submit, {
             setCssClass,
+            onClear,
         });
         form.listen();
 
         fireEvent.keyUp(input, { key: 'b', code: 'KeyB' });
 
         expect(setCssClass).toHaveBeenCalledTimes(1);
-        expect(setCssClass.mock.calls[0][0]).toBe(formElement, '');
+        expect(setCssClass.mock.calls[0][0]).toBe(formElement);
+        expect(onClear).toHaveBeenCalledTimes(1);
+    });
+
+    test('"onClear" is called', () => {
+        const onClear = jest.fn();
+        const form = new Form('.js-form', [], submit, {
+            onClear,
+        });
+        form.setCssClass('');
+        expect(onClear).toHaveBeenCalledTimes(1);
+        expect(onClear.mock.calls[0][0]).toBe(formElement);
     });
 });
 

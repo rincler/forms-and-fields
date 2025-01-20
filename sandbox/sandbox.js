@@ -19,8 +19,8 @@ const setFieldError = (fieldElement, error) => {
     );
 }
 
-const clearFieldError = (fieldElement) => {
-    fieldElement.parentNode.querySelector('.error')?.remove();
+const clearFieldError = (containerElement) => {
+    containerElement.querySelector('.error')?.remove();
 };
 
 const setFormError = (formElement, error) => {
@@ -71,11 +71,8 @@ const domainField = new Field('.js-domain', '.js-container', ['required', 'isFQD
         isFQDN: 'Domain is not valid.',
     },
     validateOnType: true,
-    onTypingStart: (_, fieldElement) => {
-        clearFieldError(fieldElement);
-    },
-    onBeforeValidate: (fieldElement) => {
-        clearFieldError(fieldElement);
+    onClear: (fieldElement) => {
+        clearFieldError(fieldElement.parentNode);
     },
     onAfterValidate: (validationResult, fieldElement) => {
         if (!validationResult.isValid()) {
@@ -192,8 +189,8 @@ const uploadForm = new Form(
                 ),
             ],
             {
-                onChange: (_, fieldElement) => {
-                    clearFieldError(fieldElement);
+                onClear: (fieldElement) => {
+                    clearFieldError(fieldElement.parentNode);
                 },
                 onAfterValidate: (validationResult, fieldElement) => {
                     if (!validationResult.isValid()) {
@@ -218,11 +215,8 @@ const addressForm = new Form('.js-address-form', [
         return ValidationResult.valid();
     }], {
         validateOnType: true,
-        onTypingStart: (_, fieldElement) => {
-            clearFieldError(fieldElement);
-        },
-        onBeforeValidate: (fieldElement) => {
-            clearFieldError(fieldElement);
+        onClear: (fieldElement) => {
+            clearFieldError(fieldElement.parentNode);
         },
         onValidationError: (error, fieldElement) => {
             setFieldError(fieldElement, error)
