@@ -6,7 +6,7 @@ const FIELD_VALIDATING_CSS_CLASS = 'ff-field-validating';
 const FIELD_VALID_CSS_CLASS = 'ff-field-valid';
 const FIELD_INVALID_CSS_CLASS = 'ff-field-invalid';
 
-const FIELD_CONTAINER_CSS_CLASS = 'js-ff-field-container';
+const FIELD_WRAPPER_CSS_CLASS = 'js-ff-field-wrapper';
 
 const NOOP = () => {};
 
@@ -228,26 +228,26 @@ export default class Field {
      *
      * @returns {Element}
      */
-    getFieldElement = () => {
+    getFieldElement() {
         const fieldElement = this.rootElement.querySelector(this.fieldSelector);
         if (!fieldElement) {
             throw new Error(`Field element with the "${this.fieldSelector}" selector not found.`);
         }
 
         return fieldElement;
-    };
+    }
 
     /**
      * @private
      *
      * @returns {Element|null}
      */
-    getFieldContainerElement = () => {
+    getFieldWrapperElement() {
         const fieldElement = this.getFieldElement();
-        return fieldElement.parentElement.classList.contains(FIELD_CONTAINER_CSS_CLASS)
+        return fieldElement.parentElement.classList.contains(FIELD_WRAPPER_CSS_CLASS)
             ? fieldElement.parentElement
             : null;
-    };
+    }
 
     /**
      * @private
@@ -561,18 +561,18 @@ export default class Field {
 
     setCssClass(cssClass) {
         const fieldElement = this.getFieldElement();
-        const containerElement = this.getFieldContainerElement();
+        const wrapperElement = this.getFieldWrapperElement();
 
         if (cssClass === '') {
-            this.getOption('onClear')(fieldElement, containerElement);
+            this.getOption('onClear')(fieldElement, wrapperElement);
         }
 
         if (this.hasOption('setCssClass')) {
-            this.getOption('setCssClass')(fieldElement, cssClass, containerElement);
+            this.getOption('setCssClass')(fieldElement, cssClass, wrapperElement);
             return;
         }
 
-        const element = containerElement || fieldElement;
+        const element = wrapperElement || fieldElement;
 
         element.classList.remove(
             FIELD_VALIDATING_CSS_CLASS,

@@ -19,8 +19,8 @@ const setFieldError = (fieldElement, error) => {
     );
 }
 
-const clearFieldError = (containerElement) => {
-    containerElement.querySelector('.error')?.remove();
+const clearFieldError = (fieldElement) => {
+    fieldElement.parentNode.querySelector('.error')?.remove();
 };
 
 const setFormError = (formElement, error) => {
@@ -72,7 +72,7 @@ const domainField = new Field('.js-domain', '.js-container', ['required', 'isFQD
     },
     validateOnType: true,
     onClear: (fieldElement) => {
-        clearFieldError(fieldElement.parentNode);
+        clearFieldError(fieldElement);
     },
     onAfterValidate: (validationResult, fieldElement) => {
         if (!validationResult.isValid()) {
@@ -190,7 +190,7 @@ const uploadForm = new Form(
             ],
             {
                 onClear: (fieldElement) => {
-                    clearFieldError(fieldElement.parentNode);
+                    clearFieldError(fieldElement);
                 },
                 onAfterValidate: (validationResult, fieldElement) => {
                     if (!validationResult.isValid()) {
@@ -216,7 +216,7 @@ const addressForm = new Form('.js-address-form', [
     }], {
         validateOnType: true,
         onClear: (fieldElement) => {
-            clearFieldError(fieldElement.parentNode);
+            clearFieldError(fieldElement);
         },
         onValidationError: (error, fieldElement) => {
             setFieldError(fieldElement, error)

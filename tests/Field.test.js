@@ -19,7 +19,7 @@ beforeEach(() => {
             <input class="js-list-input js-list-input-2" name="list-input-name[1]" />
             <input class="js-list-input js-list-input-3" name="list-input-name[2]" />
             <input class="js-checkbox" type="checkbox" />
-            <div class="js-ff-field-container">
+            <div class="js-ff-field-wrapper">
                 <input class="js-radio js-radio-1" type="radio" name="radio" value="1">
                 <input class="js-radio js-radio-2" type="radio" name="radio" value="2" />
             </div>
@@ -943,8 +943,8 @@ describe('special CSS classes', () => {
     });
 
     test('with wrapper', async () => {
-        const field = new Field('.js-radio', '.js-ff-field-container', ['required']);
-        const wrapper = document.querySelector('.js-ff-field-container');
+        const field = new Field('.js-radio', '.js-ff-field-wrapper', ['required']);
+        const wrapper = document.querySelector('.js-ff-field-wrapper');
         await field.validate();
         expect(wrapper.classList.contains('ff-field-invalid')).toBe(true);
     });
@@ -964,7 +964,7 @@ describe('special CSS classes', () => {
 
     test.each([
         ['input', '.js-input', null],
-        ['radio', '.js-radio', '.js-ff-field-container'],
+        ['radio', '.js-radio', '.js-ff-field-wrapper'],
     ])('custom "setCssClass": %s', async (_, selector, expectedElementSelector) => {
         const setCssClass = jest.fn();
         const field = new Field(selector, '.js-container', [() => ValidationResult.valid()], {
@@ -987,7 +987,7 @@ describe('special CSS classes', () => {
 
     test.each([
         ['input', '.js-input', null],
-        ['radio', '.js-radio', '.js-ff-field-container'],
+        ['radio', '.js-radio', '.js-ff-field-wrapper'],
     ])('special CSS class is reset on change %s', (_, selector, expectedElementSelector) => {
         const setCssClass = jest.fn();
         const onClear = jest.fn();
@@ -1034,7 +1034,7 @@ describe('special CSS classes', () => {
 
     test.each([
         ['input', '.js-input', null],
-        ['radio', '.js-radio', '.js-ff-field-container'],
+        ['radio', '.js-radio', '.js-ff-field-wrapper'],
     ])('"onClear" is called: %s', (_, selector, expectedElementSelector) => {
         const onClear = jest.fn();
         const field = new Field(selector, '.js-container', [], {
