@@ -27,7 +27,7 @@ beforeEach(() => {
                 <option value="1"></option>
                 <option value="2"></option>
             </select>
-            <select multiple class="js-multi-select" name="multi-select-name">
+            <select multiple class="js-multiple-select" name="multiple-select-name">
                 <option value="1"></option>
                 <option value="2"></option>
             </select>

@@ -27,9 +27,9 @@ beforeEach(() => {
                 <option class="js-select-option-1" value="1"></option>
                 <option class="js-select-option-2" value="2"></option>
             </select>
-            <select multiple class="js-multi-select">
-                <option class="js-multi-select-option-1" value="1"></option>
-                <option class="js-multi-select-option-2" value="2"></option>
+            <select multiple class="js-multiple-select">
+                <option class="js-multiple-select-option-1" value="1"></option>
+                <option class="js-multiple-select-option-2" value="2"></option>
             </select>
             <textarea class="js-textarea"></textarea>
             <input class="js-file" type="file" />
@@ -870,10 +870,10 @@ describe('"getValue"', () => {
     });
 
     test('get multi select value', () => {
-        const field = new Field('.js-multi-select', '.js-container');
+        const field = new Field('.js-multiple-select', '.js-container');
         expect(field.getValue()).toStrictEqual([]);
-        document.querySelector('.js-multi-select-option-1').selected = true;
-        document.querySelector('.js-multi-select-option-2').selected = true;
+        document.querySelector('.js-multiple-select-option-1').selected = true;
+        document.querySelector('.js-multiple-select-option-2').selected = true;
         expect(field.getValue()).toStrictEqual(['1', '2']);
     });
 
