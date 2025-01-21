@@ -2,9 +2,9 @@ import validator from 'validator';
 import ValidationResult from './ValidationResult';
 import { ignoreRejects, startAction, finishAction } from './Reject';
 
-const FIELD_VALIDATING_CSS_CLASS = 'ff-field-validating';
-const FIELD_VALID_CSS_CLASS = 'ff-field-valid';
-const FIELD_INVALID_CSS_CLASS = 'ff-field-invalid';
+const FIELD_VALIDATING_STATUS = 'ff-field-validating';
+const FIELD_VALID_STATUS = 'ff-field-valid';
+const FIELD_INVALID_STATUS = 'ff-field-invalid';
 
 const FIELD_WRAPPER_CSS_CLASS = 'js-ff-field-wrapper';
 
@@ -25,8 +25,8 @@ const DEFAULT_OPTIONS = {
     onBeforeValidate: NOOP,
     onAfterValidate: NOOP,
     onValidationError: NOOP,
-    onClear: NOOP,
-    setCssClass: NOOP,
+    onResetStatus: NOOP,
+    setStatus: NOOP,
 };
 
 const virtualFieldsCache = {};
@@ -134,7 +134,7 @@ export default class Field {
 
         const actionId = startAction(this);
 
-        this.setCssClass(FIELD_VALIDATING_CSS_CLASS);
+        this.setStatus(FIELD_VALIDATING_STATUS);
 
         const value = this.getValue();
 
@@ -148,7 +148,7 @@ export default class Field {
                 validationResult = await validatorFn(value);
             } catch (error) {
                 finishAction(this, actionId);
-                this.setCssClass('');
+                this.setStatus('');
                 this.getOption('onValidationError')(error, fieldElement, this.containerElement);
                 throw error;
             }
@@ -168,9 +168,7 @@ export default class Field {
             );
         }
 
-        this.setCssClass(
-            this.validationResult.isValid() ? FIELD_VALID_CSS_CLASS : FIELD_INVALID_CSS_CLASS,
-        );
+        this.setStatus(this.validationResult.isValid() ? FIELD_VALID_STATUS : FIELD_INVALID_STATUS);
 
         this.getOption('onAfterValidate')(
             this.validationResult,
@@ -332,7 +330,7 @@ export default class Field {
      */
     async onChangeListener(fieldElement) {
         this.validationResult = null;
-        this.setCssClass('');
+        this.setStatus('');
 
         const value = this.getValue();
 
@@ -362,7 +360,7 @@ export default class Field {
      */
     async onKeyUpListener(fieldElement) {
         this.validationResult = null;
-        this.setCssClass('');
+        this.setStatus('');
         if (this.getOption('validateOnType')) {
             // This fixes the next case:
             // start typing -> result of the previous validation ->  finish typing -> validate
@@ -567,28 +565,24 @@ export default class Field {
         return field;
     }
 
-    setCssClass(cssClass) {
+    setStatus(status) {
         const fieldElement = this.getFieldElement();
         const wrapperElement = this.getFieldWrapperElement();
 
-        if (cssClass === '') {
-            this.getOption('onClear')(fieldElement, wrapperElement);
+        if (status === '') {
+            this.getOption('onResetStatus')(fieldElement, wrapperElement);
         }
 
-        if (this.hasOption('setCssClass')) {
-            this.getOption('setCssClass')(fieldElement, cssClass, wrapperElement);
+        if (this.hasOption('setStatus')) {
+            this.getOption('setStatus')(fieldElement, status, wrapperElement);
             return;
         }
 
         const element = wrapperElement || fieldElement;
 
-        element.classList.remove(
-            FIELD_VALIDATING_CSS_CLASS,
-            FIELD_VALID_CSS_CLASS,
-            FIELD_INVALID_CSS_CLASS,
-        );
-        if (cssClass !== '') {
-            element.classList.add(cssClass);
+        element.classList.remove(FIELD_VALIDATING_STATUS, FIELD_VALID_STATUS, FIELD_INVALID_STATUS);
+        if (status !== '') {
+            element.classList.add(status);
         }
     }
 }

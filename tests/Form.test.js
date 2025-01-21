@@ -54,8 +54,8 @@ describe('field options', () => {
         const onBeforeValidateField = jest.fn();
         const onAfterValidateField = jest.fn();
         const onFieldValidationError = jest.fn();
-        const onClearField = jest.fn();
-        const setFieldCssClass = jest.fn();
+        const onResetFieldStatus = jest.fn();
+        const setFieldStatus = jest.fn();
 
         const inputField = new Field('.js-input', '.js-form');
         const checkboxField = new Field('.js-checkbox', '.js-form');
@@ -76,8 +76,8 @@ describe('field options', () => {
             onBeforeValidateField,
             onAfterValidateField,
             onFieldValidationError,
-            onClearField,
-            setFieldCssClass,
+            onResetFieldStatus,
+            setFieldStatus,
         });
 
         expect(inputField.getOption('invalidMessages')).toBe(invalidMessages);
@@ -122,11 +122,11 @@ describe('field options', () => {
         expect(inputField.getOption('onValidationError')).toBe(onFieldValidationError);
         expect(checkboxField.getOption('onValidationError')).toBe(onFieldValidationError);
 
-        expect(inputField.getOption('onClear')).toBe(onClearField);
-        expect(checkboxField.getOption('onClear')).toBe(onClearField);
+        expect(inputField.getOption('onResetStatus')).toBe(onResetFieldStatus);
+        expect(checkboxField.getOption('onResetStatus')).toBe(onResetFieldStatus);
 
-        expect(inputField.getOption('setCssClass')).toBe(setFieldCssClass);
-        expect(checkboxField.getOption('setCssClass')).toBe(setFieldCssClass);
+        expect(inputField.getOption('setStatus')).toBe(setFieldStatus);
+        expect(checkboxField.getOption('setStatus')).toBe(setFieldStatus);
     });
 
     test('form options do not override field options', () => {
@@ -144,8 +144,8 @@ describe('field options', () => {
         const onBeforeValidate = jest.fn();
         const onAfterValidate = jest.fn();
         const onValidationError = jest.fn();
-        const onClear = jest.fn();
-        const setCssClass = jest.fn();
+        const onResetStatus = jest.fn();
+        const setStatus = jest.fn();
 
         const inputField = new Field('.js-input', '.js-form', [], {
             invalidMessages,
@@ -162,8 +162,8 @@ describe('field options', () => {
             onBeforeValidate,
             onAfterValidate,
             onValidationError,
-            onClear,
-            setCssClass,
+            onResetStatus,
+            setStatus,
         });
 
         // eslint-disable-next-line no-new
@@ -182,8 +182,8 @@ describe('field options', () => {
             onBeforeValidateField: jest.fn(),
             onAfterValidateField: jest.fn(),
             onFieldValidationError: jest.fn(),
-            onClearField: jest.fn(),
-            setFieldCssClass: jest.fn(),
+            onResetFieldStatus: jest.fn(),
+            setFieldStatus: jest.fn(),
         });
 
         expect(inputField.getOption('invalidMessages')).toBe(invalidMessages);
@@ -200,8 +200,8 @@ describe('field options', () => {
         expect(inputField.getOption('onBeforeValidate')).toBe(onBeforeValidate);
         expect(inputField.getOption('onAfterValidate')).toBe(onAfterValidate);
         expect(inputField.getOption('onValidationError')).toBe(onValidationError);
-        expect(inputField.getOption('onClear')).toBe(onClear);
-        expect(inputField.getOption('setCssClass')).toBe(setCssClass);
+        expect(inputField.getOption('onResetStatus')).toBe(onResetStatus);
+        expect(inputField.getOption('setStatus')).toBe(setStatus);
     });
 
     test('"onChange" is called on text input change', () => {
@@ -419,7 +419,7 @@ describe('validation callback options', () => {
 
     test('"onValidationError" is called when validating fields', async () => {
         const onValidationError = jest.fn();
-        const onClear = jest.fn();
+        const onResetStatus = jest.fn();
         const error = new Error('foo');
         const form = new Form(
             '.js-form',
@@ -440,7 +440,7 @@ describe('validation callback options', () => {
             submit,
             {
                 onValidationError,
-                onClear,
+                onResetStatus,
             },
         );
 
@@ -449,19 +449,19 @@ describe('validation callback options', () => {
         expect(onValidationError).toHaveBeenCalledTimes(1);
         expect(onValidationError.mock.calls[0][0]).toBe(error);
         expect(onValidationError.mock.calls[0][1]).toBe(formElement);
-        expect(onClear).toHaveBeenCalledTimes(1);
+        expect(onResetStatus).toHaveBeenCalledTimes(1);
     });
 
     test('"onValidationError" is called when validating form', async () => {
         const onValidationError = jest.fn();
-        const onClear = jest.fn();
+        const onResetStatus = jest.fn();
         const error = new Error('foo');
         const form = new Form('.js-form', [], submit, {
             validate: () => {
                 throw error;
             },
             onValidationError,
-            onClear,
+            onResetStatus,
         });
 
         await expect(form.validate()).rejects.toThrow(error);
@@ -469,7 +469,7 @@ describe('validation callback options', () => {
         expect(onValidationError).toHaveBeenCalledTimes(1);
         expect(onValidationError.mock.calls[0][0]).toBe(error);
         expect(onValidationError.mock.calls[0][1]).toBe(formElement);
-        expect(onClear).toHaveBeenCalledTimes(1);
+        expect(onResetStatus).toHaveBeenCalledTimes(1);
     });
 });
 
@@ -812,7 +812,7 @@ describe('init form', () => {
     });
 });
 
-describe('special CSS classes', () => {
+describe('statuses', () => {
     test('validating', async () => {
         const field = new Field('.js-input', '.js-form', [
             () => {
@@ -863,7 +863,7 @@ describe('special CSS classes', () => {
         expect(formElement.classList.contains('ff-form-invalid')).toBe(true);
     });
 
-    test('no special CSS classes when validation error', async () => {
+    test('no status when validation error', async () => {
         const form = new Form(
             '.js-form',
             [
@@ -958,14 +958,14 @@ describe('special CSS classes', () => {
         });
     });
 
-    test('custom "setCssClass"', async () => {
-        const setCssClass = jest.fn();
+    test('custom "setStatus"', async () => {
+        const setStatus = jest.fn();
         const form = new Form(
             '.js-form',
             [new Field('.js-input', '.js-form', ['required'])],
             submit,
             {
-                setCssClass,
+                setStatus,
             },
         );
 
@@ -973,21 +973,23 @@ describe('special CSS classes', () => {
 
         await form.validate();
 
-        expect(setCssClass).toHaveBeenCalledTimes(2);
-        expect(setCssClass.mock.calls[0][0]).toBe(formElement);
-        expect(setCssClass.mock.calls[0][1]).toBe('ff-form-validating');
-        expect(setCssClass.mock.calls[1][0]).toBe(formElement);
-        expect(setCssClass.mock.calls[1][1]).toBe('ff-form-valid');
+        expect(setStatus).toHaveBeenCalledTimes(2);
+        expect(setStatus.mock.calls[0][0]).toBe(formElement);
+        expect(setStatus.mock.calls[0][1]).toBe('ff-form-validating');
+        expect(setStatus.mock.calls[1][0]).toBe(formElement);
+        expect(setStatus.mock.calls[1][1]).toBe('ff-form-valid');
+
+        expect(formElement.classList.contains('ff-form-valid')).toBe(false);
     });
 
-    test('custom field "setCssClass"', async () => {
-        const setCssClass = jest.fn();
+    test('custom field "setStatus"', async () => {
+        const setStatus = jest.fn();
         const form = new Form(
             '.js-form',
             [new Field('.js-input', '.js-form', ['required'])],
             submit,
             {
-                setFieldCssClass: setCssClass,
+                setFieldStatus: setStatus,
             },
         );
 
@@ -995,53 +997,54 @@ describe('special CSS classes', () => {
 
         await form.validate();
 
-        expect(setCssClass).toHaveBeenCalledTimes(2);
-        expect(setCssClass.mock.calls[0][0]).toBe(input);
-        expect(setCssClass.mock.calls[0][1]).toBe('ff-field-validating');
-        expect(setCssClass.mock.calls[1][0]).toBe(input);
-        expect(setCssClass.mock.calls[1][1]).toBe('ff-field-valid');
+        expect(setStatus).toHaveBeenCalledTimes(2);
+        expect(setStatus.mock.calls[0][0]).toBe(input);
+        expect(setStatus.mock.calls[0][1]).toBe('ff-field-validating');
+        expect(setStatus.mock.calls[1][0]).toBe(input);
+        expect(setStatus.mock.calls[1][1]).toBe('ff-field-valid');
+        expect(input.classList.contains('ff-field-valid')).toBe(false);
     });
 
-    test('special CSS class is reset on change', () => {
-        const setCssClass = jest.fn();
-        const onClear = jest.fn();
+    test('status is reset on change', () => {
+        const setStatus = jest.fn();
+        const onResetStatus = jest.fn();
         const form = new Form('.js-form', [new Field('.js-input', '.js-form', [])], submit, {
-            setCssClass,
-            onClear,
+            setStatus,
+            onResetStatus,
         });
         form.listen();
 
         fireEvent.change(input, { target: { value: 'bar' } });
 
-        expect(setCssClass).toHaveBeenCalledTimes(1);
-        expect(setCssClass.mock.calls[0][0]).toBe(formElement);
-        expect(onClear).toHaveBeenCalledTimes(1);
+        expect(setStatus).toHaveBeenCalledTimes(1);
+        expect(setStatus.mock.calls[0][0]).toBe(formElement);
+        expect(onResetStatus).toHaveBeenCalledTimes(1);
     });
 
-    test('special CSS class is reset on type', () => {
-        const setCssClass = jest.fn();
-        const onClear = jest.fn();
+    test('status is reset on type', () => {
+        const setStatus = jest.fn();
+        const onResetStatus = jest.fn();
         const form = new Form('.js-form', [new Field('.js-input', '.js-form', [])], submit, {
-            setCssClass,
-            onClear,
+            setStatus,
+            onResetStatus,
         });
         form.listen();
 
         fireEvent.keyUp(input, { key: 'b', code: 'KeyB' });
 
-        expect(setCssClass).toHaveBeenCalledTimes(1);
-        expect(setCssClass.mock.calls[0][0]).toBe(formElement);
-        expect(onClear).toHaveBeenCalledTimes(1);
+        expect(setStatus).toHaveBeenCalledTimes(1);
+        expect(setStatus.mock.calls[0][0]).toBe(formElement);
+        expect(onResetStatus).toHaveBeenCalledTimes(1);
     });
 
-    test('"onClear" is called', () => {
-        const onClear = jest.fn();
+    test('"onResetStatus" is called', () => {
+        const onResetStatus = jest.fn();
         const form = new Form('.js-form', [], submit, {
-            onClear,
+            onResetStatus,
         });
-        form.setCssClass('');
-        expect(onClear).toHaveBeenCalledTimes(1);
-        expect(onClear.mock.calls[0][0]).toBe(formElement);
+        form.setStatus('');
+        expect(onResetStatus).toHaveBeenCalledTimes(1);
+        expect(onResetStatus.mock.calls[0][0]).toBe(formElement);
     });
 });
 

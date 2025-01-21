@@ -1,13 +1,13 @@
 import ValidationResult from './ValidationResult';
 import { ignoreRejects, startAction, finishAction } from './Reject';
 
-const FORM_VALIDATING_CSS_CLASS = 'ff-form-validating';
-const FORM_VALID_CSS_CLASS = 'ff-form-valid';
-const FORM_INVALID_CSS_CLASS = 'ff-form-invalid';
+const FORM_VALIDATING_STATUS = 'ff-form-validating';
+const FORM_VALID_STATUS = 'ff-form-valid';
+const FORM_INVALID_STATUS = 'ff-form-invalid';
 
-const FORM_SUBMITTING_CSS_CLASS = 'ff-form-submitting';
-const FORM_POSITIVE_SUBMIT_CSS_CLASS = 'ff-form-positive-submit';
-const FORM_NEGATIVE_SUBMIT_CSS_CLASS = 'ff-form-negative-submit';
+const FORM_SUBMITTING_STATUS = 'ff-form-submitting';
+const FORM_POSITIVE_SUBMIT_STATUS = 'ff-form-positive-submit';
+const FORM_NEGATIVE_SUBMIT_STATUS = 'ff-form-negative-submit';
 
 const NOOP = () => {};
 
@@ -15,14 +15,14 @@ const DEFAULT_OPTIONS = {
     onBeforeValidate: NOOP,
     validate: NOOP,
     onAfterValidate: NOOP,
+    onValidationError: NOOP,
     onBeforeSubmit: NOOP,
     onAfterSubmit: NOOP,
     onAfterPositiveSubmit: NOOP,
     onAfterNegativeSubmit: NOOP,
-    onValidationError: NOOP,
     onSubmissionError: NOOP,
-    onClear: NOOP,
-    setCssClass: NOOP,
+    onResetStatus: NOOP,
+    setStatus: NOOP,
 };
 
 export default class Form {
@@ -136,12 +136,12 @@ export default class Form {
                 onValidationError: field.hasOption('onValidationError')
                     ? field.getOption('onValidationError')
                     : options.onFieldValidationError,
-                onClear: field.hasOption('onClear')
-                    ? field.getOption('onClear')
-                    : options.onClearField,
-                setCssClass: field.hasOption('setCssClass')
-                    ? field.getOption('setCssClass')
-                    : options.setFieldCssClass,
+                onResetStatus: field.hasOption('onResetStatus')
+                    ? field.getOption('onResetStatus')
+                    : options.onResetFieldStatus,
+                setStatus: field.hasOption('setStatus')
+                    ? field.getOption('setStatus')
+                    : options.setFieldStatus,
             });
         }
     }
@@ -151,10 +151,10 @@ export default class Form {
      */
     listen() {
         this.formElement.addEventListener('change', () => {
-            this.setCssClass('');
+            this.setStatus('');
         });
         this.formElement.addEventListener('keyup', () => {
-            this.setCssClass('');
+            this.setStatus('');
         });
         this.formElement.addEventListener('submit', this.onSubmitForm.bind(this));
 
@@ -202,7 +202,7 @@ export default class Form {
 
         this.getOption('onBeforeValidate')(this.formElement);
 
-        this.setCssClass(FORM_VALIDATING_CSS_CLASS);
+        this.setStatus(FORM_VALIDATING_STATUS);
 
         const actionId = startAction(this);
 
@@ -219,7 +219,7 @@ export default class Form {
             validationResults.push(formValidationResult);
         } catch (error) {
             finishAction(this, actionId);
-            this.setCssClass('');
+            this.setStatus('');
             this.getOption('onValidationError')(error, this.formElement);
             throw error;
         }
@@ -228,7 +228,7 @@ export default class Form {
 
         const isValid = ValidationResult.areValid(validationResults);
 
-        this.setCssClass(isValid ? FORM_VALID_CSS_CLASS : FORM_INVALID_CSS_CLASS);
+        this.setStatus(isValid ? FORM_VALID_STATUS : FORM_INVALID_STATUS);
 
         this.getOption('onAfterValidate')(validationResults, this.formElement);
 
@@ -247,7 +247,7 @@ export default class Form {
 
         const actionId = startAction(this);
 
-        this.setCssClass(FORM_SUBMITTING_CSS_CLASS);
+        this.setStatus(FORM_SUBMITTING_STATUS);
 
         let submissionResult;
 
@@ -255,7 +255,7 @@ export default class Form {
             submissionResult = await this.submit(data);
         } catch (error) {
             finishAction(this, actionId);
-            this.setCssClass(FORM_VALID_CSS_CLASS);
+            this.setStatus(FORM_VALID_STATUS);
             this.getOption('onSubmissionError')(error, this.formElement);
             throw error;
         }
@@ -265,10 +265,10 @@ export default class Form {
         this.getOption('onAfterSubmit')(submissionResult, this.formElement);
 
         if (submissionResult.isPositive()) {
-            this.setCssClass(FORM_POSITIVE_SUBMIT_CSS_CLASS);
+            this.setStatus(FORM_POSITIVE_SUBMIT_STATUS);
             this.getOption('onAfterPositiveSubmit')(submissionResult.getData(), this.formElement);
         } else {
-            this.setCssClass(FORM_NEGATIVE_SUBMIT_CSS_CLASS);
+            this.setStatus(FORM_NEGATIVE_SUBMIT_STATUS);
             this.getOption('onAfterNegativeSubmit')(submissionResult.getData(), this.formElement);
         }
     }
@@ -301,26 +301,26 @@ export default class Form {
         return fields;
     }
 
-    setCssClass(cssClass) {
-        if (cssClass === '') {
-            this.getOption('onClear')(this.formElement);
+    setStatus(status) {
+        if (status === '') {
+            this.getOption('onResetStatus')(this.formElement);
         }
 
-        if (this.hasOption('setCssClass')) {
-            this.getOption('setCssClass')(this.formElement, cssClass);
+        if (this.hasOption('setStatus')) {
+            this.getOption('setStatus')(this.formElement, status);
             return;
         }
 
         this.formElement.classList.remove(
-            FORM_VALIDATING_CSS_CLASS,
-            FORM_VALID_CSS_CLASS,
-            FORM_INVALID_CSS_CLASS,
-            FORM_SUBMITTING_CSS_CLASS,
-            FORM_POSITIVE_SUBMIT_CSS_CLASS,
-            FORM_NEGATIVE_SUBMIT_CSS_CLASS,
+            FORM_VALIDATING_STATUS,
+            FORM_VALID_STATUS,
+            FORM_INVALID_STATUS,
+            FORM_SUBMITTING_STATUS,
+            FORM_POSITIVE_SUBMIT_STATUS,
+            FORM_NEGATIVE_SUBMIT_STATUS,
         );
-        if (cssClass !== '') {
-            this.formElement.classList.add(cssClass);
+        if (status !== '') {
+            this.formElement.classList.add(status);
         }
     }
 }

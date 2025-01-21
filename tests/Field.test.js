@@ -254,7 +254,7 @@ describe('validation callback options', () => {
 
     test('"onValidationError" is called', async () => {
         const onValidationError = jest.fn();
-        const onClear = jest.fn();
+        const onResetStatus = jest.fn();
         const error = new Error('foo');
         const field = new Field(
             '.js-input',
@@ -266,7 +266,7 @@ describe('validation callback options', () => {
             ],
             {
                 onValidationError,
-                onClear,
+                onResetStatus,
             },
         );
 
@@ -275,7 +275,7 @@ describe('validation callback options', () => {
         expect(onValidationError.mock.calls[0][0]).toBe(error);
         expect(onValidationError.mock.calls[0][1]).toBe(input);
         expect(onValidationError.mock.calls[0][2]).toBe(container);
-        expect(onClear).toHaveBeenCalledTimes(1);
+        expect(onResetStatus).toHaveBeenCalledTimes(1);
     });
 });
 
@@ -915,7 +915,7 @@ describe('"getValue"', () => {
     });
 });
 
-describe('special CSS classes', () => {
+describe('statuses', () => {
     test('validating', async () => {
         const field = new Field('.js-input', '.js-container', [
             (value) => {
@@ -949,7 +949,7 @@ describe('special CSS classes', () => {
         expect(wrapper.classList.contains('ff-field-invalid')).toBe(true);
     });
 
-    test('no special CSS classes when error', async () => {
+    test('no status when error', async () => {
         const field = new Field('.js-input', '.js-container', [
             () => {
                 throw new Error('foo');
@@ -965,10 +965,10 @@ describe('special CSS classes', () => {
     test.each([
         ['input', '.js-input', null],
         ['radio', '.js-radio', '.js-ff-field-wrapper'],
-    ])('custom "setCssClass": %s', async (_, selector, expectedElementSelector) => {
-        const setCssClass = jest.fn();
+    ])('custom "setStatus": %s', async (_, selector, expectedElementSelector) => {
+        const setStatus = jest.fn();
         const field = new Field(selector, '.js-container', [() => ValidationResult.valid()], {
-            setCssClass,
+            setStatus,
         });
 
         await field.validate();
@@ -976,24 +976,27 @@ describe('special CSS classes', () => {
         const element = document.querySelector(selector);
         const wrapper = expectedElementSelector && document.querySelector(expectedElementSelector);
 
-        expect(setCssClass).toHaveBeenCalledTimes(2);
-        expect(setCssClass.mock.calls[0][0]).toBe(element);
-        expect(setCssClass.mock.calls[0][1]).toBe('ff-field-validating');
-        expect(setCssClass.mock.calls[0][2]).toBe(wrapper);
-        expect(setCssClass.mock.calls[1][0]).toBe(element);
-        expect(setCssClass.mock.calls[1][1]).toBe('ff-field-valid');
-        expect(setCssClass.mock.calls[1][2]).toBe(wrapper);
+        expect(setStatus).toHaveBeenCalledTimes(2);
+        expect(setStatus.mock.calls[0][0]).toBe(element);
+        expect(setStatus.mock.calls[0][1]).toBe('ff-field-validating');
+        expect(setStatus.mock.calls[0][2]).toBe(wrapper);
+        expect(setStatus.mock.calls[1][0]).toBe(element);
+        expect(setStatus.mock.calls[1][1]).toBe('ff-field-valid');
+        expect(setStatus.mock.calls[1][2]).toBe(wrapper);
+
+        expect(element.classList.contains('ff-field-valid')).toBe(false);
+        expect(wrapper && wrapper.classList.contains('ff-field-valid')).toBeFalsy();
     });
 
     test.each([
         ['input', '.js-input', null],
         ['radio', '.js-radio', '.js-ff-field-wrapper'],
-    ])('special CSS class is reset on change %s', (_, selector, expectedElementSelector) => {
-        const setCssClass = jest.fn();
-        const onClear = jest.fn();
+    ])('status is reset on change %s', (_, selector, expectedElementSelector) => {
+        const setStatus = jest.fn();
+        const onResetStatus = jest.fn();
         const field = new Field(selector, '.js-container', [], {
-            setCssClass,
-            onClear,
+            setStatus,
+            onResetStatus,
         });
         field.listen();
 
@@ -1001,22 +1004,22 @@ describe('special CSS classes', () => {
 
         fireEvent.change(document.querySelector(selector));
 
-        expect(setCssClass).toHaveBeenCalledTimes(1);
-        expect(setCssClass.mock.calls[0][0]).toBe(document.querySelector(selector));
-        expect(setCssClass.mock.calls[0][1]).toBe('');
-        expect(setCssClass.mock.calls[0][2]).toBe(
+        expect(setStatus).toHaveBeenCalledTimes(1);
+        expect(setStatus.mock.calls[0][0]).toBe(document.querySelector(selector));
+        expect(setStatus.mock.calls[0][1]).toBe('');
+        expect(setStatus.mock.calls[0][2]).toBe(
             expectedElementSelector && document.querySelector(expectedElementSelector),
         );
-        expect(onClear).toHaveBeenCalledTimes(1);
+        expect(onResetStatus).toHaveBeenCalledTimes(1);
         expect(field.validationResult).toBeNull();
     });
 
-    test('special CSS class is reset on type', () => {
-        const setCssClass = jest.fn();
-        const onClear = jest.fn();
+    test('status is reset on type', () => {
+        const setStatus = jest.fn();
+        const onResetStatus = jest.fn();
         const field = new Field('.js-input', '.js-container', [], {
-            setCssClass,
-            onClear,
+            setStatus,
+            onResetStatus,
         });
         field.listen();
 
@@ -1024,26 +1027,26 @@ describe('special CSS classes', () => {
 
         fireEvent.keyUp(input, { key: 'b', code: 'KeyB' });
 
-        expect(setCssClass).toHaveBeenCalledTimes(1);
-        expect(setCssClass.mock.calls[0][0]).toBe(input);
-        expect(setCssClass.mock.calls[0][1]).toBe('');
-        expect(setCssClass.mock.calls[0][2]).toBeNull();
-        expect(onClear).toHaveBeenCalledTimes(1);
+        expect(setStatus).toHaveBeenCalledTimes(1);
+        expect(setStatus.mock.calls[0][0]).toBe(input);
+        expect(setStatus.mock.calls[0][1]).toBe('');
+        expect(setStatus.mock.calls[0][2]).toBeNull();
+        expect(onResetStatus).toHaveBeenCalledTimes(1);
         expect(field.validationResult).toBeNull();
     });
 
     test.each([
         ['input', '.js-input', null],
         ['radio', '.js-radio', '.js-ff-field-wrapper'],
-    ])('"onClear" is called: %s', (_, selector, expectedElementSelector) => {
-        const onClear = jest.fn();
+    ])('"onResetStatus" is called: %s', (_, selector, expectedElementSelector) => {
+        const onResetStatus = jest.fn();
         const field = new Field(selector, '.js-container', [], {
-            onClear,
+            onResetStatus,
         });
-        field.setCssClass('');
-        expect(onClear).toHaveBeenCalledTimes(1);
-        expect(onClear.mock.calls[0][0]).toBe(document.querySelector(selector));
-        expect(onClear.mock.calls[0][1]).toBe(
+        field.setStatus('');
+        expect(onResetStatus).toHaveBeenCalledTimes(1);
+        expect(onResetStatus.mock.calls[0][0]).toBe(document.querySelector(selector));
+        expect(onResetStatus.mock.calls[0][1]).toBe(
             expectedElementSelector && document.querySelector(expectedElementSelector),
         );
     });
