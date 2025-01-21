@@ -36,19 +36,21 @@ export default class Field {
      * @public
      *
      * @param {string} fieldSelector
-     * @param {string} rootSelector
+     * @param {string} containerSelector
      * @param {array} validators
      * @param {object} options
      */
-    constructor(fieldSelector, rootSelector, validators, options = {}) {
-        this.rootElement = document.querySelector(rootSelector);
+    constructor(fieldSelector, containerSelector, validators, options = {}) {
+        this.containerElement = document.querySelector(containerSelector);
 
-        if (!this.rootElement) {
-            throw new Error(`Root element with the "${rootSelector}" selector not found.`);
+        if (!this.containerElement) {
+            throw new Error(
+                `Container element with the "${containerSelector}" selector not found.`,
+            );
         }
 
         this.fieldSelector = fieldSelector;
-        this.rootSelector = rootSelector;
+        this.containerSelector = containerSelector;
 
         this.validators = validators;
         this.validationResult = null;
@@ -97,12 +99,12 @@ export default class Field {
      * @public
      */
     listen() {
-        this.addEventListenerDelegatedToRootElement(
+        this.addEventListenerDelegatedToContainerElement(
             'change',
             this.onChangeListener,
             this.fieldSelector,
         );
-        this.addEventListenerDelegatedToRootElement(
+        this.addEventListenerDelegatedToContainerElement(
             'keyup',
             this.onKeyUpListener,
             this.fieldSelector,
@@ -128,7 +130,7 @@ export default class Field {
 
         const fieldElement = this.getFieldElement();
 
-        this.getOption('onBeforeValidate')(fieldElement, this.rootElement);
+        this.getOption('onBeforeValidate')(fieldElement, this.containerElement);
 
         const actionId = startAction(this);
 
@@ -147,7 +149,7 @@ export default class Field {
             } catch (error) {
                 finishAction(this, actionId);
                 this.setCssClass('');
-                this.getOption('onValidationError')(error, fieldElement, this.rootElement);
+                this.getOption('onValidationError')(error, fieldElement, this.containerElement);
                 throw error;
             }
 
@@ -170,7 +172,11 @@ export default class Field {
             this.validationResult.isValid() ? FIELD_VALID_CSS_CLASS : FIELD_INVALID_CSS_CLASS,
         );
 
-        this.getOption('onAfterValidate')(this.validationResult, fieldElement, this.rootElement);
+        this.getOption('onAfterValidate')(
+            this.validationResult,
+            fieldElement,
+            this.containerElement,
+        );
 
         return this.validationResult;
     }
@@ -220,7 +226,7 @@ export default class Field {
      * @returns {boolean}
      */
     exists() {
-        return this.rootElement.querySelector(this.fieldSelector) !== null;
+        return this.containerElement.querySelector(this.fieldSelector) !== null;
     }
 
     /**
@@ -229,7 +235,7 @@ export default class Field {
      * @returns {Element}
      */
     getFieldElement() {
-        const fieldElement = this.rootElement.querySelector(this.fieldSelector);
+        const fieldElement = this.containerElement.querySelector(this.fieldSelector);
         if (!fieldElement) {
             throw new Error(`Field element with the "${this.fieldSelector}" selector not found.`);
         }
@@ -252,8 +258,8 @@ export default class Field {
     /**
      * @private
      */
-    addEventListenerDelegatedToRootElement(type, listener, selector) {
-        this.rootElement.addEventListener(type, (event) => {
+    addEventListenerDelegatedToContainerElement(type, listener, selector) {
+        this.containerElement.addEventListener(type, (event) => {
             const target = event.target;
 
             if (target.classList.contains(selector.substring(1))) {
@@ -333,8 +339,8 @@ export default class Field {
         if (this.typingDelayId) {
             clearTimeout(this.typingDelayId);
             this.typingDelayId = null;
-            this.getOption('onTypingEnd')(value, fieldElement, this.rootElement);
-            this.getOption('onChange')(value, fieldElement, this.rootElement);
+            this.getOption('onTypingEnd')(value, fieldElement, this.containerElement);
+            this.getOption('onChange')(value, fieldElement, this.containerElement);
             if (this.getOption('validateOnType') || this.getOption('validateOnChange')) {
                 await ignoreRejects(async () => {
                     await this.validate();
@@ -343,7 +349,7 @@ export default class Field {
             return;
         }
 
-        this.getOption('onChange')(value, fieldElement, this.rootElement);
+        this.getOption('onChange')(value, fieldElement, this.containerElement);
         if (this.getOption('validateOnChange')) {
             await ignoreRejects(async () => {
                 await this.validate();
@@ -369,13 +375,13 @@ export default class Field {
         if (this.typingDelayId) {
             clearTimeout(this.typingDelayId);
         } else {
-            this.getOption('onTypingStart')(value, fieldElement, this.rootElement);
+            this.getOption('onTypingStart')(value, fieldElement, this.containerElement);
         }
 
         this.typingDelayId = setTimeout(async () => {
             this.typingDelayId = null;
 
-            this.getOption('onTypingEnd')(value, fieldElement, this.rootElement);
+            this.getOption('onTypingEnd')(value, fieldElement, this.containerElement);
 
             if (this.getOption('validateOnType')) {
                 await ignoreRejects(async () => {
@@ -391,7 +397,7 @@ export default class Field {
      * @returns {Element[]}
      */
     getListElementsExceptFirst() {
-        return Array.from(this.rootElement.querySelectorAll(this.fieldSelector)).slice(1);
+        return Array.from(this.containerElement.querySelectorAll(this.fieldSelector)).slice(1);
     }
 
     /**
@@ -415,7 +421,7 @@ export default class Field {
             return null;
         }
 
-        return this.rootElement.querySelector(`[name=${this.getFieldElement().name}]:checked`);
+        return this.containerElement.querySelector(`[name=${this.getFieldElement().name}]:checked`);
     }
 
     /**
@@ -446,7 +452,9 @@ export default class Field {
      * @returns {boolean}
      */
     isList() {
-        return this.rootElement.querySelectorAll(this.fieldSelector).length > 1 && !this.isRadio();
+        return (
+            this.containerElement.querySelectorAll(this.fieldSelector).length > 1 && !this.isRadio()
+        );
     }
 
     /**
@@ -550,7 +558,7 @@ export default class Field {
 
         const field = new Field(
             `${this.fieldSelector}[data-field-id="${element.dataset.fieldId}"]`,
-            this.rootSelector,
+            this.containerSelector,
             this.validators,
             this.options,
         );

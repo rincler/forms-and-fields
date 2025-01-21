@@ -832,7 +832,7 @@ describe('file validator', () => {
 });
 
 describe('init field', () => {
-    test('non-existent root element', () => {
+    test('non-existent container element', () => {
         expect(() => new Field('.js-input', '.js-foo')).toThrow(Error);
     });
 
