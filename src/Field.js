@@ -31,6 +31,8 @@ export default class Field {
     /**
      * @public
      *
+     * @constructor
+     *
      * @param {string} fieldSelector
      * @param {string} containerSelector
      * @param {array} validators
@@ -58,6 +60,22 @@ export default class Field {
 
     /**
      * @public
+     */
+    listen() {
+        this.addEventListenerDelegatedToContainerElement(
+            'change',
+            this.onChangeListener,
+            this.fieldSelector,
+        );
+        this.addEventListenerDelegatedToContainerElement(
+            'keyup',
+            this.onKeyUpListener,
+            this.fieldSelector,
+        );
+    }
+
+    /**
+     * @private
      *
      * @param {object} options
      */
@@ -71,7 +89,7 @@ export default class Field {
     }
 
     /**
-     * @public
+     * @private
      *
      * @param {string} name
      *
@@ -93,23 +111,7 @@ export default class Field {
     }
 
     /**
-     * @public
-     */
-    listen() {
-        this.addEventListenerDelegatedToContainerElement(
-            'change',
-            this.onChangeListener,
-            this.fieldSelector,
-        );
-        this.addEventListenerDelegatedToContainerElement(
-            'keyup',
-            this.onKeyUpListener,
-            this.fieldSelector,
-        );
-    }
-
-    /**
-     * @public
+     * @private
      *
      * @param {boolean} force
      *
@@ -177,7 +179,7 @@ export default class Field {
     }
 
     /**
-     * @public
+     * @private
      *
      * @returns {string|string[]|boolean|null|FileList}
      */
@@ -252,6 +254,10 @@ export default class Field {
 
     /**
      * @private
+     *
+     * @param {string} type
+     * @param {function} listener
+     * @param {string} selector
      */
     addEventListenerDelegatedToContainerElement(type, listener, selector) {
         this.containerElement.addEventListener(type, (event) => {
@@ -272,7 +278,7 @@ export default class Field {
     /**
      * @private
      *
-     * @param {string|function} validatorItem
+     * @param {string|function|object} validatorItem
      *
      * @returns {function}
      */
@@ -319,6 +325,8 @@ export default class Field {
 
     /**
      * @private
+     *
+     * @param {Element} fieldElement
      */
     async onChangeListener(fieldElement) {
         this.validationResult = null;
@@ -349,6 +357,8 @@ export default class Field {
 
     /**
      * @private
+     *
+     * @param {Element} fieldElement
      */
     async onKeyUpListener(fieldElement) {
         this.validationResult = null;
@@ -497,7 +507,7 @@ export default class Field {
     /**
      * @private
      *
-     * @param {string|boolean|object} value
+     * @param {string|string[]|boolean|null|FileList} value
      *
      * @returns {boolean}
      */
@@ -572,6 +582,11 @@ export default class Field {
         return field;
     }
 
+    /**
+     * @private
+     *
+     * @param {string} status
+     */
     setStatus(status) {
         const fieldElement = this.getFieldElement();
         const wrapperElement = this.getFieldWrapperElement();

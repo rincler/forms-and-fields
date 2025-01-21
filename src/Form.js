@@ -29,6 +29,8 @@ export default class Form {
     /**
      * @public
      *
+     * @constructor
+     *
      * @param {string} formSelector
      * @param {array} fields
      * @param {function} submit
@@ -50,6 +52,24 @@ export default class Form {
 
     /**
      * @public
+     */
+    listen() {
+        this.formElement.addEventListener('change', () => {
+            this.setStatus('');
+        });
+        this.formElement.addEventListener('keyup', () => {
+            this.setStatus('');
+        });
+        this.formElement.addEventListener('submit', this.onSubmitForm.bind(this));
+
+        // eslint-disable-next-line no-restricted-syntax
+        for (const field of this.fields) {
+            field.listen();
+        }
+    }
+
+    /**
+     * @private
      *
      * @param {object} options
      */
@@ -64,7 +84,7 @@ export default class Form {
     }
 
     /**
-     * @public
+     * @private
      *
      * @param {string} name
      *
@@ -147,27 +167,9 @@ export default class Form {
     }
 
     /**
-     * @public
-     */
-    listen() {
-        this.formElement.addEventListener('change', () => {
-            this.setStatus('');
-        });
-        this.formElement.addEventListener('keyup', () => {
-            this.setStatus('');
-        });
-        this.formElement.addEventListener('submit', this.onSubmitForm.bind(this));
-
-        // eslint-disable-next-line no-restricted-syntax
-        for (const field of this.fields) {
-            field.listen();
-        }
-    }
-
-    /**
      * @private
      *
-     * @param {object} e
+     * @param {SubmitEvent} e
      *
      * @returns {Promise<void>}
      */
@@ -188,7 +190,7 @@ export default class Form {
     }
 
     /**
-     * @public
+     * @private
      *
      * @returns {Promise<ValidationResult[]>}
      */
@@ -273,6 +275,11 @@ export default class Form {
         }
     }
 
+    /**
+     * @private
+     *
+     * @return FormData
+     */
     getData() {
         return new FormData(this.formElement);
     }
@@ -301,6 +308,11 @@ export default class Form {
         return fields;
     }
 
+    /**
+     * @private
+     *
+     * @param {string} status
+     */
     setStatus(status) {
         if (status === '') {
             this.getOption('onResetStatus')(this.formElement);
