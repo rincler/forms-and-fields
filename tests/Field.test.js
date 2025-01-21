@@ -19,7 +19,7 @@ beforeEach(() => {
             <input class="js-list-input js-list-input-2" name="list-input-name[1]" />
             <input class="js-list-input js-list-input-3" name="list-input-name[2]" />
             <input class="js-checkbox" type="checkbox" />
-            <div class="js-ff-field-wrapper">
+            <div class="js-wrapper" data-field-wrapper>
                 <input class="js-radio js-radio-1" type="radio" name="radio" value="1">
                 <input class="js-radio js-radio-2" type="radio" name="radio" value="2" />
             </div>
@@ -943,8 +943,8 @@ describe('statuses', () => {
     });
 
     test('with wrapper', async () => {
-        const field = new Field('.js-radio', '.js-ff-field-wrapper', ['required']);
-        const wrapper = document.querySelector('.js-ff-field-wrapper');
+        const field = new Field('.js-radio', '.js-container', ['required']);
+        const wrapper = document.querySelector('.js-wrapper');
         await field.validate();
         expect(wrapper.classList.contains('ff-field-invalid')).toBe(true);
     });
@@ -964,7 +964,7 @@ describe('statuses', () => {
 
     test.each([
         ['input', '.js-input', null],
-        ['radio', '.js-radio', '.js-ff-field-wrapper'],
+        ['radio', '.js-radio', '.js-wrapper'],
     ])('custom "setStatus": %s', async (_, selector, expectedElementSelector) => {
         const setStatus = jest.fn();
         const field = new Field(selector, '.js-container', [() => ValidationResult.valid()], {
@@ -990,7 +990,7 @@ describe('statuses', () => {
 
     test.each([
         ['input', '.js-input', null],
-        ['radio', '.js-radio', '.js-ff-field-wrapper'],
+        ['radio', '.js-radio', '.js-wrapper'],
     ])('status is reset on change %s', (_, selector, expectedElementSelector) => {
         const setStatus = jest.fn();
         const onResetStatus = jest.fn();
@@ -1037,7 +1037,7 @@ describe('statuses', () => {
 
     test.each([
         ['input', '.js-input', null],
-        ['radio', '.js-radio', '.js-ff-field-wrapper'],
+        ['radio', '.js-radio', '.js-wrapper'],
     ])('"onResetStatus" is called: %s', (_, selector, expectedElementSelector) => {
         const onResetStatus = jest.fn();
         const field = new Field(selector, '.js-container', [], {

@@ -248,7 +248,7 @@ Special CSS classes are dynamically added to form and field elements during vali
 - `ff-form-positive-submit`
 - `ff-form-negative-submit`
 
-You can wrap any field element in a container with the `js-ff-field-wrapper` CSS class.
+You can wrap any field element in a container with the `data-field-wrapper` attribute.
 The special classes will then be applied to this wrapper instead of the field element itself. This is particularly useful for checkboxes and radio buttons.
 
 The `onResetStatus` callback can be useful for clearing form or field errors that were set using the `onAfterValidate` or `onAfterNegativeSubmit` callbacks, for example.

@@ -6,8 +6,6 @@ const FIELD_VALIDATING_STATUS = 'ff-field-validating';
 const FIELD_VALID_STATUS = 'ff-field-valid';
 const FIELD_INVALID_STATUS = 'ff-field-invalid';
 
-const FIELD_WRAPPER_CSS_CLASS = 'js-ff-field-wrapper';
-
 const NOOP = () => {};
 
 const DEFAULT_OPTIONS = {
@@ -247,7 +245,7 @@ export default class Field {
      */
     getFieldWrapperElement() {
         const fieldElement = this.getFieldElement();
-        return fieldElement.parentElement.classList.contains(FIELD_WRAPPER_CSS_CLASS)
+        return 'fieldWrapper' in fieldElement.parentElement.dataset
             ? fieldElement.parentElement
             : null;
     }
