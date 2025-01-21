@@ -197,7 +197,7 @@ describe('"validateOnType" and "validateOnChange" options', () => {
         jest.runAllTimers();
 
         await waitFor(() => {
-            expect(field.validationResult.isValid()).toBeTruthy();
+            expect(field.validationResult.isValid()).toBe(true);
         });
     });
 });
@@ -509,7 +509,7 @@ describe('other options', () => {
 
         let validationResult = await field2.validate();
 
-        expect(validationResult.isValid()).toBeFalsy();
+        expect(validationResult.isValid()).toBe(false);
 
         fireEvent.change(input, { target: { value: '' } });
 
@@ -522,7 +522,7 @@ describe('other options', () => {
 describe('validation result', () => {
     test('validation result with true is passed to "onAfterValidate"', async () => {
         const onAfterValidate = (validationResult) => {
-            expect(validationResult.isValid()).toBeTruthy();
+            expect(validationResult.isValid()).toBe(true);
         };
 
         const field = new Field('.js-input', '.js-container', ['required'], {
@@ -536,7 +536,7 @@ describe('validation result', () => {
 
     test('validation result with false is passed to "onAfterValidate"', async () => {
         const onAfterValidate = (validationResult) => {
-            expect(validationResult.isValid()).toBeFalsy();
+            expect(validationResult.isValid()).toBe(false);
         };
 
         const field = new Field('.js-input', '.js-container', ['required'], {
@@ -750,14 +750,14 @@ describe('file validator', () => {
         });
 
         const validationResult = await field.validate();
-        expect(validationResult.isValid()).toBeTruthy();
+        expect(validationResult.isValid()).toBe(true);
     });
 
     test('valid when no file', async () => {
         const field = new Field('.js-file', '.js-container', [newFileValidator()]);
 
         const validationResult = await field.validate();
-        expect(validationResult.isValid()).toBeTruthy();
+        expect(validationResult.isValid()).toBe(true);
     });
 
     test.each([
