@@ -29,8 +29,6 @@ const DEFAULT_OPTIONS = {
     setStatus: NOOP,
 };
 
-const virtualFieldsCache = {};
-
 export default class Field {
     /**
      * @public
@@ -54,6 +52,7 @@ export default class Field {
 
         this.validators = validators;
         this.validationResult = null;
+        this.virtualFieldsCache = {};
 
         this.options = {};
         this.setOptions(options);
@@ -263,13 +262,8 @@ export default class Field {
             if (target.classList.contains(selector.substring(1))) {
                 let field = this;
                 if (this.isList()) {
-                    const listElementsExceptFirst = this.getListElementsExceptFirst();
-                    const notFirstListElement = listElementsExceptFirst.find((e) =>
-                        e.isSameNode(target),
-                    );
-                    if (notFirstListElement) {
-                        field = this.getVirtualFieldForElement(notFirstListElement);
-                    }
+                    const virtualFields = this.getVirtualFieldsOfList();
+                    field = virtualFields[this.findElementIndexInList(target)];
                 }
 
                 listener.call(field, target);
@@ -394,19 +388,17 @@ export default class Field {
      *
      * @returns {Element[]}
      */
-    getListElementsExceptFirst() {
-        return Array.from(this.containerElement.querySelectorAll(this.fieldSelector)).slice(1);
+    getListElements() {
+        return Array.from(this.containerElement.querySelectorAll(this.fieldSelector));
     }
 
     /**
      * @private
      *
-     * @returns {Field[]}
+     * @param {Element} element
      */
-    getVirtualFieldsOfList() {
-        return this.getListElementsExceptFirst().map((listElement) =>
-            this.getVirtualFieldForElement(listElement),
-        );
+    findElementIndexInList(element) {
+        return this.getListElements().findIndex((e) => e.isSameNode(element));
     }
 
     /**
@@ -450,6 +442,10 @@ export default class Field {
      * @returns {boolean}
      */
     isList() {
+        if ('fieldId' in this.getFieldElement().dataset) {
+            return true;
+        }
+
         return (
             this.containerElement.querySelectorAll(this.fieldSelector).length > 1 && !this.isRadio()
         );
@@ -543,6 +539,19 @@ export default class Field {
 
     /**
      * @private
+     *
+     * @returns {Field[]}
+     */
+    getVirtualFieldsOfList() {
+        return this.getListElements().map((listElement) =>
+            this.getVirtualFieldForElement(listElement),
+        );
+    }
+
+    /**
+     * @private
+     *
+     * @param {Element} element
      */
     getVirtualFieldForElement(element) {
         if (!element.dataset.fieldId) {
@@ -550,8 +559,8 @@ export default class Field {
             element.dataset.fieldId = Math.random().toString(36).substring(2);
         }
 
-        if (virtualFieldsCache[element.dataset.fieldId]) {
-            return virtualFieldsCache[element.dataset.fieldId];
+        if (this.virtualFieldsCache[element.dataset.fieldId]) {
+            return this.virtualFieldsCache[element.dataset.fieldId];
         }
 
         const field = new Field(
@@ -560,7 +569,7 @@ export default class Field {
             this.validators,
             this.options,
         );
-        virtualFieldsCache[element.dataset.fieldId] = field;
+        this.virtualFieldsCache[element.dataset.fieldId] = field;
 
         return field;
     }

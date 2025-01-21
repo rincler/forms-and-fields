@@ -291,10 +291,10 @@ export default class Form {
                 continue;
             }
 
-            fields.push(field);
-
             if (field.isList()) {
                 fields.push(...field.getVirtualFieldsOfList());
+            } else {
+                fields.push(field);
             }
         }
 
