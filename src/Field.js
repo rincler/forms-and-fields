@@ -264,6 +264,7 @@ export default class Field {
             const target = event.target;
 
             if (target.classList.contains(selector.substring(1))) {
+                // eslint-disable-next-line @typescript-eslint/no-this-alias
                 let field = this;
                 if (this.isList()) {
                     const virtualFields = this.getVirtualFieldsOfList();

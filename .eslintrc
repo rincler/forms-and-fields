@@ -1,15 +1,24 @@
 {
+    "root": true,
     "env": {
         "browser": true,
         "es6": true,
         "jest/globals": true
     },
-    "extends": ["airbnb-base", "plugin:prettier/recommended",  "plugin:jest/recommended"],
+    "extends": [
+        "airbnb-base",
+        "airbnb-typescript/base",
+        "plugin:prettier/recommended",
+        "plugin:jest/recommended",
+        "plugin:@typescript-eslint/recommended"
+    ],
     "globals": {
         "Atomics": "readonly",
         "SharedArrayBuffer": "readonly"
     },
+    "parser": "@typescript-eslint/parser",
     "parserOptions": {
+        "project": "./tsconfig.json",
         "ecmaVersion": "latest",
         "sourceType": "module"
     },
