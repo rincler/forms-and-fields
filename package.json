@@ -12,6 +12,7 @@
         "validate"
     ],
     "main": "dist/index.js",
+    "types": "dist/index.d.ts",
     "files": [
         "dist"
     ],
@@ -35,6 +36,7 @@
         "@babel/plugin-transform-runtime": "^7.25.9",
         "@babel/preset-env": "^7.26.0",
         "@testing-library/dom": "^10.4.0",
+        "@types/validator": "^13.12.2",
         "@typescript-eslint/eslint-plugin": "^7.18.0",
         "@typescript-eslint/parser": "^7.18.0",
         "babelify": "^10.0.0",
@@ -52,9 +54,9 @@
         "typescript": "^5.7.3"
     },
     "scripts": {
-        "build": "babel src --out-dir dist",
+        "build": "tsc",
         "prepack": "npm run build",
-        "lint": "eslint .",
+        "check": "tsc --noEmit && eslint .",
         "sandbox": "npm run sandbox:build && npm run sandbox:start",
         "sandbox:build": "browserify sandbox/sandbox.js -o sandbox/bundle.js -t babelify --debug",
         "sandbox:start": "node sandbox/server.js",

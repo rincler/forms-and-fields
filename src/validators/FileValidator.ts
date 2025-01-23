@@ -1,46 +1,41 @@
 import ValidationResult from '../ValidationResult';
+import { FieldValue, FileValidatorInvalidMessages, FileValidatorRules } from '../types';
 
 export default class FileValidator {
-    /**
-     * @public
-     *
-     * @param {object} rules
-     * @param {object} invalidMessages
-     */
-    constructor(rules, invalidMessages = {}) {
-        this.rules = rules;
-        this.invalidMessages = invalidMessages;
+    rules: FileValidatorRules;
+    invalidMessages: Required<FileValidatorInvalidMessages>;
 
-        this.invalidMessages.maxCount = this.invalidMessages.maxCount || 'Invalid count.';
+    constructor(rules: FileValidatorRules, invalidMessages: FileValidatorInvalidMessages = {}) {
+        this.rules = rules;
 
         const defaultInvalidMessage = '{file} is invalid.';
-        this.invalidMessages.maxSize = this.invalidMessages.maxSize || defaultInvalidMessage;
-        this.invalidMessages.allowedExtensions =
-            this.invalidMessages.allowedExtensions || defaultInvalidMessage;
-        this.invalidMessages.allowedMimeTypes =
-            this.invalidMessages.allowedMimeTypes || defaultInvalidMessage;
+
+        this.invalidMessages = {
+            maxCount: invalidMessages.maxCount || 'Invalid count.',
+            maxSize: invalidMessages.maxSize || defaultInvalidMessage,
+            allowedExtensions: invalidMessages.allowedExtensions || defaultInvalidMessage,
+            allowedMimeTypes: invalidMessages.allowedMimeTypes || defaultInvalidMessage,
+        };
     }
 
-    /**
-     *
-     * @param {FileList} files
-     *
-     * @return ValidationResult
-     */
-    validate(files) {
-        if (this.rules.maxCount && files.length > this.rules.maxCount) {
+    validate(files: FieldValue): ValidationResult {
+        if (!(files instanceof FileList)) {
+            throw new Error('Files are not an instance of the FileList class.');
+        }
+
+        if (this.rules.maxCount !== undefined && files.length > this.rules.maxCount) {
             return ValidationResult.invalid(this.prepareMessage(this.invalidMessages.maxCount));
         }
 
         // eslint-disable-next-line no-restricted-syntax
         for (const file of files) {
-            if (this.rules.maxSize && file.size > this.rules.maxSize) {
+            if (this.rules.maxSize !== undefined && file.size > this.rules.maxSize) {
                 return ValidationResult.invalid(
                     this.prepareMessage(this.prepareMessage(this.invalidMessages.maxSize, file)),
                 );
             }
 
-            if (this.rules.allowedExtensions) {
+            if (this.rules.allowedExtensions !== undefined) {
                 if (!this.rules.allowedExtensions.some((e) => file.name.endsWith(e))) {
                     return ValidationResult.invalid(
                         this.prepareMessage(this.invalidMessages.allowedExtensions, file),
@@ -48,7 +43,10 @@ export default class FileValidator {
                 }
             }
 
-            if (this.rules.allowedMimeTypes && !this.rules.allowedMimeTypes.includes(file.type)) {
+            if (
+                this.rules.allowedMimeTypes !== undefined &&
+                !this.rules.allowedMimeTypes.includes(file.type)
+            ) {
                 return ValidationResult.invalid(
                     this.prepareMessage(this.invalidMessages.allowedMimeTypes, file),
                 );
@@ -58,14 +56,14 @@ export default class FileValidator {
         return ValidationResult.valid();
     }
 
-    prepareMessage(message, file = undefined) {
+    prepareMessage(message: string, file: File | undefined = undefined): string {
         let preparedMessage = message;
 
         if (this.rules.maxCount) {
-            preparedMessage = preparedMessage.replace('{maxCount}', this.rules.maxCount);
+            preparedMessage = preparedMessage.replace('{maxCount}', this.rules.maxCount.toString());
         }
 
-        if (!file) {
+        if (file === undefined) {
             return preparedMessage;
         }
 
@@ -87,29 +85,32 @@ export default class FileValidator {
         }
 
         if (this.rules.maxSize) {
-            const round = (v) => Math.round(v * 100) / 100;
-            preparedMessage = preparedMessage.replace('{fileSize}', file.size);
-            preparedMessage = preparedMessage.replace('{fileSizeInKib}', round(file.size / 1024));
+            const round = (v: number): number => Math.round(v * 100) / 100;
+            preparedMessage = preparedMessage.replace('{fileSize}', file.size.toString());
+            preparedMessage = preparedMessage.replace(
+                '{fileSizeInKib}',
+                round(file.size / 1024).toString(),
+            );
             preparedMessage = preparedMessage.replace(
                 '{fileSizeInMiB}',
-                round(file.size / 1024 / 1024),
+                round(file.size / 1024 / 1024).toString(),
             );
             preparedMessage = preparedMessage.replace(
                 '{fileSizeInGiB}',
-                round(file.size / 1024 / 1024 / 1024),
+                round(file.size / 1024 / 1024 / 1024).toString(),
             );
-            preparedMessage = preparedMessage.replace('{maxSize}', this.rules.maxSize);
+            preparedMessage = preparedMessage.replace('{maxSize}', this.rules.maxSize.toString());
             preparedMessage = preparedMessage.replace(
                 '{maxSizeInKiB}',
-                round(this.rules.maxSize / 1024),
+                round(this.rules.maxSize / 1024).toString(),
             );
             preparedMessage = preparedMessage.replace(
                 '{maxSizeInMiB}',
-                round(this.rules.maxSize / 1024 / 1024),
+                round(this.rules.maxSize / 1024 / 1024).toString(),
             );
             preparedMessage = preparedMessage.replace(
                 '{maxSizeInGiB}',
-                round(this.rules.maxSize / 1024 / 1024 / 1024),
+                round(this.rules.maxSize / 1024 / 1024 / 1024).toString(),
             );
         }
 

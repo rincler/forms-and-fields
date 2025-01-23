@@ -18,13 +18,23 @@
     },
     "parser": "@typescript-eslint/parser",
     "parserOptions": {
-        "project": "./tsconfig.json",
+        "project": "./tsconfig.eslint.json",
         "ecmaVersion": "latest",
         "sourceType": "module"
     },
     "rules": {
         "no-continue": ["off"],
         "prefer-destructuring": ["off"],
-        "no-plusplus": ["off"]
-    }
+        "no-plusplus": ["off"],
+        "@typescript-eslint/lines-between-class-members": ["off"],
+        "@typescript-eslint/explicit-function-return-type": ["error"]
+    },
+    "overrides": [
+        {
+            "files": ["*.js"],
+            "rules": {
+                "@typescript-eslint/explicit-function-return-type": ["off"]
+            }
+        }
+    ]
 }

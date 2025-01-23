@@ -1,19 +1,12 @@
 import ValidationResult from './ValidationResult';
-import { ignoreRejects, startAction, finishAction } from './Reject';
+import { finishAction, ignoreRejects, startAction } from './Reject';
+import Field from './Field';
+import { FormOptionName, FormOptions, FormStatus, SubmitFn } from './types';
 
-const FORM_VALIDATING_STATUS = 'ff-form-validating';
-const FORM_VALID_STATUS = 'ff-form-valid';
-const FORM_INVALID_STATUS = 'ff-form-invalid';
+const NOOP = (): void => {};
 
-const FORM_SUBMITTING_STATUS = 'ff-form-submitting';
-const FORM_POSITIVE_SUBMIT_STATUS = 'ff-form-positive-submit';
-const FORM_NEGATIVE_SUBMIT_STATUS = 'ff-form-negative-submit';
-
-const NOOP = () => {};
-
-const DEFAULT_OPTIONS = {
+const DEFAULT_OPTIONS: FormOptions = {
     onBeforeValidate: NOOP,
-    validate: NOOP,
     onAfterValidate: NOOP,
     onValidationError: NOOP,
     onBeforeSubmit: NOOP,
@@ -22,43 +15,50 @@ const DEFAULT_OPTIONS = {
     onAfterNegativeSubmit: NOOP,
     onSubmissionError: NOOP,
     onResetStatus: NOOP,
-    setStatus: NOOP,
 };
 
-export default class Form {
-    /**
-     * @public
-     *
-     * @constructor
-     *
-     * @param {string} formSelector
-     * @param {array} fields
-     * @param {function} submit
-     * @param {object} options
-     */
-    constructor(formSelector, fields, submit, options = {}) {
-        this.formElement = document.querySelector(formSelector);
+const ALLOWED_OPTIONS = [...Object.keys(DEFAULT_OPTIONS), 'validate', 'setFieldStatus'];
 
-        if (!this.formElement) {
-            throw new Error(`Form element with the "${formSelector}" selector not found.`);
+export default class Form {
+    formElement: HTMLFormElement;
+    fields: Field[];
+    submit: SubmitFn;
+    options: FormOptions;
+    actionId: number;
+
+    constructor(
+        formSelector: string,
+        fields: Field[],
+        submit: SubmitFn,
+        options: FormOptions = {},
+    ) {
+        const formElement = document.querySelector(formSelector);
+
+        if (!formElement) {
+            throw new Error(`A form element with the "${formSelector}" selector not found.`);
         }
+
+        if (!(formElement instanceof HTMLFormElement)) {
+            throw new Error(`An element with the "${formSelector}" selector is not a form.`);
+        }
+
+        this.formElement = formElement;
 
         this.submit = submit;
         this.fields = fields;
 
         this.options = {};
         this.setOptions(options);
+
+        this.actionId = 0;
     }
 
-    /**
-     * @public
-     */
-    listen() {
+    listen(): void {
         this.formElement.addEventListener('change', () => {
-            this.setStatus('');
+            this.setStatus(FormStatus.No);
         });
         this.formElement.addEventListener('keyup', () => {
-            this.setStatus('');
+            this.setStatus(FormStatus.No);
         });
         this.formElement.addEventListener('submit', this.onSubmitForm.bind(this));
 
@@ -68,49 +68,34 @@ export default class Form {
         }
     }
 
-    /**
-     * @private
-     *
-     * @param {object} options
-     */
-    setOptions(options) {
+    setOptions(options: FormOptions): void {
         // eslint-disable-next-line no-restricted-syntax
-        for (const name of Object.keys(options)) {
-            if (name in DEFAULT_OPTIONS && options[name] !== undefined) {
+        for (const name of Object.keys(options) as Array<FormOptionName>) {
+            if (ALLOWED_OPTIONS.includes(name) && options[name] !== undefined) {
+                // @ts-expect-error The same type.
                 this.options[name] = options[name];
             }
         }
         this.setFieldOptions(options);
     }
 
-    /**
-     * @private
-     *
-     * @param {string} name
-     *
-     * @returns {any}
-     */
-    getOption(name) {
-        return this.hasOption(name) ? this.options[name] : DEFAULT_OPTIONS[name];
+    getOption<Name extends FormOptionName>(name: Name): Required<FormOptions>[Name] {
+        if (this.hasOption(name)) {
+            return this.options[name] as Required<FormOptions>[Name];
+        }
+
+        if (DEFAULT_OPTIONS[name] === undefined) {
+            throw new Error(`The "${name}" form option is not set.`);
+        }
+
+        return DEFAULT_OPTIONS[name] as Required<FormOptions>[Name];
     }
 
-    /**
-     * @private
-     *
-     * @param {string} name
-     *
-     * @returns {boolean}
-     */
-    hasOption(name) {
+    hasOption(name: FormOptionName): boolean {
         return this.options[name] !== undefined;
     }
 
-    /**
-     * @private
-     *
-     * @param {object} options
-     */
-    setFieldOptions(options) {
+    setFieldOptions(options: FormOptions): void {
         // eslint-disable-next-line no-restricted-syntax
         for (const field of this.fields) {
             field.setOptions({
@@ -166,14 +151,7 @@ export default class Form {
         }
     }
 
-    /**
-     * @private
-     *
-     * @param {SubmitEvent} e
-     *
-     * @returns {Promise<void>}
-     */
-    async onSubmitForm(e) {
+    async onSubmitForm(e: Event): Promise<void> {
         e.preventDefault();
 
         await ignoreRejects(async () => {
@@ -189,24 +167,19 @@ export default class Form {
         });
     }
 
-    /**
-     * @private
-     *
-     * @returns {Promise<ValidationResult[]>}
-     */
-    async validate() {
+    async validate(): Promise<ValidationResult[]> {
         if (
             this.fields.every((field) => field.validators.length === 0) &&
             !this.hasOption('validate')
         ) {
-            return [];
+            return Promise.resolve([]);
         }
 
         this.getOption('onBeforeValidate')(this.formElement);
 
-        this.setStatus(FORM_VALIDATING_STATUS);
-
         const actionId = startAction(this);
+
+        this.setStatus(FormStatus.Validating);
 
         let validationResults = [];
 
@@ -221,7 +194,7 @@ export default class Form {
             validationResults.push(formValidationResult);
         } catch (error) {
             finishAction(this, actionId);
-            this.setStatus('');
+            this.setStatus(FormStatus.No);
             this.getOption('onValidationError')(error, this.formElement);
             throw error;
         }
@@ -230,26 +203,21 @@ export default class Form {
 
         const isValid = ValidationResult.areValid(validationResults);
 
-        this.setStatus(isValid ? FORM_VALID_STATUS : FORM_INVALID_STATUS);
+        this.setStatus(isValid ? FormStatus.Valid : FormStatus.Invalid);
 
         this.getOption('onAfterValidate')(validationResults, this.formElement);
 
         return validationResults;
     }
 
-    /**
-     * @private
-     *
-     * @returns {Promise<void>}
-     */
-    async runSubmitProcess() {
+    async runSubmitProcess(): Promise<void> {
         const data = this.getData();
 
         this.getOption('onBeforeSubmit')(data, this.formElement);
 
         const actionId = startAction(this);
 
-        this.setStatus(FORM_SUBMITTING_STATUS);
+        this.setStatus(FormStatus.Submitting);
 
         let submissionResult;
 
@@ -257,7 +225,7 @@ export default class Form {
             submissionResult = await this.submit(data);
         } catch (error) {
             finishAction(this, actionId);
-            this.setStatus(FORM_VALID_STATUS);
+            this.setStatus(FormStatus.Valid);
             this.getOption('onSubmissionError')(error, this.formElement);
             throw error;
         }
@@ -267,29 +235,19 @@ export default class Form {
         this.getOption('onAfterSubmit')(submissionResult, this.formElement);
 
         if (submissionResult.isPositive()) {
-            this.setStatus(FORM_POSITIVE_SUBMIT_STATUS);
+            this.setStatus(FormStatus.PositiveSubmit);
             this.getOption('onAfterPositiveSubmit')(submissionResult.getData(), this.formElement);
         } else {
-            this.setStatus(FORM_NEGATIVE_SUBMIT_STATUS);
+            this.setStatus(FormStatus.NegativeSubmit);
             this.getOption('onAfterNegativeSubmit')(submissionResult.getData(), this.formElement);
         }
     }
 
-    /**
-     * @private
-     *
-     * @return FormData
-     */
-    getData() {
+    getData(): FormData {
         return new FormData(this.formElement);
     }
 
-    /**
-     * @private
-     *
-     * @returns {Field[]}
-     */
-    getAllFields() {
+    getAllFields(): Field[] {
         const fields = [];
 
         // eslint-disable-next-line no-restricted-syntax
@@ -308,13 +266,8 @@ export default class Form {
         return fields;
     }
 
-    /**
-     * @private
-     *
-     * @param {string} status
-     */
-    setStatus(status) {
-        if (status === '') {
+    setStatus(status: FormStatus): void {
+        if (status === FormStatus.No) {
             this.getOption('onResetStatus')(this.formElement);
         }
 
@@ -324,14 +277,14 @@ export default class Form {
         }
 
         this.formElement.classList.remove(
-            FORM_VALIDATING_STATUS,
-            FORM_VALID_STATUS,
-            FORM_INVALID_STATUS,
-            FORM_SUBMITTING_STATUS,
-            FORM_POSITIVE_SUBMIT_STATUS,
-            FORM_NEGATIVE_SUBMIT_STATUS,
+            FormStatus.Validating,
+            FormStatus.Valid,
+            FormStatus.Invalid,
+            FormStatus.Submitting,
+            FormStatus.PositiveSubmit,
+            FormStatus.NegativeSubmit,
         );
-        if (status !== '') {
+        if (status !== FormStatus.No) {
             this.formElement.classList.add(status);
         }
     }
