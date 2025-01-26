@@ -7,17 +7,16 @@ import FileValidator from '../src/validators/FileValidator';
 const fetchOk = async (input, init) => {
     const response = await fetch(input, init);
     if (!response.ok) {
-        throw new Error(`The request "${input}" returned with an HTTP status code: ${response.status}.`);
+        throw new Error(
+            `The request "${input}" returned with an HTTP status code: ${response.status}.`,
+        );
     }
     return response;
-}
+};
 
 const setFieldError = (fieldElement, error) => {
-    fieldElement.insertAdjacentHTML(
-        'afterend',
-        `<div class="error">${error}</div>`,
-    );
-}
+    fieldElement.insertAdjacentHTML('afterend', `<div class="error">${error}</div>`);
+};
 
 const clearFieldError = (fieldElement) => {
     fieldElement.parentNode.querySelector('.error')?.remove();
@@ -29,7 +28,7 @@ const setFormError = (formElement, error) => {
         'beforebegin',
         `<div class="form-error">${error}<br /><br /></div>`,
     );
-}
+};
 
 const clearFormError = (formElement) => {
     formElement.querySelector('.form-error')?.remove();
@@ -50,9 +49,7 @@ const form = new Form(
         new Field('.js-movie', '.js-form', ['required']),
         new Field('.js-file', '.js-form', ['required']),
     ],
-    (formData) => {
-        // eslint-disable-next-line no-console
-        console.log(formData);
+    () => {
         // here can be AJAX-request
         return new SubmissionResult(true);
     },
@@ -60,26 +57,35 @@ const form = new Form(
 
 form.listen();
 
-const domainField = new Field('.js-domain', '.js-container', ['required', 'isFQDN', async (value) => {
-    const response = await fetchOk(`/check-domain?domain=${encodeURIComponent(value)}`);
-    const result = await response.json();
+const domainField = new Field(
+    '.js-domain',
+    '.js-container',
+    [
+        'required',
+        'isFQDN',
+        async (value) => {
+            const response = await fetchOk(`/check-domain?domain=${encodeURIComponent(value)}`);
+            const result = await response.json();
 
-    return ValidationResult.make(result.isValid, 'The domain must be in the .com zone.');
-}], {
-    invalidMessages: {
-        required: 'Domain is required.',
-        isFQDN: 'Domain is not valid.',
+            return ValidationResult.make(result.isValid, 'The domain must be in the .com zone.');
+        },
+    ],
+    {
+        invalidMessages: {
+            required: 'Domain is required.',
+            isFQDN: 'Domain is not valid.',
+        },
+        validateOnType: true,
+        onResetStatus: (fieldElement) => {
+            clearFieldError(fieldElement);
+        },
+        onAfterValidate: (validationResult, fieldElement) => {
+            if (!validationResult.isValid()) {
+                setFieldError(fieldElement, validationResult.getMessage());
+            }
+        },
     },
-    validateOnType: true,
-    onResetStatus: (fieldElement) => {
-        clearFieldError(fieldElement);
-    },
-    onAfterValidate: (validationResult, fieldElement) => {
-        if (!validationResult.isValid()) {
-            setFieldError(fieldElement, validationResult.getMessage());
-        }
-    },
-});
+);
 
 domainField.listen();
 
@@ -112,16 +118,21 @@ const registrationForm = new Form(
             },
         ]),
         new Field('.js-password', '.js-register-form', ['required']),
-        new Field('.js-confirm-password', '.js-register-form', [
-            'required',
-            (value) => {
-                const password = document.querySelector('.js-password').value;
+        new Field(
+            '.js-confirm-password',
+            '.js-register-form',
+            [
+                'required',
+                (value) => {
+                    const password = document.querySelector('.js-password').value;
 
-                return ValidationResult.make(value === password);
+                    return ValidationResult.make(value === password);
+                },
+            ],
+            {
+                validationCacheEnabled: false,
             },
-        ], {
-            validationCacheEnabled: false,
-        }),
+        ),
     ],
     async (formData) => {
         const data = {
@@ -149,16 +160,20 @@ registrationForm.listen();
 
 const emailListForm = new Form(
     '.js-email-list-form',
-    [new Field('.js-email', '.js-email-list-form', ['required', 'isEmail', () => {
-        return new Promise((resolve) => {
-            setTimeout(() => {
-                resolve(ValidationResult.valid());
-            }, 2000)
-        })
-    }])],
-    (formData) => {
-        // eslint-disable-next-line no-console
-        console.log(formData);
+    [
+        new Field('.js-email', '.js-email-list-form', [
+            'required',
+            'isEmail',
+            () => {
+                return new Promise((resolve) => {
+                    setTimeout(() => {
+                        resolve(ValidationResult.valid());
+                    }, 2000);
+                });
+            },
+        ]),
+    ],
+    () => {
         return new SubmissionResult(true);
     },
 );
@@ -201,48 +216,58 @@ const uploadForm = new Form(
         ),
     ],
     async () => {
-        // eslint-disable-next-line no-console
-        console.log(formData);
         return new SubmissionResult(true);
     },
 );
 
 uploadForm.listen();
 
-const addressForm = new Form('.js-address-form', [
-    new Field('.js-zip-code', '.js-address-form', [async (value) => {
-        await fetchOk(`/check-zip-code?zip-code=${encodeURIComponent(value)}`);
-        return ValidationResult.valid();
-    }], {
-        validateOnType: true,
-        onResetStatus: (fieldElement) => {
-            clearFieldError(fieldElement);
-        },
-        onValidationError: (error, fieldElement) => {
-            setFieldError(fieldElement, error)
-        },
-    }),
-    new Field('.js-address', '.js-address-form', ['required']),
-], async (formData) => {
-    const url = mapResponseTypeToUrl(formData.get('response'));
+const addressForm = new Form(
+    '.js-address-form',
+    [
+        new Field(
+            '.js-zip-code',
+            '.js-address-form',
+            [
+                async (value) => {
+                    await fetchOk(`/check-zip-code?zip-code=${encodeURIComponent(value)}`);
+                    return ValidationResult.valid();
+                },
+            ],
+            {
+                validateOnType: true,
+                onResetStatus: (fieldElement) => {
+                    clearFieldError(fieldElement);
+                },
+                onValidationError: (error, fieldElement) => {
+                    setFieldError(fieldElement, error);
+                },
+            },
+        ),
+        new Field('.js-address', '.js-address-form', ['required']),
+    ],
+    async (formData) => {
+        const url = mapResponseTypeToUrl(formData.get('response'));
 
-    const response = await fetchOk(url, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-    });
+        const response = await fetchOk(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
 
-    const result = await response.json();
+        const result = await response.json();
 
-    return new SubmissionResult(result.isSuccess);
-}, {
-    onBeforeValidate: (formElement) => {
-        clearFormError(formElement);
+        return new SubmissionResult(result.isSuccess);
     },
-    onSubmissionError: (error, formElement) => {
-        setFormError(formElement, error);
-    }
-});
+    {
+        onBeforeValidate: (formElement) => {
+            clearFormError(formElement);
+        },
+        onSubmissionError: (error, formElement) => {
+            setFormError(formElement, error);
+        },
+    },
+);
 
 addressForm.listen();
