@@ -1,15 +1,27 @@
-/**
- * @jest-environment jsdom
- */
-
 import { fireEvent, waitFor } from '@testing-library/dom';
+import { userEvent } from '@testing-library/user-event';
 import Field from '../src/Field';
 import ValidationResult from '../src/ValidationResult';
 import FileValidator from '../src/validators/FileValidator';
+import { FieldStatus, FieldValue } from '../src/types';
 
-let input = null;
-let container = null;
+// @ts-expect-error It will not be `null` after the `beforeEach`.
+let container: HTMLElement = null;
+// @ts-expect-error It will not be `null` after the `beforeEach`.
+let input: HTMLInputElement = null;
 jest.useFakeTimers();
+
+const getInputElement = (selector: string): HTMLInputElement => {
+    return document.querySelector<HTMLInputElement>(selector)!;
+};
+
+const getOptionElement = (selector: string): HTMLOptionElement => {
+    return document.querySelector<HTMLOptionElement>(selector)!;
+};
+
+const getTextareaElement = (selector: string): HTMLTextAreaElement => {
+    return document.querySelector<HTMLTextAreaElement>(selector)!;
+};
 
 beforeEach(() => {
     document.body.innerHTML = `
@@ -32,12 +44,12 @@ beforeEach(() => {
                 <option class="js-multiple-select-option-2" value="2"></option>
             </select>
             <textarea class="js-textarea"></textarea>
-            <input class="js-file" type="file" />
+            <input class="js-file" type="file" multiple />
         </div>
     `;
 
-    input = document.querySelector('.js-input');
-    container = document.querySelector('.js-container');
+    container = document.querySelector<HTMLElement>('.js-container')!;
+    input = getInputElement('.js-input');
 });
 
 describe('"validateOnType" and "validateOnChange" options', () => {
@@ -197,7 +209,7 @@ describe('"validateOnType" and "validateOnChange" options', () => {
         jest.runAllTimers();
 
         await waitFor(() => {
-            expect(field.validationResult.isValid()).toBe(true);
+            expect(field.validationResult!.isValid()).toBe(true);
         });
     });
 });
@@ -355,13 +367,13 @@ describe('callback options', () => {
         field.listen();
 
         document
-            .querySelector('.js-container')
+            .querySelector('.js-container')!
             .insertAdjacentHTML(
                 'beforeend',
                 '<input class="js-dynamic-input" name="dynamic-input-name" />',
             );
 
-        const dynamicInput = document.querySelector('.js-dynamic-input');
+        const dynamicInput = getInputElement('.js-dynamic-input');
         dynamicInput.value = 'foo';
         fireEvent.change(dynamicInput, { target: { value: 'bar' } });
 
@@ -378,7 +390,7 @@ describe('callback options', () => {
         });
         field.listen();
 
-        const listInput = document.querySelector('.js-list-input-3');
+        const listInput = getInputElement('.js-list-input-3');
         listInput.value = 'foo';
 
         fireEvent.change(listInput, { target: { value: 'bar' } });
@@ -397,13 +409,13 @@ describe('callback options', () => {
         field.listen();
 
         document
-            .querySelector('.js-container')
+            .querySelector('.js-container')!
             .insertAdjacentHTML(
                 'beforeend',
                 `<input class="js-list-input js-dynamic-input-x" name="list-input-name[x]" />`,
             );
 
-        const dynamicListInput = document.querySelector('.js-dynamic-input-x');
+        const dynamicListInput = getInputElement('.js-dynamic-input-x');
         dynamicListInput.value = 'foo';
 
         fireEvent.change(dynamicListInput, { target: { value: 'bar' } });
@@ -421,7 +433,7 @@ describe('callback options', () => {
         });
         field.listen();
 
-        const radio = document.querySelector('.js-radio-2');
+        const radio = getInputElement('.js-radio-2');
 
         fireEvent.click(radio);
 
@@ -438,13 +450,13 @@ describe('callback options', () => {
         });
         field.listen();
 
-        document.querySelector('.js-container').insertAdjacentHTML(
+        document.querySelector('.js-container')!.insertAdjacentHTML(
             'beforeend',
             `<input class="js-dynamic-radio js-dynamic-radio-1" type="radio" name="dynamic-radio-name" value="1" />
              <input class="js-dynamic-radio js-dynamic-radio-2" type="radio" name="dynamic-radio-name" value="2" />`,
         );
 
-        const dynamicRadio = document.querySelector('.js-dynamic-radio-2');
+        const dynamicRadio = getInputElement('.js-dynamic-radio-2');
 
         fireEvent.click(dynamicRadio);
 
@@ -457,7 +469,7 @@ describe('callback options', () => {
 
 describe('message options', () => {
     test('default invalid message', async () => {
-        const onAfterValidate = (validationResult) => {
+        const onAfterValidate = (validationResult: ValidationResult) => {
             expect(validationResult.getMessage()).toBe('Invalid value.');
         };
 
@@ -469,7 +481,7 @@ describe('message options', () => {
     });
 
     test('invalid message', async () => {
-        const onAfterValidate = (validationResult) => {
+        const onAfterValidate = (validationResult: ValidationResult) => {
             expect(validationResult.getMessage()).toBe('This field is required.');
         };
 
@@ -489,7 +501,7 @@ describe('other options', () => {
         [true, false],
         [false, true],
     ])('"validationCacheEnabled" is %s', async (validationCacheEnabled, expectedIsValid) => {
-        const field1 = new Field('.js-list-input-1', '.js-container', ['']);
+        const field1 = new Field('.js-list-input-1', '.js-container');
         const field2 = new Field(
             '.js-list-input-2',
             '.js-container',
@@ -521,7 +533,7 @@ describe('other options', () => {
 
 describe('validation result', () => {
     test('validation result with true is passed to "onAfterValidate"', async () => {
-        const onAfterValidate = (validationResult) => {
+        const onAfterValidate = (validationResult: ValidationResult) => {
             expect(validationResult.isValid()).toBe(true);
         };
 
@@ -535,7 +547,7 @@ describe('validation result', () => {
     });
 
     test('validation result with false is passed to "onAfterValidate"', async () => {
-        const onAfterValidate = (validationResult) => {
+        const onAfterValidate = (validationResult: ValidationResult) => {
             expect(validationResult.isValid()).toBe(false);
         };
 
@@ -569,7 +581,7 @@ describe('some validators', () => {
     test('no validators', async () => {
         let validationResult;
 
-        const field = new Field('.js-input', '.js-container', []);
+        const field = new Field('.js-input', '.js-container');
 
         input.value = '';
         validationResult = await field.validate(true);
@@ -643,7 +655,7 @@ describe('some validators', () => {
         let validationResult;
 
         const validator = {
-            validate: (value) => {
+            validate: (value: FieldValue) => {
                 return ValidationResult.make(value === '12345');
             },
         };
@@ -743,14 +755,15 @@ describe('file validator', () => {
     test('valid file', async () => {
         const field = new Field('.js-file', '.js-container', [newFileValidator()]);
 
-        fireEvent.change(document.querySelector('.js-file'), {
-            target: {
-                files: [new File([], 'example.jpg', { type: 'image/jpg' })],
-            },
-        });
+        const fileInput = getInputElement('.js-file');
 
-        const validationResult = await field.validate();
-        expect(validationResult.isValid()).toBe(true);
+        userEvent.upload(fileInput, new File([], 'example.jpg', { type: 'image/jpg' }));
+
+        await waitFor(async () => {
+            expect(fileInput.files).toHaveLength(1);
+            const validationResult = await field.validate();
+            expect(validationResult.isValid()).toBe(true);
+        });
     });
 
     test('valid when no file', async () => {
@@ -820,14 +833,15 @@ describe('file validator', () => {
     ])('invalid %s', async (_, files, invalidMessages, expectedErrorMessage) => {
         const field = new Field('.js-file', '.js-container', [newFileValidator(invalidMessages)]);
 
-        fireEvent.change(document.querySelector('.js-file'), {
-            target: {
-                files,
-            },
-        });
+        const fileInput = getInputElement('.js-file');
 
-        const validationResult = await field.validate();
-        expect(validationResult).toStrictEqual(ValidationResult.invalid(expectedErrorMessage));
+        userEvent.upload(fileInput, files);
+
+        await waitFor(async () => {
+            expect(fileInput.files).toHaveLength(files.length);
+            const validationResult = await field.validate();
+            expect(validationResult).toStrictEqual(ValidationResult.invalid(expectedErrorMessage));
+        });
     });
 });
 
@@ -851,52 +865,52 @@ describe('"getValue"', () => {
     test('get checkbox value', () => {
         const field = new Field('.js-checkbox', '.js-container');
         expect(field.getValue()).toBe(false);
-        document.querySelector('.js-checkbox').checked = true;
+        getInputElement('.js-checkbox').checked = true;
         expect(field.getValue()).toBe(true);
     });
 
     test('get radio value', () => {
         const field = new Field('.js-radio', '.js-container');
         expect(field.getValue()).toBeNull();
-        document.querySelector('.js-radio-2').checked = true;
+        getInputElement('.js-radio-2').checked = true;
         expect(field.getValue()).toBe('2');
     });
 
     test('get select value', () => {
         const field = new Field('.js-select', '.js-container');
         expect(field.getValue()).toBe('1');
-        document.querySelector('.js-select-option-2').selected = true;
+        getOptionElement('.js-select-option-2').selected = true;
         expect(field.getValue()).toBe('2');
     });
 
     test('get multi select value', () => {
         const field = new Field('.js-multiple-select', '.js-container');
         expect(field.getValue()).toStrictEqual([]);
-        document.querySelector('.js-multiple-select-option-1').selected = true;
-        document.querySelector('.js-multiple-select-option-2').selected = true;
+        getOptionElement('.js-multiple-select-option-1').selected = true;
+        getOptionElement('.js-multiple-select-option-2').selected = true;
         expect(field.getValue()).toStrictEqual(['1', '2']);
     });
 
     test('get file value', () => {
         const field = new Field('.js-file', '.js-container');
         expect(field.getValue()).toBeInstanceOf(FileList);
-        expect(field.getValue().length).toBe(0);
+        expect((field.getValue() as FileList).length).toBe(0);
 
         const expectedFile = new File([], 'example.jpg', { type: 'image/jpg' });
-        fireEvent.change(document.querySelector('.js-file'), {
+        fireEvent.change(getInputElement('.js-file'), {
             target: {
                 files: [expectedFile],
             },
         });
 
-        expect(field.getValue().length).toBe(1);
-        const file = field.getValue()[0];
+        expect((field.getValue() as FileList).length).toBe(1);
+        const file = (field.getValue() as FileList)[0];
         expect(file).toBe(expectedFile);
     });
 
     test('get textarea value', () => {
         const field = new Field('.js-textarea', '.js-container');
-        document.querySelector('.js-textarea').value = ' foo ';
+        getTextareaElement('.js-textarea').value = ' foo ';
         expect(field.getValue()).toBe('foo');
     });
 
@@ -909,7 +923,7 @@ describe('"getValue"', () => {
         });
 
         input.value = ' foo ';
-        document.querySelector('.js-textarea').value = ' foo ';
+        getTextareaElement('.js-textarea').value = ' foo ';
         expect(fieldInput.getValue()).toBe(' foo ');
         expect(fieldTextarea.getValue()).toBe(' foo ');
     });
@@ -946,7 +960,7 @@ describe('statuses', () => {
         const field = new Field('.js-radio', '.js-container', ['required']);
         const wrapper = document.querySelector('.js-wrapper');
         await field.validate();
-        expect(wrapper.classList.contains('ff-field-invalid')).toBe(true);
+        expect(wrapper!.classList.contains('ff-field-invalid')).toBe(true);
     });
 
     test('no status when error', async () => {
@@ -984,7 +998,7 @@ describe('statuses', () => {
         expect(setStatus.mock.calls[1][1]).toBe('ff-field-valid');
         expect(setStatus.mock.calls[1][2]).toBe(wrapper);
 
-        expect(element.classList.contains('ff-field-valid')).toBe(false);
+        expect(element!.classList.contains('ff-field-valid')).toBe(false);
         expect(wrapper && wrapper.classList.contains('ff-field-valid')).toBeFalsy();
     });
 
@@ -1002,7 +1016,7 @@ describe('statuses', () => {
 
         field.validationResult = ValidationResult.valid();
 
-        fireEvent.change(document.querySelector(selector));
+        fireEvent.change(document.querySelector(selector)!);
 
         expect(setStatus).toHaveBeenCalledTimes(1);
         expect(setStatus.mock.calls[0][0]).toBe(document.querySelector(selector));
@@ -1043,7 +1057,7 @@ describe('statuses', () => {
         const field = new Field(selector, '.js-container', [], {
             onResetStatus,
         });
-        field.setStatus('');
+        field.setStatus(FieldStatus.No);
         expect(onResetStatus).toHaveBeenCalledTimes(1);
         expect(onResetStatus.mock.calls[0][0]).toBe(document.querySelector(selector));
         expect(onResetStatus.mock.calls[0][1]).toBe(

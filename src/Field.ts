@@ -49,7 +49,7 @@ export default class Field {
     constructor(
         fieldSelector: string,
         containerSelector: string,
-        validators: Validator[],
+        validators: Validator[] = [],
         options = {},
     ) {
         const containerElement = document.querySelector(containerSelector);

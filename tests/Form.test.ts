@@ -1,17 +1,20 @@
-/**
- * @jest-environment jsdom
- */
-
 import { fireEvent, waitFor } from '@testing-library/dom';
 import Field from '../src/Field';
 import Form from '../src/Form';
 import ValidationResult from '../src/ValidationResult';
 import SubmissionResult from '../src/SubmissionResult';
+import { FormStatus } from '../src/types';
 
-let formElement = null;
+// @ts-expect-error It will not be `null` after the `beforeEach`.
+let formElement: HTMLFormElement = null;
+// @ts-expect-error It will not be `null` after the `beforeEach`.
+let input: HTMLInputElement = null;
 const submit = () => new SubmissionResult(true);
-let input = null;
 jest.useFakeTimers();
+
+const getInputElement = (selector: string): HTMLInputElement => {
+    return document.querySelector<HTMLInputElement>(selector)!;
+};
 
 beforeEach(() => {
     document.body.innerHTML = `
@@ -34,8 +37,8 @@ beforeEach(() => {
             <textarea class="js-textarea" name="textarea-name"></textarea>
         </form>`;
 
-    formElement = document.querySelector('.js-form');
-    input = document.querySelector('.js-input');
+    formElement = document.querySelector<HTMLFormElement>('.js-form')!;
+    input = getInputElement('.js-input');
 });
 
 describe('field options', () => {
@@ -45,7 +48,7 @@ describe('field options', () => {
         const validateOnChange = true;
         const validateOnType = true;
         const typingDelay = 3;
-        const validatorParams = { foo: [] };
+        const validatorParams = { isEmail: [{ allow_utf8_local_part: false }] };
         const validationCacheEnabled = false;
         const trimEnabled = false;
         const onChange = jest.fn();
@@ -174,7 +177,7 @@ describe('field options', () => {
             typingDelay: 3,
             validateOnChange: false,
             validateOnType: false,
-            validatorParams: { foo: [] },
+            validatorParams: { isEmail: [{ allow_utf8_local_part: false }] },
             validationCacheEnabled: true,
             onChange: jest.fn(),
             onTypingStart: jest.fn(),
@@ -206,7 +209,7 @@ describe('field options', () => {
 
     test('"onChange" is called on text input change', () => {
         const onChange = jest.fn();
-        const form = new Form('.js-form', [new Field('.js-input', '.js-form', [])], submit, {
+        const form = new Form('.js-form', [new Field('.js-input', '.js-form')], submit, {
             onChange,
         });
         form.listen();
@@ -230,7 +233,7 @@ describe('validation callback options', () => {
             [
                 new Field('.js-input', '.js-form', ['required']),
                 new Field('.js-checkbox', '.js-form', ['required']),
-                new Field('.js-textarea', '.js-form', []),
+                new Field('.js-textarea', '.js-form'),
             ],
             submit,
             {
@@ -256,7 +259,7 @@ describe('validation callback options', () => {
             [
                 new Field('.js-input', '.js-form', ['required']),
                 new Field('.js-checkbox', '.js-form', ['required']),
-                new Field('.js-textarea', '.js-form', []),
+                new Field('.js-textarea', '.js-form'),
             ],
             submit,
             {
@@ -294,7 +297,7 @@ describe('validation callback options', () => {
                         throw error;
                     },
                 ]),
-                new Field('.js-textarea', '.js-form', []),
+                new Field('.js-textarea', '.js-form'),
             ],
             submit,
             {
@@ -322,7 +325,7 @@ describe('validation callback options', () => {
             [
                 new Field('.js-input', '.js-form', ['required']),
                 new Field('.js-checkbox', '.js-form', ['required']),
-                new Field('.js-textarea', '.js-form', []),
+                new Field('.js-textarea', '.js-form'),
             ],
             submit,
             {
@@ -340,7 +343,7 @@ describe('validation callback options', () => {
         const onBeforeValidate = jest.fn();
         const form = new Form(
             '.js-form',
-            [new Field('.js-input', '.js-form', []), new Field('.js-checkbox', '.js-form', [])],
+            [new Field('.js-input', '.js-form'), new Field('.js-checkbox', '.js-form')],
             submit,
             {
                 onBeforeValidate,
@@ -370,7 +373,7 @@ describe('validation callback options', () => {
             [
                 new Field('.js-input', '.js-form', ['required']),
                 new Field('.js-checkbox', '.js-form', ['required']),
-                new Field('.js-textarea', '.js-form', []),
+                new Field('.js-textarea', '.js-form'),
             ],
             submit,
             {
@@ -394,7 +397,7 @@ describe('validation callback options', () => {
         const onAfterValidate = jest.fn();
         const form = new Form(
             '.js-form',
-            [new Field('.js-input', '.js-form', []), new Field('.js-checkbox', '.js-form', [])],
+            [new Field('.js-input', '.js-form'), new Field('.js-checkbox', '.js-form')],
             submit,
             {
                 onAfterValidate,
@@ -435,7 +438,7 @@ describe('validation callback options', () => {
                         throw error;
                     },
                 ]),
-                new Field('.js-textarea', '.js-form', []),
+                new Field('.js-textarea', '.js-form'),
             ],
             submit,
             {
@@ -476,7 +479,7 @@ describe('validation callback options', () => {
 describe('submit callback options', () => {
     test('"onBeforeSubmit" is called', async () => {
         const onBeforeSubmit = jest.fn();
-        const form = new Form('.js-form', [new Field('.js-input', '.js-form', [])], submit, {
+        const form = new Form('.js-form', [new Field('.js-input', '.js-form')], submit, {
             onBeforeSubmit,
         });
 
@@ -728,10 +731,11 @@ describe('validation', () => {
     );
 
     test('"validate" is called when no fields', async () => {
-        const validate = jest.fn(() => ValidationResult.valid());
+        const validate = jest.fn();
+        validate.mockReturnValue(ValidationResult.valid());
         const form = new Form(
             '.js-form',
-            [new Field('.js-input', '.js-form', []), new Field('.js-checkbox', '.js-form', [])],
+            [new Field('.js-input', '.js-form'), new Field('.js-checkbox', '.js-form')],
             submit,
             {
                 validate,
@@ -747,7 +751,8 @@ describe('validation', () => {
 
 describe('submission', () => {
     test('submit valid form', async () => {
-        const submitMock = jest.fn(() => new SubmissionResult(true));
+        const submitMock = jest.fn();
+        submitMock.mockReturnValue(new SubmissionResult(true));
         const form = new Form(
             '.js-form',
             [
@@ -760,7 +765,7 @@ describe('submission', () => {
         form.listen();
 
         input.value = 'foo';
-        document.querySelector('.js-checkbox').checked = true;
+        getInputElement('.js-checkbox').checked = true;
 
         fireEvent.submit(formElement);
 
@@ -839,7 +844,7 @@ describe('statuses', () => {
         );
 
         input.value = 'foo';
-        document.querySelector('.js-checkbox').checked = true;
+        getInputElement('.js-checkbox').checked = true;
 
         await form.validate();
 
@@ -1008,7 +1013,7 @@ describe('statuses', () => {
     test('status is reset on change', () => {
         const setStatus = jest.fn();
         const onResetStatus = jest.fn();
-        const form = new Form('.js-form', [new Field('.js-input', '.js-form', [])], submit, {
+        const form = new Form('.js-form', [new Field('.js-input', '.js-form')], submit, {
             setStatus,
             onResetStatus,
         });
@@ -1024,7 +1029,7 @@ describe('statuses', () => {
     test('status is reset on type', () => {
         const setStatus = jest.fn();
         const onResetStatus = jest.fn();
-        const form = new Form('.js-form', [new Field('.js-input', '.js-form', [])], submit, {
+        const form = new Form('.js-form', [new Field('.js-input', '.js-form')], submit, {
             setStatus,
             onResetStatus,
         });
@@ -1042,7 +1047,7 @@ describe('statuses', () => {
         const form = new Form('.js-form', [], submit, {
             onResetStatus,
         });
-        form.setStatus('');
+        form.setStatus(FormStatus.No);
         expect(onResetStatus).toHaveBeenCalledTimes(1);
         expect(onResetStatus.mock.calls[0][0]).toBe(formElement);
     });
@@ -1052,7 +1057,7 @@ describe('rejection', () => {
     test('reject validation when new field validation starts', async () => {
         const onAfterValidate = jest.fn();
         const field = new Field('.js-input', '.js-form', [() => ValidationResult.valid()]);
-        const form = new Form('.js-form', [field], () => {}, {
+        const form = new Form('.js-form', [field], () => new SubmissionResult(true), {
             onAfterValidate,
         });
 
@@ -1067,8 +1072,8 @@ describe('rejection', () => {
 
     test('reject validation when new form validation starts', async () => {
         const onAfterValidate = jest.fn();
-        const field = new Field('.js-input', '.js-form', []);
-        const form = new Form('.js-form', [field], () => {}, {
+        const field = new Field('.js-input', '.js-form');
+        const form = new Form('.js-form', [field], () => new SubmissionResult(true), {
             onAfterValidate,
             validate: () => ValidationResult.valid(),
         });

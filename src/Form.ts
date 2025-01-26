@@ -17,7 +17,7 @@ const DEFAULT_OPTIONS: FormOptions = {
     onResetStatus: NOOP,
 };
 
-const ALLOWED_OPTIONS = [...Object.keys(DEFAULT_OPTIONS), 'validate', 'setFieldStatus'];
+const ALLOWED_OPTIONS = [...Object.keys(DEFAULT_OPTIONS), 'validate', 'setStatus'];
 
 export default class Form {
     formElement: HTMLFormElement;
@@ -118,10 +118,10 @@ export default class Form {
                     ? field.getOption('validateOnType')
                     : options.validateOnType,
                 validationCacheEnabled: field.hasOption('validationCacheEnabled')
-                    ? this.getOption('validationCacheEnabled')
+                    ? field.getOption('validationCacheEnabled')
                     : options.validationCacheEnabled,
                 validatorParams: field.hasOption('validatorParams')
-                    ? this.getOption('validatorParams')
+                    ? field.getOption('validatorParams')
                     : options.validatorParams,
                 onChange: field.hasOption('onChange')
                     ? field.getOption('onChange')
