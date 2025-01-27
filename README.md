@@ -79,6 +79,20 @@ Find more examples in the [sandbox](./sandbox).
 
     npm install forms-and-fields
 
+The library can be loaded either as a standalone script with the `FF` global name:
+
+```HTML
+<div class="js-email-container">
+    <input type="text" name="email" class="js-email"/> 
+</div>
+
+<script type="text/javascript" src="https://unpkg.com/browse/forms-and-fields@latest/dist/forms-and-fields.min.js"></script>
+<script type="text/javascript">
+  const field = new FF.Field('.js-email', '.js-email-container', ['required', 'isEmail']);
+  field.listen();
+</script>
+```
+
 ## Documentation
 
 ### Common

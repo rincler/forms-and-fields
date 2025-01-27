@@ -1,5 +1,5 @@
 // eslint-disable-next-line import/no-extraneous-dependencies, @typescript-eslint/no-var-requires
-const express = require('express');
+import express from 'express';
 
 const app = express();
 app.use(express.static('sandbox'));
