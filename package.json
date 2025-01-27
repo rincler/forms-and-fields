@@ -43,6 +43,7 @@
         "@typescript-eslint/parser": "^7.18.0",
         "babelify": "^10.0.0",
         "browserify": "^17.0.1",
+        "esbuild": "^0.24.2",
         "eslint": "^8.57.0",
         "eslint-config-airbnb-base": "^15.0.0",
         "eslint-config-airbnb-typescript": "^18.0.0",
@@ -61,7 +62,7 @@
         "prepack": "npm run build",
         "check": "tsc --noEmit && eslint .",
         "sandbox": "npm run sandbox:build && npm run sandbox:start",
-        "sandbox:build": "browserify sandbox/sandbox.js -o sandbox/bundle.js -t babelify --debug",
+        "sandbox:build": "esbuild sandbox/sandbox.js --outfile=sandbox/bundle.js --format=iife  --sourcemap=inline --bundle",
         "sandbox:start": "node sandbox/server.js",
         "test": "jest"
     }
