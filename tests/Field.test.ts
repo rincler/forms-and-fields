@@ -304,8 +304,8 @@ describe('callback options', () => {
         fireEvent.keyUp(input, { key: 'r', code: 'KeyR' });
 
         expect(onTypingStart).toHaveBeenCalledTimes(1);
-        expect(onTypingStart.mock.calls[0][1]).toBe(input);
-        expect(onTypingStart.mock.calls[0][2]).toBe(container);
+        expect(onTypingStart.mock.calls[0][0]).toBe(input);
+        expect(onTypingStart.mock.calls[0][1]).toBe(container);
     });
 
     test('"onTypingEnd" is called  on key up', () => {
@@ -737,6 +737,24 @@ describe('some validators', () => {
         validationResult = await field.validate(true);
         expect(validationResult.isValid()).toBe(true);
     });
+
+    test('trim before validation', async () => {
+        const fieldInput = new Field('.js-input', '.js-container', [], {
+            trimEnabled: true,
+        });
+        const fieldTextarea = new Field('.js-textarea', '.js-container', [], {
+            trimEnabled: false,
+        });
+
+        input.value = ' foo ';
+        getTextareaElement('.js-textarea').value = ' foo ';
+
+        await fieldInput.validate();
+        await fieldTextarea.validate();
+
+        expect(fieldInput.getValue()).toBe('foo');
+        expect(fieldTextarea.getValue()).toBe(' foo ');
+    });
 });
 
 describe('file validator', () => {
@@ -858,7 +876,7 @@ describe('init field', () => {
 describe('"getValue"', () => {
     test('get input value', () => {
         const field = new Field('.js-input', '.js-container');
-        input.value = ' foo ';
+        input.value = 'foo';
         expect(field.getValue()).toBe('foo');
     });
 
@@ -910,22 +928,8 @@ describe('"getValue"', () => {
 
     test('get textarea value', () => {
         const field = new Field('.js-textarea', '.js-container');
-        getTextareaElement('.js-textarea').value = ' foo ';
+        getTextareaElement('.js-textarea').value = 'foo';
         expect(field.getValue()).toBe('foo');
-    });
-
-    test('get not trimmed value', () => {
-        const fieldInput = new Field('.js-input', '.js-container', [], {
-            trimEnabled: false,
-        });
-        const fieldTextarea = new Field('.js-textarea', '.js-container', [], {
-            trimEnabled: false,
-        });
-
-        input.value = ' foo ';
-        getTextareaElement('.js-textarea').value = ' foo ';
-        expect(fieldInput.getValue()).toBe(' foo ');
-        expect(fieldTextarea.getValue()).toBe(' foo ');
     });
 });
 

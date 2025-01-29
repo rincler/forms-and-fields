@@ -21,11 +21,7 @@ export interface FieldOptions {
     validatorParams?: { [K in VendorValidatorName]?: any[] };
     validationCacheEnabled?: boolean;
     onChange?: (fieldValue: FieldValue, fieldElement: Element, containerElement: Element) => void;
-    onTypingStart?: (
-        fieldValue: FieldValue,
-        fieldElement: Element,
-        containerElement: Element,
-    ) => void;
+    onTypingStart?: (fieldElement: Element, containerElement: Element) => void;
     onTypingEnd?: (
         fieldValue: FieldValue,
         fieldElement: Element,

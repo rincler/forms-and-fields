@@ -159,18 +159,16 @@ export default class Field {
             startAction(this);
         }
 
-        const value = this.getValue();
-
         if (this.typingDelayId) {
             clearTimeout(this.typingDelayId);
         } else {
-            this.getOption('onTypingStart')(value, fieldElement, this.containerElement);
+            this.getOption('onTypingStart')(fieldElement, this.containerElement);
         }
 
         this.typingDelayId = window.setTimeout(async () => {
             this.typingDelayId = null;
 
-            this.getOption('onTypingEnd')(value, fieldElement, this.containerElement);
+            this.getOption('onTypingEnd')(this.getValue(), fieldElement, this.containerElement);
 
             if (this.getOption('validateOnType')) {
                 await ignoreRejects(async () => {
@@ -210,6 +208,8 @@ export default class Field {
         if (this.getOption('validationCacheEnabled') && this.validationResult !== null && !force) {
             return this.validationResult;
         }
+
+        this.trim();
 
         if (this.validators.length === 0) {
             this.validationResult = ValidationResult.valid();
@@ -301,12 +301,6 @@ export default class Field {
 
     getValue(): FieldValue {
         const fieldElement = this.getFieldElement();
-
-        if (this.getOption('trimEnabled') && this.isTextable()) {
-            (fieldElement as ValueableElement).value = (
-                fieldElement as ValueableElement
-            ).value.trim();
-        }
 
         if (this.isTextable()) {
             return (fieldElement as ValueableElement).value;
@@ -472,6 +466,18 @@ export default class Field {
         );
     }
 
+    reset(): void {
+        this.validationResult = null;
+        this.setStatus(FieldStatus.No);
+    }
+
+    trim(): void {
+        if (this.getOption('trimEnabled') && this.isTextable()) {
+            const fieldElement = this.getFieldElement<ValueableElement>();
+            fieldElement.value = fieldElement.value.trim();
+        }
+    }
+
     setStatus(status: FieldStatus): void {
         const fieldElement = this.getFieldElement();
         const wrapperElement = this.getFieldWrapperElement();
@@ -496,10 +502,5 @@ export default class Field {
         if (status !== FieldStatus.No) {
             element.classList.add(status);
         }
-    }
-
-    reset(): void {
-        this.validationResult = null;
-        this.setStatus(FieldStatus.No);
     }
 }
