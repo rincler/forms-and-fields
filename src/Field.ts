@@ -116,8 +116,9 @@ export default class Field {
     }
 
     async onChangeListener(event: Event): Promise<void> {
-        this.validationResult = null;
-        this.setStatus(FieldStatus.No);
+        if (!this.isTextable()) {
+            this.reset();
+        }
 
         // @ts-expect-error The `event.target` is always an `Element` here.
         const fieldElement: Element = event.target;
@@ -146,8 +147,7 @@ export default class Field {
     }
 
     async onKeyUpListener(event: Event): Promise<void> {
-        this.validationResult = null;
-        this.setStatus(FieldStatus.No);
+        this.reset();
 
         // @ts-expect-error The `event.target` is always an `Element` here.
         const fieldElement: Element = event.target;
@@ -302,13 +302,13 @@ export default class Field {
     getValue(): FieldValue {
         const fieldElement = this.getFieldElement();
 
-        if (this.getOption('trimEnabled') && this.trimAllowed()) {
+        if (this.getOption('trimEnabled') && this.isTextable()) {
             (fieldElement as ValueableElement).value = (
                 fieldElement as ValueableElement
             ).value.trim();
         }
 
-        if (this.isText() || this.isTextarea()) {
+        if (this.isTextable()) {
             return (fieldElement as ValueableElement).value;
         }
 
@@ -442,7 +442,7 @@ export default class Field {
     }
 
     isEmpty(value: FieldValue): boolean {
-        if (this.isText() || this.isTextarea()) {
+        if (this.isTextable()) {
             return value === '';
         }
 
@@ -461,7 +461,7 @@ export default class Field {
         return value === '';
     }
 
-    trimAllowed(): boolean {
+    isTextable(): boolean {
         return this.isText() || this.isTextarea();
     }
 
@@ -496,5 +496,10 @@ export default class Field {
         if (status !== FieldStatus.No) {
             element.classList.add(status);
         }
+    }
+
+    reset(): void {
+        this.validationResult = null;
+        this.setStatus(FieldStatus.No);
     }
 }

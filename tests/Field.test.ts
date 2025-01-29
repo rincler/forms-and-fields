@@ -1004,13 +1004,10 @@ describe('statuses', () => {
         expect(wrapper && wrapper.classList.contains('ff-field-valid')).toBeFalsy();
     });
 
-    test.each([
-        ['input', '.js-input', null],
-        ['radio', '.js-radio', '.js-wrapper'],
-    ])('status is reset on change %s', (_, selector, expectedElementSelector) => {
+    test('status is not reset on change input', () => {
         const setStatus = jest.fn();
         const onResetStatus = jest.fn();
-        const field = new Field(selector, '.js-container', [], {
+        const field = new Field('.js-input', '.js-container', [], {
             setStatus,
             onResetStatus,
         });
@@ -1018,15 +1015,31 @@ describe('statuses', () => {
 
         field.validationResult = ValidationResult.valid();
 
-        fireEvent.change(document.querySelector(selector)!);
+        fireEvent.change(input);
+
+        expect(setStatus).not.toHaveBeenCalled();
+        expect(onResetStatus).not.toHaveBeenCalled();
+        expect(field.validationResult).toBe(field.validationResult);
+    });
+
+    test('status is reset on change radio', () => {
+        const setStatus = jest.fn();
+        const onResetStatus = jest.fn();
+        const field = new Field('.js-radio', '.js-container', [], {
+            setStatus,
+            onResetStatus,
+        });
+        field.listen();
+
+        field.validationResult = ValidationResult.valid();
+
+        fireEvent.change(getInputElement('.js-radio'));
 
         expect(setStatus).toHaveBeenCalledTimes(1);
         expect(setStatus.mock.calls[0][0]).toBe('');
-        expect(setStatus.mock.calls[0][1]).toBe(document.querySelector(selector));
+        expect(setStatus.mock.calls[0][1]).toBe(getInputElement('.js-radio'));
         expect(setStatus.mock.calls[0][2]).toBe(container);
-        expect(setStatus.mock.calls[0][3]).toBe(
-            expectedElementSelector && document.querySelector(expectedElementSelector),
-        );
+        expect(setStatus.mock.calls[0][3]).toBe(document.querySelector('.js-wrapper'));
         expect(onResetStatus).toHaveBeenCalledTimes(1);
         expect(field.validationResult).toBeNull();
     });
