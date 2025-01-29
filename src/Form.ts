@@ -2,6 +2,7 @@ import ValidationResult from './ValidationResult';
 import { finishAction, ignoreRejects, startAction } from './Reject';
 import Field from './Field';
 import { FormOptionName, FormOptions, FormStatus, SubmitFn } from './types';
+import SubmissionResult from './SubmissionResult.js';
 
 const NOOP = (): void => {};
 
@@ -14,16 +15,19 @@ const DEFAULT_OPTIONS: FormOptions = {
     onAfterPositiveSubmit: NOOP,
     onAfterNegativeSubmit: NOOP,
     onSubmissionError: NOOP,
-    onResetStatus: NOOP,
+    onStatusChange: NOOP,
+    onStatusReset: NOOP,
 };
 
-const ALLOWED_OPTIONS = [...Object.keys(DEFAULT_OPTIONS), 'validate', 'setStatus'];
+const ALLOWED_OPTIONS = [...Object.keys(DEFAULT_OPTIONS), 'validate'];
 
 export default class Form {
     formElement: HTMLFormElement;
     fields: Field[];
     submit: SubmitFn;
     options: FormOptions;
+    validationResults: ValidationResult[];
+    submissionResult: SubmissionResult | null;
     actionId: number;
 
     constructor(
@@ -52,22 +56,40 @@ export default class Form {
         this.options = {};
         this.setOptions(options);
 
+        this.validationResults = [];
+        this.submissionResult = null;
         this.actionId = 0;
     }
 
     listen(): void {
         this.formElement.addEventListener('change', () => {
-            this.setStatus(FormStatus.No);
+            this.reset();
         });
         this.formElement.addEventListener('keyup', () => {
-            this.setStatus(FormStatus.No);
+            this.reset();
         });
-        this.formElement.addEventListener('submit', this.onSubmitForm.bind(this));
+        this.formElement.addEventListener('submit', this.onSubmit.bind(this));
 
         // eslint-disable-next-line no-restricted-syntax
         for (const field of this.fields) {
             field.listen();
         }
+    }
+
+    async onSubmit(e: Event): Promise<void> {
+        e.preventDefault();
+
+        await ignoreRejects(async () => {
+            const validationResults = await this.validate();
+
+            const isValid = ValidationResult.areValid(validationResults);
+
+            if (!isValid) {
+                return;
+            }
+
+            await this.runSubmitProcess();
+        });
     }
 
     setOptions(options: FormOptions): void {
@@ -143,30 +165,14 @@ export default class Form {
                 onValidationError: field.hasOption('onValidationError')
                     ? field.getOption('onValidationError')
                     : options.onFieldValidationError,
-                onResetStatus: field.hasOption('onResetStatus')
-                    ? field.getOption('onResetStatus')
-                    : options.onResetFieldStatus,
-                setStatus: field.hasOption('setStatus')
-                    ? field.getOption('setStatus')
-                    : options.setFieldStatus,
+                onStatusChange: field.hasOption('onStatusChange')
+                    ? field.getOption('onStatusChange')
+                    : options.onFieldStatusChange,
+                onStatusReset: field.hasOption('onStatusReset')
+                    ? field.getOption('onStatusReset')
+                    : options.onFieldStatusReset,
             });
         }
-    }
-
-    async onSubmitForm(e: Event): Promise<void> {
-        e.preventDefault();
-
-        await ignoreRejects(async () => {
-            const validationResults = await this.validate();
-
-            const isValid = ValidationResult.areValid(validationResults);
-
-            if (!isValid) {
-                return;
-            }
-
-            await this.runSubmitProcess();
-        });
     }
 
     async validate(): Promise<ValidationResult[]> {
@@ -181,6 +187,8 @@ export default class Form {
 
         const actionId = startAction(this);
 
+        this.validationResults = [];
+        this.submissionResult = null;
         this.setStatus(FormStatus.Validating);
 
         let validationResults = [];
@@ -203,13 +211,15 @@ export default class Form {
 
         finishAction(this, actionId);
 
-        const isValid = ValidationResult.areValid(validationResults);
+        this.validationResults = validationResults;
+
+        const isValid = ValidationResult.areValid(this.validationResults);
 
         this.setStatus(isValid ? FormStatus.Valid : FormStatus.Invalid);
 
-        this.getOption('onAfterValidate')(validationResults, this.formElement);
+        this.getOption('onAfterValidate')(this.validationResults, this.formElement);
 
-        return validationResults;
+        return this.validationResults;
     }
 
     async runSubmitProcess(): Promise<void> {
@@ -219,6 +229,7 @@ export default class Form {
 
         const actionId = startAction(this);
 
+        this.submissionResult = null;
         this.setStatus(FormStatus.Submitting);
 
         let submissionResult;
@@ -234,14 +245,26 @@ export default class Form {
 
         finishAction(this, actionId);
 
-        this.getOption('onAfterSubmit')(submissionResult, this.formElement);
+        this.submissionResult = submissionResult;
+
+        this.setStatus(
+            this.submissionResult.isPositive()
+                ? FormStatus.PositiveSubmit
+                : FormStatus.NegativeSubmit,
+        );
+
+        this.getOption('onAfterSubmit')(this.submissionResult, this.formElement);
 
         if (submissionResult.isPositive()) {
-            this.setStatus(FormStatus.PositiveSubmit);
-            this.getOption('onAfterPositiveSubmit')(submissionResult.getData(), this.formElement);
+            this.getOption('onAfterPositiveSubmit')(
+                this.submissionResult.getData(),
+                this.formElement,
+            );
         } else {
-            this.setStatus(FormStatus.NegativeSubmit);
-            this.getOption('onAfterNegativeSubmit')(submissionResult.getData(), this.formElement);
+            this.getOption('onAfterNegativeSubmit')(
+                this.submissionResult.getData(),
+                this.formElement,
+            );
         }
     }
 
@@ -268,14 +291,15 @@ export default class Form {
         return fields;
     }
 
+    reset(): void {
+        this.validationResults = [];
+        this.submissionResult = null;
+        this.setStatus(FormStatus.No);
+    }
+
     setStatus(status: FormStatus): void {
         if (status === FormStatus.No) {
-            this.getOption('onResetStatus')(this.formElement);
-        }
-
-        if (this.hasOption('setStatus')) {
-            this.getOption('setStatus')(status, this.formElement);
-            return;
+            this.getOption('onStatusReset')(this.formElement);
         }
 
         this.formElement.classList.remove(
@@ -286,8 +310,16 @@ export default class Form {
             FormStatus.PositiveSubmit,
             FormStatus.NegativeSubmit,
         );
+
         if (status !== FormStatus.No) {
             this.formElement.classList.add(status);
         }
+
+        this.getOption('onStatusChange')(
+            status,
+            this.validationResults,
+            this.submissionResult,
+            this.formElement,
+        );
     }
 }

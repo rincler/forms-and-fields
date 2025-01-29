@@ -76,7 +76,7 @@ const domainField = new Field(
             isFQDN: 'Domain is not valid.',
         },
         validateOnType: true,
-        onResetStatus: (fieldElement) => {
+        onStatusReset: (fieldElement) => {
             clearFieldError(fieldElement);
         },
         onAfterValidate: (validationResult, fieldElement) => {
@@ -204,7 +204,7 @@ const uploadForm = new Form(
                 ),
             ],
             {
-                onResetStatus: (fieldElement) => {
+                onStatusReset: (fieldElement) => {
                     clearFieldError(fieldElement);
                 },
                 onAfterValidate: (validationResult, fieldElement) => {
@@ -236,7 +236,7 @@ const addressForm = new Form(
             ],
             {
                 validateOnType: true,
-                onResetStatus: (fieldElement) => {
+                onStatusReset: (fieldElement) => {
                     clearFieldError(fieldElement);
                 },
                 onValidationError: (error, fieldElement) => {

@@ -30,10 +30,11 @@ const DEFAULT_OPTIONS: FieldOptions = {
     onBeforeValidate: NOOP,
     onAfterValidate: NOOP,
     onValidationError: NOOP,
-    onResetStatus: NOOP,
+    onStatusChange: NOOP,
+    onStatusReset: NOOP,
 };
 
-const ALLOWED_OPTIONS = [...Object.keys(DEFAULT_OPTIONS), 'setStatus'];
+const ALLOWED_OPTIONS = Object.keys(DEFAULT_OPTIONS);
 
 export default class Field {
     containerElement: Element;
@@ -50,7 +51,7 @@ export default class Field {
         fieldSelector: string,
         containerSelector: string,
         validators: Validator[] = [],
-        options = {},
+        options: FieldOptions = {},
     ) {
         const containerElement = document.querySelector(containerSelector);
 
@@ -79,14 +80,10 @@ export default class Field {
     listen(): void {
         this.addEventListenerDelegatedToContainerElement(
             'change',
-            this.onChangeListener,
+            this.onChange,
             this.fieldSelector,
         );
-        this.addEventListenerDelegatedToContainerElement(
-            'keyup',
-            this.onKeyUpListener,
-            this.fieldSelector,
-        );
+        this.addEventListenerDelegatedToContainerElement('keyup', this.onKeyUp, this.fieldSelector);
     }
 
     addEventListenerDelegatedToContainerElement(
@@ -115,14 +112,13 @@ export default class Field {
         });
     }
 
-    async onChangeListener(event: Event): Promise<void> {
+    async onChange(event: Event): Promise<void> {
         if (!this.isTextable()) {
             this.reset();
         }
 
         // @ts-expect-error The `event.target` is always an `HTMLElement` here.
         const fieldElement: HTMLElement = event.target;
-
         const value = this.getValue();
 
         if (this.typingDelayId) {
@@ -142,7 +138,7 @@ export default class Field {
         }
     }
 
-    async onKeyUpListener(event: Event): Promise<void> {
+    async onKeyUp(event: Event): Promise<void> {
         this.reset();
 
         // @ts-expect-error The `event.target` is always an `Element` here.
@@ -207,6 +203,7 @@ export default class Field {
 
         if (this.validators.length === 0) {
             this.validationResult = ValidationResult.valid();
+            this.setStatus(FieldStatus.Valid);
             return ValidationResult.valid();
         }
 
@@ -216,6 +213,7 @@ export default class Field {
 
         const actionId = startAction(this);
 
+        this.validationResult = null;
         this.setStatus(FieldStatus.Validating);
 
         const value = this.getValue();
@@ -242,13 +240,11 @@ export default class Field {
 
         finishAction(this, actionId);
 
-        this.validationResult = validationResult as ValidationResult;
-
-        if (!this.validationResult.isValid() && !this.validationResult.hasMessage()) {
-            this.validationResult = ValidationResult.invalid(
-                this.getOption('defaultInvalidMessage'),
-            );
+        if (!validationResult!.isValid() && !validationResult!.hasMessage()) {
+            validationResult = ValidationResult.invalid(this.getOption('defaultInvalidMessage'));
         }
+
+        this.validationResult = validationResult!;
 
         this.setStatus(this.validationResult.isValid() ? FieldStatus.Valid : FieldStatus.Invalid);
 
@@ -515,7 +511,10 @@ export default class Field {
     trim(): void {
         if (this.getOption('trimEnabled') && this.isTextable()) {
             const fieldElement = this.getFieldElement<ValueableElement>();
-            fieldElement.value = fieldElement.value.trim();
+            if (fieldElement.value.startsWith(' ') || fieldElement.value.endsWith(' ')) {
+                fieldElement.value = fieldElement.value.trim();
+                this.getOption('onChange')(fieldElement.value, fieldElement, this.containerElement);
+            }
         }
     }
 
@@ -523,25 +522,24 @@ export default class Field {
         const fieldElement = this.getFieldElement();
         const wrapperElement = this.getFieldWrapperElement();
 
-        if (status === FieldStatus.No) {
-            this.getOption('onResetStatus')(fieldElement, this.containerElement, wrapperElement);
-        }
-
-        if (this.hasOption('setStatus')) {
-            this.getOption('setStatus')(
-                status,
-                fieldElement,
-                this.containerElement,
-                wrapperElement,
-            );
-            return;
-        }
-
         const element = wrapperElement || fieldElement;
 
         element.classList.remove(FieldStatus.Validating, FieldStatus.Valid, FieldStatus.Invalid);
+
+        if (status === FieldStatus.No) {
+            this.getOption('onStatusReset')(fieldElement, this.containerElement, wrapperElement);
+        }
+
         if (status !== FieldStatus.No) {
             element.classList.add(status);
         }
+
+        this.getOption('onStatusChange')(
+            status,
+            this.validationResult,
+            fieldElement,
+            this.containerElement,
+            wrapperElement,
+        );
     }
 }

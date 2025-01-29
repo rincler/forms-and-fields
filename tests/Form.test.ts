@@ -3,7 +3,6 @@ import Field from '../src/Field';
 import Form from '../src/Form';
 import ValidationResult from '../src/ValidationResult';
 import SubmissionResult from '../src/SubmissionResult';
-import { FormStatus } from '../src/types';
 
 // @ts-expect-error It will not be `null` after the `beforeEach`.
 let formElement: HTMLFormElement = null;
@@ -57,8 +56,8 @@ describe('field options', () => {
         const onBeforeValidateField = jest.fn();
         const onAfterValidateField = jest.fn();
         const onFieldValidationError = jest.fn();
-        const onResetFieldStatus = jest.fn();
-        const setFieldStatus = jest.fn();
+        const onFieldStatusChange = jest.fn();
+        const onFieldStatusReset = jest.fn();
 
         const inputField = new Field('.js-input', '.js-form');
         const checkboxField = new Field('.js-checkbox', '.js-form');
@@ -79,8 +78,8 @@ describe('field options', () => {
             onBeforeValidateField,
             onAfterValidateField,
             onFieldValidationError,
-            onResetFieldStatus,
-            setFieldStatus,
+            onFieldStatusChange,
+            onFieldStatusReset,
         });
 
         expect(inputField.getOption('invalidMessages')).toBe(invalidMessages);
@@ -125,11 +124,11 @@ describe('field options', () => {
         expect(inputField.getOption('onValidationError')).toBe(onFieldValidationError);
         expect(checkboxField.getOption('onValidationError')).toBe(onFieldValidationError);
 
-        expect(inputField.getOption('onResetStatus')).toBe(onResetFieldStatus);
-        expect(checkboxField.getOption('onResetStatus')).toBe(onResetFieldStatus);
+        expect(inputField.getOption('onStatusChange')).toBe(onFieldStatusChange);
+        expect(checkboxField.getOption('onStatusChange')).toBe(onFieldStatusChange);
 
-        expect(inputField.getOption('setStatus')).toBe(setFieldStatus);
-        expect(checkboxField.getOption('setStatus')).toBe(setFieldStatus);
+        expect(inputField.getOption('onStatusReset')).toBe(onFieldStatusReset);
+        expect(checkboxField.getOption('onStatusReset')).toBe(onFieldStatusReset);
     });
 
     test('form options do not override field options', () => {
@@ -139,7 +138,7 @@ describe('field options', () => {
         const typingDelay = 2;
         const validateOnChange = true;
         const validateOnType = true;
-        const validatorParams = { bar: [] };
+        const validatorParams = { isEmail: [{ allow_utf8_local_part: false }] };
         const validationCacheEnabled = false;
         const onChange = jest.fn();
         const onTypingStart = jest.fn();
@@ -147,8 +146,8 @@ describe('field options', () => {
         const onBeforeValidate = jest.fn();
         const onAfterValidate = jest.fn();
         const onValidationError = jest.fn();
-        const onResetStatus = jest.fn();
-        const setStatus = jest.fn();
+        const onStatusChange = jest.fn();
+        const onStatusReset = jest.fn();
 
         const inputField = new Field('.js-input', '.js-form', [], {
             invalidMessages,
@@ -165,8 +164,8 @@ describe('field options', () => {
             onBeforeValidate,
             onAfterValidate,
             onValidationError,
-            onResetStatus,
-            setStatus,
+            onStatusChange,
+            onStatusReset,
         });
 
         // eslint-disable-next-line no-new
@@ -185,8 +184,8 @@ describe('field options', () => {
             onBeforeValidateField: jest.fn(),
             onAfterValidateField: jest.fn(),
             onFieldValidationError: jest.fn(),
-            onResetFieldStatus: jest.fn(),
-            setFieldStatus: jest.fn(),
+            onFieldStatusChange: jest.fn(),
+            onFieldStatusReset: jest.fn(),
         });
 
         expect(inputField.getOption('invalidMessages')).toBe(invalidMessages);
@@ -203,8 +202,8 @@ describe('field options', () => {
         expect(inputField.getOption('onBeforeValidate')).toBe(onBeforeValidate);
         expect(inputField.getOption('onAfterValidate')).toBe(onAfterValidate);
         expect(inputField.getOption('onValidationError')).toBe(onValidationError);
-        expect(inputField.getOption('onResetStatus')).toBe(onResetStatus);
-        expect(inputField.getOption('setStatus')).toBe(setStatus);
+        expect(inputField.getOption('onStatusChange')).toBe(onStatusChange);
+        expect(inputField.getOption('onStatusReset')).toBe(onStatusReset);
     });
 
     test('"onChange" is called on text input change', () => {
@@ -422,7 +421,6 @@ describe('validation callback options', () => {
 
     test('"onValidationError" is called when validating fields', async () => {
         const onValidationError = jest.fn();
-        const onResetStatus = jest.fn();
         const error = new Error('foo');
         const form = new Form(
             '.js-form',
@@ -443,7 +441,6 @@ describe('validation callback options', () => {
             submit,
             {
                 onValidationError,
-                onResetStatus,
             },
         );
 
@@ -452,19 +449,16 @@ describe('validation callback options', () => {
         expect(onValidationError).toHaveBeenCalledTimes(1);
         expect(onValidationError.mock.calls[0][0]).toBe(error);
         expect(onValidationError.mock.calls[0][1]).toBe(formElement);
-        expect(onResetStatus).toHaveBeenCalledTimes(1);
     });
 
     test('"onValidationError" is called when validating form', async () => {
         const onValidationError = jest.fn();
-        const onResetStatus = jest.fn();
         const error = new Error('foo');
         const form = new Form('.js-form', [], submit, {
             validate: () => {
                 throw error;
             },
             onValidationError,
-            onResetStatus,
         });
 
         await expect(form.validate()).rejects.toThrow(error);
@@ -472,7 +466,6 @@ describe('validation callback options', () => {
         expect(onValidationError).toHaveBeenCalledTimes(1);
         expect(onValidationError.mock.calls[0][0]).toBe(error);
         expect(onValidationError.mock.calls[0][1]).toBe(formElement);
-        expect(onResetStatus).toHaveBeenCalledTimes(1);
     });
 });
 
@@ -819,21 +812,28 @@ describe('init form', () => {
 
 describe('statuses', () => {
     test('validating', async () => {
+        const onStatusChange = jest.fn();
         const field = new Field('.js-input', '.js-form', [
             () => {
                 expect(formElement.classList.contains('ff-form-validating')).toBe(true);
+                expect(onStatusChange).toHaveBeenCalledTimes(1);
+                expect(onStatusChange.mock.calls[0][0]).toBe('ff-form-validating');
+                expect(onStatusChange.mock.calls[0][1]).toStrictEqual([]);
+                expect(onStatusChange.mock.calls[0][2]).toBeNull();
+                expect(onStatusChange.mock.calls[0][3]).toBe(formElement);
                 return ValidationResult.valid();
             },
         ]);
 
-        const form = new Form('.js-form', [field], submit);
-
-        inputElement.value = 'foo';
+        const form = new Form('.js-form', [field], submit, {
+            onStatusChange,
+        });
 
         await form.validate();
     });
 
     test('valid', async () => {
+        const onStatusChange = jest.fn();
         const form = new Form(
             '.js-form',
             [
@@ -841,6 +841,9 @@ describe('statuses', () => {
                 new Field('.js-checkbox', '.js-form', ['required']),
             ],
             submit,
+            {
+                onStatusChange,
+            },
         );
 
         inputElement.value = 'foo';
@@ -849,9 +852,19 @@ describe('statuses', () => {
         await form.validate();
 
         expect(formElement.classList.contains('ff-form-valid')).toBe(true);
+        expect(onStatusChange).toHaveBeenCalledTimes(2);
+        expect(onStatusChange.mock.calls[1][0]).toBe('ff-form-valid');
+        expect(onStatusChange.mock.calls[1][1]).toStrictEqual([
+            ValidationResult.valid(),
+            ValidationResult.valid(),
+            ValidationResult.valid(),
+        ]);
+        expect(onStatusChange.mock.calls[1][2]).toBeNull();
+        expect(onStatusChange.mock.calls[1][3]).toBe(formElement);
     });
 
     test('invalid', async () => {
+        const onStatusChange = jest.fn();
         const form = new Form(
             '.js-form',
             [
@@ -859,6 +872,9 @@ describe('statuses', () => {
                 new Field('.js-checkbox', '.js-form', ['required']),
             ],
             submit,
+            {
+                onStatusChange,
+            },
         );
 
         inputElement.value = 'foo';
@@ -866,9 +882,154 @@ describe('statuses', () => {
         await form.validate();
 
         expect(formElement.classList.contains('ff-form-invalid')).toBe(true);
+        expect(onStatusChange).toHaveBeenCalledTimes(2);
+        expect(onStatusChange.mock.calls[1][0]).toBe('ff-form-invalid');
+        expect(onStatusChange.mock.calls[1][1]).toStrictEqual([
+            ValidationResult.valid(),
+            ValidationResult.invalid('Invalid value.'),
+            ValidationResult.invalid(),
+        ]);
+        expect(onStatusChange.mock.calls[1][2]).toBeNull();
+        expect(onStatusChange.mock.calls[1][3]).toBe(formElement);
     });
 
-    test('no status when validation error', async () => {
+    test('submitting', async () => {
+        const onStatusChange = jest.fn();
+        const form = new Form(
+            '.js-form',
+            [new Field('.js-input', '.js-form', ['required'])],
+            () => {
+                expect(formElement.classList.contains('ff-form-submitting')).toBe(true);
+                expect(onStatusChange).toHaveBeenCalledTimes(3);
+                expect(onStatusChange.mock.calls[2][0]).toBe('ff-form-submitting');
+                expect(onStatusChange.mock.calls[2][1]).toStrictEqual([
+                    ValidationResult.valid(),
+                    ValidationResult.valid(),
+                ]);
+                expect(onStatusChange.mock.calls[2][2]).toBeNull();
+                expect(onStatusChange.mock.calls[2][3]).toBe(formElement);
+                return SubmissionResult.positive();
+            },
+            {
+                onStatusChange,
+            },
+        );
+        form.listen();
+
+        inputElement.value = 'foo';
+
+        fireEvent.submit(formElement);
+    });
+
+    test('positive submit', async () => {
+        const onStatusChange = jest.fn();
+        const form = new Form(
+            '.js-form',
+            [new Field('.js-input', '.js-form', ['required'])],
+            () => SubmissionResult.positive(),
+            {
+                onStatusChange,
+            },
+        );
+        form.listen();
+
+        inputElement.value = 'foo';
+
+        fireEvent.submit(formElement);
+
+        await waitFor(() => {
+            expect(formElement.classList.contains('ff-form-positive-submit')).toBe(true);
+            expect(onStatusChange).toHaveBeenCalledTimes(4);
+            expect(onStatusChange.mock.calls[3][0]).toBe('ff-form-positive-submit');
+            expect(onStatusChange.mock.calls[3][1]).toStrictEqual([
+                ValidationResult.valid(),
+                ValidationResult.valid(),
+            ]);
+            expect(onStatusChange.mock.calls[3][2]).toStrictEqual(SubmissionResult.positive());
+            expect(onStatusChange.mock.calls[3][3]).toBe(formElement);
+        });
+    });
+
+    test('negative submit', async () => {
+        const onStatusChange = jest.fn();
+        const form = new Form(
+            '.js-form',
+            [new Field('.js-input', '.js-form', ['required'])],
+            () => SubmissionResult.negative(),
+            {
+                onStatusChange,
+            },
+        );
+        form.listen();
+
+        inputElement.value = 'foo';
+
+        fireEvent.submit(formElement);
+
+        await waitFor(() => {
+            expect(formElement.classList.contains('ff-form-negative-submit')).toBe(true);
+            expect(onStatusChange).toHaveBeenCalledTimes(4);
+            expect(onStatusChange.mock.calls[3][0]).toBe('ff-form-negative-submit');
+            expect(onStatusChange.mock.calls[3][1]).toStrictEqual([
+                ValidationResult.valid(),
+                ValidationResult.valid(),
+            ]);
+            expect(onStatusChange.mock.calls[3][2]).toStrictEqual(SubmissionResult.negative());
+            expect(onStatusChange.mock.calls[3][3]).toBe(formElement);
+        });
+    });
+
+    test('status is reset on change', () => {
+        const onStatusChange = jest.fn();
+        const onStatusReset = jest.fn();
+        const form = new Form('.js-form', [new Field('.js-input', '.js-form')], submit, {
+            onStatusChange,
+            onStatusReset,
+        });
+        form.listen();
+
+        formElement.classList.add('ff-form-valid', 'ff-form-invalid');
+
+        fireEvent.change(inputElement);
+
+        expect(formElement.classList.contains('ff-field-valid')).toBe(false);
+        expect(formElement.classList.contains('ff-field-invalid')).toBe(false);
+        expect(onStatusChange).toHaveBeenCalledTimes(1);
+        expect(onStatusChange.mock.calls[0][0]).toBe('');
+        expect(onStatusChange.mock.calls[0][1]).toStrictEqual([]);
+        expect(onStatusChange.mock.calls[0][2]).toBeNull();
+        expect(onStatusChange.mock.calls[0][3]).toBe(formElement);
+        expect(onStatusReset).toHaveBeenCalledTimes(1);
+        expect(onStatusReset.mock.calls[0][0]).toBe(formElement);
+    });
+
+    test('status is reset on type', () => {
+        const onStatusChange = jest.fn();
+        const onStatusReset = jest.fn();
+        const form = new Form('.js-form', [new Field('.js-input', '.js-form')], submit, {
+            onStatusChange,
+            onStatusReset,
+        });
+        form.listen();
+
+        formElement.classList.add('ff-form-valid', 'ff-form-invalid');
+
+        fireEvent.keyUp(inputElement);
+
+        expect(formElement.classList.contains('ff-field-valid')).toBe(false);
+        expect(formElement.classList.contains('ff-field-invalid')).toBe(false);
+        expect(onStatusChange).toHaveBeenCalledTimes(1);
+        expect(onStatusChange.mock.calls[0][0]).toBe('');
+        expect(onStatusChange.mock.calls[0][1]).toStrictEqual([]);
+        expect(onStatusChange.mock.calls[0][2]).toBeNull();
+        expect(onStatusChange.mock.calls[0][3]).toBe(formElement);
+        expect(onStatusReset).toHaveBeenCalledTimes(1);
+        expect(onStatusReset.mock.calls[0][0]).toBe(formElement);
+    });
+
+    test('status is reset on validation error (field)', async () => {
+        const onStatusChange = jest.fn();
+        const onStatusReset = jest.fn();
         const form = new Form(
             '.js-form',
             [
@@ -880,180 +1041,87 @@ describe('statuses', () => {
                 new Field('.js-checkbox', '.js-form', ['required']),
             ],
             submit,
+            {
+                onStatusChange,
+                onStatusReset,
+            },
         );
 
         await form.validate().catch(() => {});
 
         expect(formElement.classList.contains('ff-form-invalid')).toBe(false);
         expect(formElement.classList.contains('ff-form-valid')).toBe(false);
+        expect(onStatusChange).toHaveBeenCalledTimes(2);
+        expect(onStatusChange.mock.calls[1][0]).toBe('');
+        expect(onStatusChange.mock.calls[1][1]).toStrictEqual([]);
+        expect(onStatusChange.mock.calls[1][2]).toBeNull();
+        expect(onStatusChange.mock.calls[1][3]).toBe(formElement);
+        expect(onStatusReset).toHaveBeenCalledTimes(1);
+        expect(onStatusReset.mock.calls[0][0]).toBe(formElement);
     });
 
-    test('submitting', async () => {
-        const form = new Form(
-            '.js-form',
-            [new Field('.js-input', '.js-form', ['required'])],
-            () => {
-                expect(formElement.classList.contains('ff-form-submitting')).toBe(true);
-                return SubmissionResult.positive();
+    test('status is reset on validation error (form)', async () => {
+        const onStatusChange = jest.fn();
+        const onStatusReset = jest.fn();
+        const form = new Form('.js-form', [], submit, {
+            validate: () => {
+                throw new Error('foo');
             },
-        );
-        form.listen();
-
-        inputElement.value = 'foo';
-
-        fireEvent.submit(formElement);
-    });
-
-    test('positive submit', async () => {
-        const form = new Form(
-            '.js-form',
-            [new Field('.js-input', '.js-form', ['required'])],
-            () => {
-                return SubmissionResult.positive();
-            },
-        );
-        form.listen();
-
-        inputElement.value = 'foo';
-
-        fireEvent.submit(formElement);
-
-        await waitFor(() => {
-            expect(formElement.classList.contains('ff-form-positive-submit')).toBe(true);
+            onStatusChange,
+            onStatusReset,
         });
+
+        await form.validate().catch(() => {});
+
+        expect(formElement.classList.contains('ff-form-invalid')).toBe(false);
+        expect(formElement.classList.contains('ff-form-valid')).toBe(false);
+        expect(onStatusChange).toHaveBeenCalledTimes(2);
+        expect(onStatusChange.mock.calls[1][0]).toBe('');
+        expect(onStatusChange.mock.calls[1][1]).toStrictEqual([]);
+        expect(onStatusChange.mock.calls[1][2]).toBeNull();
+        expect(onStatusChange.mock.calls[1][3]).toBe(formElement);
+        expect(onStatusReset).toHaveBeenCalledTimes(1);
+        expect(onStatusReset.mock.calls[0][0]).toBe(formElement);
     });
 
-    test('negative submit', async () => {
-        const form = new Form(
-            '.js-form',
-            [new Field('.js-input', '.js-form', ['required'])],
-            () => {
-                return SubmissionResult.negative();
-            },
-        );
-        form.listen();
-
-        inputElement.value = 'foo';
-
-        fireEvent.submit(formElement);
-
-        await waitFor(() => {
-            expect(formElement.classList.contains('ff-form-negative-submit')).toBe(true);
-        });
-    });
-
-    test('valid when submit error', async () => {
+    test('status is "valid" on submission error', async () => {
+        const onStatusChange = jest.fn();
+        const onStatusReset = jest.fn();
         const form = new Form(
             '.js-form',
             [new Field('.js-input', '.js-form', ['required'])],
             () => {
                 throw new Error('foo');
             },
+            {
+                onStatusChange,
+                onStatusReset,
+            },
         );
+        form.validationResults = [ValidationResult.valid(), ValidationResult.valid()];
         form.listen();
+
+        formElement.classList.add('ff-form-valid', 'ff-form-invalid');
 
         inputElement.value = 'foo';
 
         await form.runSubmitProcess().catch(() => {});
 
         await waitFor(() => {
+            expect(formElement.classList.contains('ff-form-valid')).toBe(true);
             expect(formElement.classList.contains('ff-form-positive-submit')).toBe(false);
             expect(formElement.classList.contains('ff-form-negative-submit')).toBe(false);
             expect(formElement.classList.contains('ff-form-valid')).toBe(true);
+            expect(onStatusChange).toHaveBeenCalledTimes(2);
+            expect(onStatusChange.mock.calls[1][0]).toBe('ff-form-valid');
+            expect(onStatusChange.mock.calls[1][1]).toStrictEqual([
+                ValidationResult.valid(),
+                ValidationResult.valid(),
+            ]);
+            expect(onStatusChange.mock.calls[1][2]).toBeNull();
+            expect(onStatusChange.mock.calls[1][3]).toBe(formElement);
+            expect(onStatusReset).not.toHaveBeenCalled();
         });
-    });
-
-    test('custom "setStatus"', async () => {
-        const setStatus = jest.fn();
-        const form = new Form(
-            '.js-form',
-            [new Field('.js-input', '.js-form', ['required'])],
-            submit,
-            {
-                setStatus,
-            },
-        );
-
-        inputElement.value = 'foo';
-
-        await form.validate();
-
-        expect(setStatus).toHaveBeenCalledTimes(2);
-        expect(setStatus.mock.calls[0][0]).toBe('ff-form-validating');
-        expect(setStatus.mock.calls[0][1]).toBe(formElement);
-        expect(setStatus.mock.calls[1][0]).toBe('ff-form-valid');
-        expect(setStatus.mock.calls[1][1]).toBe(formElement);
-
-        expect(formElement.classList.contains('ff-form-valid')).toBe(false);
-    });
-
-    test('custom field "setStatus"', async () => {
-        const setStatus = jest.fn();
-        const form = new Form(
-            '.js-form',
-            [new Field('.js-input', '.js-form', ['required'])],
-            submit,
-            {
-                setFieldStatus: setStatus,
-            },
-        );
-
-        inputElement.value = 'foo';
-
-        await form.validate();
-
-        expect(setStatus).toHaveBeenCalledTimes(2);
-        expect(setStatus.mock.calls[0][0]).toBe('ff-field-validating');
-        expect(setStatus.mock.calls[0][1]).toBe(inputElement);
-        expect(setStatus.mock.calls[0][2]).toBe(formElement);
-        expect(setStatus.mock.calls[1][0]).toBe('ff-field-valid');
-        expect(setStatus.mock.calls[1][1]).toBe(inputElement);
-        expect(setStatus.mock.calls[1][2]).toBe(formElement);
-        expect(inputElement.classList.contains('ff-field-valid')).toBe(false);
-    });
-
-    test('status is reset on change', () => {
-        const setStatus = jest.fn();
-        const onResetStatus = jest.fn();
-        const form = new Form('.js-form', [new Field('.js-input', '.js-form')], submit, {
-            setStatus,
-            onResetStatus,
-        });
-        form.listen();
-
-        fireEvent.change(inputElement, { target: { value: 'bar' } });
-
-        expect(setStatus).toHaveBeenCalledTimes(1);
-        expect(setStatus.mock.calls[0][0]).toBe('');
-        expect(setStatus.mock.calls[0][1]).toBe(formElement);
-        expect(onResetStatus).toHaveBeenCalledTimes(1);
-    });
-
-    test('status is reset on type', () => {
-        const setStatus = jest.fn();
-        const onResetStatus = jest.fn();
-        const form = new Form('.js-form', [new Field('.js-input', '.js-form')], submit, {
-            setStatus,
-            onResetStatus,
-        });
-        form.listen();
-
-        fireEvent.keyUp(inputElement, { key: 'b', code: 'KeyB' });
-
-        expect(setStatus).toHaveBeenCalledTimes(1);
-        expect(setStatus.mock.calls[0][0]).toBe('');
-        expect(setStatus.mock.calls[0][1]).toBe(formElement);
-        expect(onResetStatus).toHaveBeenCalledTimes(1);
-    });
-
-    test('"onResetStatus" is called', () => {
-        const onResetStatus = jest.fn();
-        const form = new Form('.js-form', [], submit, {
-            onResetStatus,
-        });
-        form.setStatus(FormStatus.No);
-        expect(onResetStatus).toHaveBeenCalledTimes(1);
-        expect(onResetStatus.mock.calls[0][0]).toBe(formElement);
     });
 });
 

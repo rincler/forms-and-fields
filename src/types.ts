@@ -42,13 +42,14 @@ export interface FieldOptions {
         fieldElement: HTMLElement,
         containerElement: Element,
     ) => void;
-    onResetStatus?: (
+    onStatusChange?: (
+        status: FieldStatus,
+        validationResult: ValidationResult | null,
         fieldElement: HTMLElement,
         containerElement: Element,
         wrapperElement: HTMLElement | null,
     ) => void;
-    setStatus?: (
-        status: FieldStatus,
+    onStatusReset?: (
         fieldElement: HTMLElement,
         containerElement: Element,
         wrapperElement: HTMLElement | null,
@@ -172,13 +173,18 @@ export type FormOptions = FieldOptions & {
     onAfterPositiveSubmit?: (data: object, formElement: HTMLFormElement) => void;
     onAfterNegativeSubmit?: (data: object, formElement: HTMLFormElement) => void;
     onSubmissionError?: (error: unknown, formElement: HTMLFormElement) => void;
-    onResetStatus?: (formElement: HTMLFormElement) => void;
-    setStatus?: (status: FormStatus, formElement: HTMLFormElement) => void;
+    onStatusChange?: (
+        status: FormStatus,
+        validationResults: ValidationResult[],
+        submissionResult: SubmissionResult | null,
+        formElement: HTMLFormElement,
+    ) => void;
+    onStatusReset?: (formElement: HTMLFormElement) => void;
     onBeforeValidateField?: FieldOptions['onBeforeValidate'];
     onAfterValidateField?: FieldOptions['onAfterValidate'];
     onFieldValidationError?: FieldOptions['onValidationError'];
-    onResetFieldStatus?: FieldOptions['onResetStatus'];
-    setFieldStatus?: FieldOptions['setStatus'];
+    onFieldStatusChange?: FieldOptions['onStatusChange'];
+    onFieldStatusReset?: FieldOptions['onStatusReset'];
 };
 
 export type FormOptionName = keyof FormOptions;
