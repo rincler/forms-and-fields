@@ -272,7 +272,7 @@ export default class Form {
         }
 
         if (this.hasOption('setStatus')) {
-            this.getOption('setStatus')(this.formElement, status);
+            this.getOption('setStatus')(status, this.formElement);
             return;
         }
 

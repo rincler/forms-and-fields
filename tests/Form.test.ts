@@ -979,10 +979,10 @@ describe('statuses', () => {
         await form.validate();
 
         expect(setStatus).toHaveBeenCalledTimes(2);
-        expect(setStatus.mock.calls[0][0]).toBe(formElement);
-        expect(setStatus.mock.calls[0][1]).toBe('ff-form-validating');
-        expect(setStatus.mock.calls[1][0]).toBe(formElement);
-        expect(setStatus.mock.calls[1][1]).toBe('ff-form-valid');
+        expect(setStatus.mock.calls[0][0]).toBe('ff-form-validating');
+        expect(setStatus.mock.calls[0][1]).toBe(formElement);
+        expect(setStatus.mock.calls[1][0]).toBe('ff-form-valid');
+        expect(setStatus.mock.calls[1][1]).toBe(formElement);
 
         expect(formElement.classList.contains('ff-form-valid')).toBe(false);
     });
@@ -1003,10 +1003,12 @@ describe('statuses', () => {
         await form.validate();
 
         expect(setStatus).toHaveBeenCalledTimes(2);
-        expect(setStatus.mock.calls[0][0]).toBe(input);
-        expect(setStatus.mock.calls[0][1]).toBe('ff-field-validating');
-        expect(setStatus.mock.calls[1][0]).toBe(input);
-        expect(setStatus.mock.calls[1][1]).toBe('ff-field-valid');
+        expect(setStatus.mock.calls[0][0]).toBe('ff-field-validating');
+        expect(setStatus.mock.calls[0][1]).toBe(input);
+        expect(setStatus.mock.calls[0][2]).toBe(formElement);
+        expect(setStatus.mock.calls[1][0]).toBe('ff-field-valid');
+        expect(setStatus.mock.calls[1][1]).toBe(input);
+        expect(setStatus.mock.calls[1][2]).toBe(formElement);
         expect(input.classList.contains('ff-field-valid')).toBe(false);
     });
 
@@ -1022,7 +1024,8 @@ describe('statuses', () => {
         fireEvent.change(input, { target: { value: 'bar' } });
 
         expect(setStatus).toHaveBeenCalledTimes(1);
-        expect(setStatus.mock.calls[0][0]).toBe(formElement);
+        expect(setStatus.mock.calls[0][0]).toBe('');
+        expect(setStatus.mock.calls[0][1]).toBe(formElement);
         expect(onResetStatus).toHaveBeenCalledTimes(1);
     });
 
@@ -1038,7 +1041,8 @@ describe('statuses', () => {
         fireEvent.keyUp(input, { key: 'b', code: 'KeyB' });
 
         expect(setStatus).toHaveBeenCalledTimes(1);
-        expect(setStatus.mock.calls[0][0]).toBe(formElement);
+        expect(setStatus.mock.calls[0][0]).toBe('');
+        expect(setStatus.mock.calls[0][1]).toBe(formElement);
         expect(onResetStatus).toHaveBeenCalledTimes(1);
     });
 

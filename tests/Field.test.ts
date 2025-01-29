@@ -991,12 +991,14 @@ describe('statuses', () => {
         const wrapper = expectedElementSelector && document.querySelector(expectedElementSelector);
 
         expect(setStatus).toHaveBeenCalledTimes(2);
-        expect(setStatus.mock.calls[0][0]).toBe(element);
-        expect(setStatus.mock.calls[0][1]).toBe('ff-field-validating');
-        expect(setStatus.mock.calls[0][2]).toBe(wrapper);
-        expect(setStatus.mock.calls[1][0]).toBe(element);
-        expect(setStatus.mock.calls[1][1]).toBe('ff-field-valid');
-        expect(setStatus.mock.calls[1][2]).toBe(wrapper);
+        expect(setStatus.mock.calls[0][0]).toBe('ff-field-validating');
+        expect(setStatus.mock.calls[0][1]).toBe(element);
+        expect(setStatus.mock.calls[0][2]).toBe(container);
+        expect(setStatus.mock.calls[0][3]).toBe(wrapper);
+        expect(setStatus.mock.calls[1][0]).toBe('ff-field-valid');
+        expect(setStatus.mock.calls[1][1]).toBe(element);
+        expect(setStatus.mock.calls[1][2]).toBe(container);
+        expect(setStatus.mock.calls[1][3]).toBe(wrapper);
 
         expect(element!.classList.contains('ff-field-valid')).toBe(false);
         expect(wrapper && wrapper.classList.contains('ff-field-valid')).toBeFalsy();
@@ -1019,9 +1021,10 @@ describe('statuses', () => {
         fireEvent.change(document.querySelector(selector)!);
 
         expect(setStatus).toHaveBeenCalledTimes(1);
-        expect(setStatus.mock.calls[0][0]).toBe(document.querySelector(selector));
-        expect(setStatus.mock.calls[0][1]).toBe('');
-        expect(setStatus.mock.calls[0][2]).toBe(
+        expect(setStatus.mock.calls[0][0]).toBe('');
+        expect(setStatus.mock.calls[0][1]).toBe(document.querySelector(selector));
+        expect(setStatus.mock.calls[0][2]).toBe(container);
+        expect(setStatus.mock.calls[0][3]).toBe(
             expectedElementSelector && document.querySelector(expectedElementSelector),
         );
         expect(onResetStatus).toHaveBeenCalledTimes(1);
@@ -1042,9 +1045,10 @@ describe('statuses', () => {
         fireEvent.keyUp(input, { key: 'b', code: 'KeyB' });
 
         expect(setStatus).toHaveBeenCalledTimes(1);
-        expect(setStatus.mock.calls[0][0]).toBe(input);
-        expect(setStatus.mock.calls[0][1]).toBe('');
-        expect(setStatus.mock.calls[0][2]).toBeNull();
+        expect(setStatus.mock.calls[0][0]).toBe('');
+        expect(setStatus.mock.calls[0][1]).toBe(input);
+        expect(setStatus.mock.calls[0][2]).toBe(container);
+        expect(setStatus.mock.calls[0][3]).toBeNull();
         expect(onResetStatus).toHaveBeenCalledTimes(1);
         expect(field.validationResult).toBeNull();
     });
@@ -1060,7 +1064,8 @@ describe('statuses', () => {
         field.setStatus(FieldStatus.No);
         expect(onResetStatus).toHaveBeenCalledTimes(1);
         expect(onResetStatus.mock.calls[0][0]).toBe(document.querySelector(selector));
-        expect(onResetStatus.mock.calls[0][1]).toBe(
+        expect(onResetStatus.mock.calls[0][1]).toBe(container);
+        expect(onResetStatus.mock.calls[0][2]).toBe(
             expectedElementSelector && document.querySelector(expectedElementSelector),
         );
     });

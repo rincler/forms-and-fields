@@ -38,8 +38,17 @@ export interface FieldOptions {
         containerElement: Element,
     ) => void;
     onValidationError?: (error: unknown, fieldElement: Element, containerElement: Element) => void;
-    onResetStatus?: (fieldElement: Element, wrapperElement: Element | null) => void;
-    setStatus?: (fieldElement: Element, status: string, wrapperElement: Element | null) => void;
+    onResetStatus?: (
+        fieldElement: Element,
+        containerElement: Element,
+        wrapperElement: Element | null,
+    ) => void;
+    setStatus?: (
+        status: FieldStatus,
+        fieldElement: Element,
+        containerElement: Element,
+        wrapperElement: Element | null,
+    ) => void;
 }
 
 export type FieldOptionName = keyof FieldOptions;
@@ -160,7 +169,7 @@ export type FormOptions = FieldOptions & {
     onAfterNegativeSubmit?: (data: object, formElement: Element) => void;
     onSubmissionError?: (error: unknown, formElement: Element) => void;
     onResetStatus?: (formElement: Element) => void;
-    setStatus?: (formElement: Element, status: FormStatus) => void;
+    setStatus?: (status: FormStatus, formElement: Element) => void;
     onBeforeValidateField?: FieldOptions['onBeforeValidate'];
     onAfterValidateField?: FieldOptions['onAfterValidate'];
     onFieldValidationError?: FieldOptions['onValidationError'];

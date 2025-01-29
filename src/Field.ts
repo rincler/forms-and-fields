@@ -477,11 +477,16 @@ export default class Field {
         const wrapperElement = this.getFieldWrapperElement();
 
         if (status === FieldStatus.No) {
-            this.getOption('onResetStatus')(fieldElement, wrapperElement);
+            this.getOption('onResetStatus')(fieldElement, this.containerElement, wrapperElement);
         }
 
         if (this.hasOption('setStatus')) {
-            this.getOption('setStatus')(fieldElement, status, wrapperElement);
+            this.getOption('setStatus')(
+                status,
+                fieldElement,
+                this.containerElement,
+                wrapperElement,
+            );
             return;
         }
 
