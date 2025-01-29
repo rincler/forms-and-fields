@@ -9,7 +9,7 @@ import { FormStatus } from '../src/types';
 let formElement: HTMLFormElement = null;
 // @ts-expect-error It will not be `null` after the `beforeEach`.
 let inputElement: HTMLInputElement = null;
-const submit = () => new SubmissionResult(true);
+const submit = () => SubmissionResult.positive();
 jest.useFakeTimers();
 
 const getInputElement = (selector: string): HTMLInputElement => {
@@ -557,7 +557,7 @@ describe('submit callback options', () => {
     test('"onAfterPositiveSubmit" is called and "onAfterNegativeSubmit" is not called', async () => {
         const onAfterPositiveSubmit = jest.fn();
         const onAfterNegativeSubmit = jest.fn();
-        const form = new Form('.js-form', [], () => new SubmissionResult(true, { foo: 'bar' }), {
+        const form = new Form('.js-form', [], () => SubmissionResult.positive({ foo: 'bar' }), {
             onAfterPositiveSubmit,
             onAfterNegativeSubmit,
         });
@@ -577,7 +577,7 @@ describe('submit callback options', () => {
     test('"onAfterPositiveSubmit" is not called and "onAfterNegativeSubmit" is called', async () => {
         const onAfterPositiveSubmit = jest.fn();
         const onAfterNegativeSubmit = jest.fn();
-        const form = new Form('.js-form', [], () => new SubmissionResult(false, { foo: 'bar' }), {
+        const form = new Form('.js-form', [], () => SubmissionResult.negative({ foo: 'bar' }), {
             onAfterPositiveSubmit,
             onAfterNegativeSubmit,
         });
@@ -752,7 +752,7 @@ describe('validation', () => {
 describe('submission', () => {
     test('submit valid form', async () => {
         const submitMock = jest.fn();
-        submitMock.mockReturnValue(new SubmissionResult(true));
+        submitMock.mockReturnValue(SubmissionResult.positive());
         const form = new Form(
             '.js-form',
             [
@@ -776,7 +776,7 @@ describe('submission', () => {
     });
 
     test('submit invalid form (invalid fields)', async () => {
-        const submitMock = jest.fn(() => new SubmissionResult(true));
+        const submitMock = jest.fn(() => SubmissionResult.positive());
         const form = new Form(
             '.js-form',
             [
@@ -796,7 +796,7 @@ describe('submission', () => {
     });
 
     test('submit invalid form (invalid form)', async () => {
-        const submitMock = jest.fn(() => new SubmissionResult(true));
+        const submitMock = jest.fn(() => SubmissionResult.positive());
         const form = new Form('.js-form', [], submitMock, {
             validate: () => ValidationResult.invalid(),
         });
@@ -894,7 +894,7 @@ describe('statuses', () => {
             [new Field('.js-input', '.js-form', ['required'])],
             () => {
                 expect(formElement.classList.contains('ff-form-submitting')).toBe(true);
-                return new SubmissionResult(true);
+                return SubmissionResult.positive();
             },
         );
         form.listen();
@@ -909,7 +909,7 @@ describe('statuses', () => {
             '.js-form',
             [new Field('.js-input', '.js-form', ['required'])],
             () => {
-                return new SubmissionResult(true);
+                return SubmissionResult.positive();
             },
         );
         form.listen();
@@ -928,7 +928,7 @@ describe('statuses', () => {
             '.js-form',
             [new Field('.js-input', '.js-form', ['required'])],
             () => {
-                return new SubmissionResult(false);
+                return SubmissionResult.negative();
             },
         );
         form.listen();
@@ -1061,7 +1061,7 @@ describe('rejection', () => {
     test('reject validation when new field validation starts', async () => {
         const onAfterValidate = jest.fn();
         const field = new Field('.js-input', '.js-form', [() => ValidationResult.valid()]);
-        const form = new Form('.js-form', [field], () => new SubmissionResult(true), {
+        const form = new Form('.js-form', [field], () => SubmissionResult.positive(), {
             onAfterValidate,
         });
 
@@ -1077,7 +1077,7 @@ describe('rejection', () => {
     test('reject validation when new form validation starts', async () => {
         const onAfterValidate = jest.fn();
         const field = new Field('.js-input', '.js-form');
-        const form = new Form('.js-form', [field], () => new SubmissionResult(true), {
+        const form = new Form('.js-form', [field], () => SubmissionResult.positive(), {
             onAfterValidate,
             validate: () => ValidationResult.valid(),
         });
@@ -1095,7 +1095,7 @@ describe('rejection', () => {
         const onAfterValidate = jest.fn();
         const onAfterSubmit = jest.fn();
         const field = new Field('.js-input', '.js-form', [() => ValidationResult.valid()]);
-        const form = new Form('.js-form', [field], () => new SubmissionResult(true), {
+        const form = new Form('.js-form', [field], () => SubmissionResult.positive(), {
             onAfterValidate,
             onAfterSubmit,
         });
@@ -1111,7 +1111,7 @@ describe('rejection', () => {
 
     test('reject submission when new submission starts', async () => {
         const onAfterSubmit = jest.fn();
-        const form = new Form('.js-form', [], () => new SubmissionResult(true), {
+        const form = new Form('.js-form', [], () => SubmissionResult.positive(), {
             onAfterSubmit,
         });
 

@@ -51,7 +51,7 @@ const form = new Form(
     ],
     () => {
         // here can be AJAX-request
-        return new SubmissionResult(true);
+        return SubmissionResult.positive();
     },
 );
 
@@ -152,7 +152,7 @@ const registrationForm = new Form(
 
         const result = await response.json();
 
-        return new SubmissionResult(result.isSuccess);
+        return SubmissionResult.make(result.isSuccess);
     },
 );
 
@@ -174,7 +174,7 @@ const emailListForm = new Form(
         ]),
     ],
     () => {
-        return new SubmissionResult(true);
+        return SubmissionResult.positive();
     },
 );
 
@@ -216,7 +216,7 @@ const uploadForm = new Form(
         ),
     ],
     async () => {
-        return new SubmissionResult(true);
+        return SubmissionResult.positive();
     },
 );
 
@@ -258,7 +258,7 @@ const addressForm = new Form(
 
         const result = await response.json();
 
-        return new SubmissionResult(result.isSuccess);
+        return SubmissionResult.make(result.isSuccess);
     },
     {
         onBeforeValidate: (formElement) => {

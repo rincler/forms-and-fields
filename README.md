@@ -42,7 +42,7 @@ const form = new Form(
     (formData) => {
         console.log(formData);
         // here can be an AJAX-request
-        return new SubmissionResult(true);
+        return SubmissionResult.positive();
     }, 
     {
         onAfterValidateField: (validationResult) => {
@@ -125,11 +125,13 @@ When a user submits a form, validation is performed first. If the form passes va
 
 #### `SubmissionResult` class
 
-| Method                                                | Description                                      |
-|-------------------------------------------------------|--------------------------------------------------|
-| constructor(result: `boolean`, data?: ` object` = {}) | Creates a new submission result.                 |
-| isPositive(): `boolean`                               | Returns `true` if submission result is positive. |
-| getData(): `object`                                   | Retrieves the submission data.                   |
+| Method                                                                                | Description                                                                                    |
+|---------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------|
+| positive(result: `boolean`, data?: ` object` = {})                                    | Static method. Creates a new positive submission result.                                       |
+| negative(result: `boolean`, data?: ` object` = {})                                    | Static method. Creates a new negative submission result.                                       |
+| make(result: `boolean`, positiveData?: ` object` = {}, negativeData?: ` object` = {}) | Static method. Creates a new positive or negative submission result depending on the `result`. |
+| isPositive(): `boolean`                                                               | Returns `true` if submission result is positive.                                               |
+| getData(): `object`                                                                   | Retrieves the submission data.                                                                 |
 
 ### Fields
 
