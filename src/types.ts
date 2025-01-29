@@ -20,30 +20,38 @@ export interface FieldOptions {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     validatorParams?: { [K in VendorValidatorName]?: any[] };
     validationCacheEnabled?: boolean;
-    onChange?: (fieldValue: FieldValue, fieldElement: Element, containerElement: Element) => void;
-    onTypingStart?: (fieldElement: Element, containerElement: Element) => void;
+    onChange?: (
+        fieldValue: FieldValue,
+        fieldElement: HTMLElement,
+        containerElement: Element,
+    ) => void;
+    onTypingStart?: (fieldElement: HTMLElement, containerElement: Element) => void;
     onTypingEnd?: (
         fieldValue: FieldValue,
-        fieldElement: Element,
+        fieldElement: HTMLElement,
         containerElement: Element,
     ) => void;
-    onBeforeValidate?: (fieldElement: Element, containerElement: Element) => void;
+    onBeforeValidate?: (fieldElement: HTMLElement, containerElement: Element) => void;
     onAfterValidate?: (
         validationResult: ValidationResult,
-        fieldElement: Element,
+        fieldElement: HTMLElement,
         containerElement: Element,
     ) => void;
-    onValidationError?: (error: unknown, fieldElement: Element, containerElement: Element) => void;
-    onResetStatus?: (
-        fieldElement: Element,
+    onValidationError?: (
+        error: unknown,
+        fieldElement: HTMLElement,
         containerElement: Element,
-        wrapperElement: Element | null,
+    ) => void;
+    onResetStatus?: (
+        fieldElement: HTMLElement,
+        containerElement: Element,
+        wrapperElement: HTMLElement | null,
     ) => void;
     setStatus?: (
         status: FieldStatus,
-        fieldElement: Element,
+        fieldElement: HTMLElement,
         containerElement: Element,
-        wrapperElement: Element | null,
+        wrapperElement: HTMLElement | null,
     ) => void;
 }
 
@@ -155,17 +163,17 @@ export enum FormStatus {
 }
 
 export type FormOptions = FieldOptions & {
-    onBeforeValidate?: (formElement: Element) => void;
+    onBeforeValidate?: (formElement: HTMLFormElement) => void;
     validate?: (formData: FormData) => ValidationResult | Promise<ValidationResult>;
-    onAfterValidate?: (validationResults: ValidationResult[], formElement: Element) => void;
-    onValidationError?: (error: unknown, formElement: Element) => void;
-    onBeforeSubmit?: (formData: FormData, formElement: Element) => void;
-    onAfterSubmit?: (submissionResult: SubmissionResult, formElement: Element) => void;
-    onAfterPositiveSubmit?: (data: object, formElement: Element) => void;
-    onAfterNegativeSubmit?: (data: object, formElement: Element) => void;
-    onSubmissionError?: (error: unknown, formElement: Element) => void;
-    onResetStatus?: (formElement: Element) => void;
-    setStatus?: (status: FormStatus, formElement: Element) => void;
+    onAfterValidate?: (validationResults: ValidationResult[], formElement: HTMLFormElement) => void;
+    onValidationError?: (error: unknown, formElement: HTMLFormElement) => void;
+    onBeforeSubmit?: (formData: FormData, formElement: HTMLFormElement) => void;
+    onAfterSubmit?: (submissionResult: SubmissionResult, formElement: HTMLFormElement) => void;
+    onAfterPositiveSubmit?: (data: object, formElement: HTMLFormElement) => void;
+    onAfterNegativeSubmit?: (data: object, formElement: HTMLFormElement) => void;
+    onSubmissionError?: (error: unknown, formElement: HTMLFormElement) => void;
+    onResetStatus?: (formElement: HTMLFormElement) => void;
+    setStatus?: (status: FormStatus, formElement: HTMLFormElement) => void;
     onBeforeValidateField?: FieldOptions['onBeforeValidate'];
     onAfterValidateField?: FieldOptions['onAfterValidate'];
     onFieldValidationError?: FieldOptions['onValidationError'];

@@ -39,7 +39,9 @@ export default class Form {
         }
 
         if (!(formElement instanceof HTMLFormElement)) {
-            throw new Error(`An element with the "${formSelector}" selector is not a form.`);
+            throw new Error(
+                `A form element with the "${formSelector}" selector is not instance of the HTMLFormElement.`,
+            );
         }
 
         this.formElement = formElement;

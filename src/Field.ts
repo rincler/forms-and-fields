@@ -97,8 +97,8 @@ export default class Field {
         this.containerElement.addEventListener(type, (event) => {
             const target = event.target;
 
-            if (!(target instanceof Element)) {
-                throw new Error('The event target is not an element.');
+            if (!(target instanceof HTMLElement)) {
+                throw new Error('The event target is not an instance of the HTMLElement.');
             }
 
             if (target.classList.contains(selector.substring(1))) {
@@ -120,8 +120,8 @@ export default class Field {
             this.reset();
         }
 
-        // @ts-expect-error The `event.target` is always an `Element` here.
-        const fieldElement: Element = event.target;
+        // @ts-expect-error The `event.target` is always an `HTMLElement` here.
+        const fieldElement: HTMLElement = event.target;
 
         const value = this.getValue();
 
@@ -146,7 +146,7 @@ export default class Field {
         this.reset();
 
         // @ts-expect-error The `event.target` is always an `Element` here.
-        const fieldElement: Element = event.target;
+        const fieldElement: HTMLElement = event.target;
 
         if (this.getOption('validateOnType')) {
             // This fixes the next case:
@@ -296,7 +296,7 @@ export default class Field {
     getValue(): FieldValue {
         const fieldElement = this.getFieldElement();
 
-        if (this.isTextable()) {
+        if (this.isTextable() || this.isSelect()) {
             return (fieldElement as ValueableElement).value;
         }
 
@@ -322,20 +322,33 @@ export default class Field {
         return fieldElement.value;
     }
 
-    getFieldElement<E extends Element = Element>(): E {
+    getFieldElement<E extends HTMLElement = HTMLElement>(): E {
         const fieldElement = this.containerElement.querySelector<E>(this.fieldSelector);
+
         if (!fieldElement) {
             throw new Error(`A field element with the "${this.fieldSelector}" selector not found.`);
+        }
+
+        if (!(fieldElement instanceof HTMLElement)) {
+            throw new Error(
+                `A field element with the "${this.fieldSelector}" selector is not instance of the HTMLElement.`,
+            );
         }
 
         return fieldElement;
     }
 
-    getFieldWrapperElement(): Element | null {
+    getFieldWrapperElement(): HTMLElement | null {
         const fieldElement = this.getFieldElement();
-        return 'fieldWrapper' in (fieldElement.parentElement?.dataset || {})
-            ? fieldElement.parentElement
-            : null;
+        const parentElement = fieldElement.parentElement;
+        if (!parentElement) {
+            return null;
+        }
+        if (!(parentElement instanceof HTMLElement)) {
+            return null;
+        }
+
+        return 'fieldWrapper' in parentElement.dataset ? parentElement : null;
     }
 
     exists(): boolean {
@@ -352,7 +365,7 @@ export default class Field {
 
     getCheckedRadioElement(): HTMLInputElement | null {
         if (!this.isRadio()) {
-            throw new Error('The field is not radio element.');
+            throw new Error('The field is not a radio element.');
         }
 
         const fieldElement = this.getFieldElement<HTMLInputElement>();
@@ -362,7 +375,7 @@ export default class Field {
 
     getCheckedOptionElements(): HTMLOptionElement[] {
         if (!this.isMultipleSelect()) {
-            throw new Error('The field is not multiple select element.');
+            throw new Error('The field is not a multiple select element.');
         }
 
         return Array.from(this.getFieldElement().querySelectorAll('option:checked'));
@@ -396,11 +409,20 @@ export default class Field {
     }
 
     isText(): boolean {
-        return this.getFieldElement<HTMLInputElement>().type === 'text';
+        const fieldElement = this.getFieldElement();
+        if (!(fieldElement instanceof HTMLInputElement)) {
+            return false;
+        }
+        return fieldElement.type === 'text';
     }
 
     isList(): boolean {
-        if ('fieldId' in this.getFieldElement<HTMLInputElement>().dataset) {
+        const fieldElement = this.getFieldElement();
+        if (!(fieldElement instanceof HTMLInputElement)) {
+            return false;
+        }
+
+        if ('fieldId' in fieldElement.dataset) {
             return true;
         }
 
@@ -410,27 +432,52 @@ export default class Field {
     }
 
     isTextarea(): boolean {
-        return this.getFieldElement<HTMLInputElement>().type === 'textarea';
+        const fieldElement = this.getFieldElement();
+        return fieldElement instanceof HTMLTextAreaElement;
     }
 
     isCheckbox(): boolean {
-        return this.getFieldElement<HTMLInputElement>().type === 'checkbox';
+        const fieldElement = this.getFieldElement();
+        if (!(fieldElement instanceof HTMLInputElement)) {
+            return false;
+        }
+        return fieldElement.type === 'checkbox';
     }
 
     isRadio(): boolean {
-        return this.getFieldElement<HTMLInputElement>().type === 'radio';
+        const fieldElement = this.getFieldElement();
+        if (!(fieldElement instanceof HTMLInputElement)) {
+            return false;
+        }
+        return fieldElement.type === 'radio';
+    }
+
+    isSelect(): boolean {
+        const fieldElement = this.getFieldElement();
+        if (!(fieldElement instanceof HTMLSelectElement)) {
+            return false;
+        }
+        return fieldElement.type === 'select-one';
     }
 
     isMultipleSelect(): boolean {
-        return this.getFieldElement<HTMLSelectElement>().type === 'select-multiple';
+        const fieldElement = this.getFieldElement();
+        if (!(fieldElement instanceof HTMLSelectElement)) {
+            return false;
+        }
+        return fieldElement.type === 'select-multiple';
     }
 
     isFile(): boolean {
-        return this.getFieldElement<HTMLInputElement>().type === 'file';
+        const fieldElement = this.getFieldElement();
+        if (!(fieldElement instanceof HTMLInputElement)) {
+            return false;
+        }
+        return fieldElement.type === 'file';
     }
 
     isEmpty(value: FieldValue): boolean {
-        if (this.isTextable()) {
+        if (this.isTextable() || this.isSelect()) {
             return value === '';
         }
 
