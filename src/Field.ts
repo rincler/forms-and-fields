@@ -131,18 +131,14 @@ export default class Field {
             this.getOption('onTypingEnd')(value, fieldElement, this.containerElement);
             this.getOption('onChange')(value, fieldElement, this.containerElement);
             if (this.getOption('validateOnType') || this.getOption('validateOnChange')) {
-                await ignoreRejects(async () => {
-                    await this.validate();
-                });
+                await ignoreRejects(this.validate.bind(this));
             }
             return;
         }
 
         this.getOption('onChange')(value, fieldElement, this.containerElement);
         if (this.getOption('validateOnChange')) {
-            await ignoreRejects(async () => {
-                await this.validate();
-            });
+            await ignoreRejects(this.validate.bind(this));
         }
     }
 
@@ -171,9 +167,7 @@ export default class Field {
             this.getOption('onTypingEnd')(this.getValue(), fieldElement, this.containerElement);
 
             if (this.getOption('validateOnType')) {
-                await ignoreRejects(async () => {
-                    await this.validate();
-                });
+                await ignoreRejects(this.validate.bind(this));
             }
         }, this.getOption('typingDelay'));
     }
