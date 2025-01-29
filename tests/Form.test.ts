@@ -8,7 +8,7 @@ import { FormStatus } from '../src/types';
 // @ts-expect-error It will not be `null` after the `beforeEach`.
 let formElement: HTMLFormElement = null;
 // @ts-expect-error It will not be `null` after the `beforeEach`.
-let input: HTMLInputElement = null;
+let inputElement: HTMLInputElement = null;
 const submit = () => new SubmissionResult(true);
 jest.useFakeTimers();
 
@@ -38,7 +38,7 @@ beforeEach(() => {
         </form>`;
 
     formElement = document.querySelector<HTMLFormElement>('.js-form')!;
-    input = getInputElement('.js-input');
+    inputElement = getInputElement('.js-input');
 });
 
 describe('field options', () => {
@@ -214,13 +214,13 @@ describe('field options', () => {
         });
         form.listen();
 
-        input.value = 'foo';
+        inputElement.value = 'foo';
 
-        fireEvent.change(input, { target: { value: 'bar' } });
+        fireEvent.change(inputElement, { target: { value: 'bar' } });
 
         expect(onChange).toHaveBeenCalledTimes(1);
         expect(onChange.mock.calls[0][0]).toBe('bar');
-        expect(onChange.mock.calls[0][1]).toBe(input);
+        expect(onChange.mock.calls[0][1]).toBe(inputElement);
         expect(onChange.mock.calls[0][2]).toBe(formElement);
     });
 });
@@ -243,12 +243,12 @@ describe('validation callback options', () => {
 
         await form.validate();
 
-        const checkbox = document.querySelector('.js-checkbox');
+        const checkboxElement = document.querySelector('.js-checkbox');
 
         expect(onBeforeValidateField).toHaveBeenCalledTimes(2);
-        expect(onBeforeValidateField.mock.calls[0][0]).toBe(input);
+        expect(onBeforeValidateField.mock.calls[0][0]).toBe(inputElement);
         expect(onBeforeValidateField.mock.calls[0][1]).toBe(formElement);
-        expect(onBeforeValidateField.mock.calls[1][0]).toBe(checkbox);
+        expect(onBeforeValidateField.mock.calls[1][0]).toBe(checkboxElement);
         expect(onBeforeValidateField.mock.calls[0][1]).toBe(formElement);
     });
 
@@ -269,14 +269,14 @@ describe('validation callback options', () => {
 
         await form.validate();
 
-        const checkbox = document.querySelector('.js-checkbox');
+        const checkboxElement = document.querySelector('.js-checkbox');
 
         expect(onAfterValidateField).toHaveBeenCalledTimes(2);
         expect(onAfterValidateField.mock.calls[0][0]).toBeInstanceOf(ValidationResult);
-        expect(onAfterValidateField.mock.calls[0][1]).toBe(input);
+        expect(onAfterValidateField.mock.calls[0][1]).toBe(inputElement);
         expect(onAfterValidateField.mock.calls[0][2]).toBe(formElement);
         expect(onAfterValidateField.mock.calls[1][0]).toBeInstanceOf(ValidationResult);
-        expect(onAfterValidateField.mock.calls[1][1]).toBe(checkbox);
+        expect(onAfterValidateField.mock.calls[1][1]).toBe(checkboxElement);
         expect(onAfterValidateField.mock.calls[1][2]).toBe(formElement);
     });
 
@@ -764,7 +764,7 @@ describe('submission', () => {
 
         form.listen();
 
-        input.value = 'foo';
+        inputElement.value = 'foo';
         getInputElement('.js-checkbox').checked = true;
 
         fireEvent.submit(formElement);
@@ -828,7 +828,7 @@ describe('statuses', () => {
 
         const form = new Form('.js-form', [field], submit);
 
-        input.value = 'foo';
+        inputElement.value = 'foo';
 
         await form.validate();
     });
@@ -843,7 +843,7 @@ describe('statuses', () => {
             submit,
         );
 
-        input.value = 'foo';
+        inputElement.value = 'foo';
         getInputElement('.js-checkbox').checked = true;
 
         await form.validate();
@@ -861,7 +861,7 @@ describe('statuses', () => {
             submit,
         );
 
-        input.value = 'foo';
+        inputElement.value = 'foo';
 
         await form.validate();
 
@@ -899,7 +899,7 @@ describe('statuses', () => {
         );
         form.listen();
 
-        input.value = 'foo';
+        inputElement.value = 'foo';
 
         fireEvent.submit(formElement);
     });
@@ -914,7 +914,7 @@ describe('statuses', () => {
         );
         form.listen();
 
-        input.value = 'foo';
+        inputElement.value = 'foo';
 
         fireEvent.submit(formElement);
 
@@ -933,7 +933,7 @@ describe('statuses', () => {
         );
         form.listen();
 
-        input.value = 'foo';
+        inputElement.value = 'foo';
 
         fireEvent.submit(formElement);
 
@@ -952,7 +952,7 @@ describe('statuses', () => {
         );
         form.listen();
 
-        input.value = 'foo';
+        inputElement.value = 'foo';
 
         await form.runSubmitProcess().catch(() => {});
 
@@ -974,7 +974,7 @@ describe('statuses', () => {
             },
         );
 
-        input.value = 'foo';
+        inputElement.value = 'foo';
 
         await form.validate();
 
@@ -998,18 +998,18 @@ describe('statuses', () => {
             },
         );
 
-        input.value = 'foo';
+        inputElement.value = 'foo';
 
         await form.validate();
 
         expect(setStatus).toHaveBeenCalledTimes(2);
         expect(setStatus.mock.calls[0][0]).toBe('ff-field-validating');
-        expect(setStatus.mock.calls[0][1]).toBe(input);
+        expect(setStatus.mock.calls[0][1]).toBe(inputElement);
         expect(setStatus.mock.calls[0][2]).toBe(formElement);
         expect(setStatus.mock.calls[1][0]).toBe('ff-field-valid');
-        expect(setStatus.mock.calls[1][1]).toBe(input);
+        expect(setStatus.mock.calls[1][1]).toBe(inputElement);
         expect(setStatus.mock.calls[1][2]).toBe(formElement);
-        expect(input.classList.contains('ff-field-valid')).toBe(false);
+        expect(inputElement.classList.contains('ff-field-valid')).toBe(false);
     });
 
     test('status is reset on change', () => {
@@ -1021,7 +1021,7 @@ describe('statuses', () => {
         });
         form.listen();
 
-        fireEvent.change(input, { target: { value: 'bar' } });
+        fireEvent.change(inputElement, { target: { value: 'bar' } });
 
         expect(setStatus).toHaveBeenCalledTimes(1);
         expect(setStatus.mock.calls[0][0]).toBe('');
@@ -1038,7 +1038,7 @@ describe('statuses', () => {
         });
         form.listen();
 
-        fireEvent.keyUp(input, { key: 'b', code: 'KeyB' });
+        fireEvent.keyUp(inputElement, { key: 'b', code: 'KeyB' });
 
         expect(setStatus).toHaveBeenCalledTimes(1);
         expect(setStatus.mock.calls[0][0]).toBe('');

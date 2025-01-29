@@ -6,9 +6,9 @@ import FileValidator from '../src/validators/FileValidator';
 import { FieldStatus, FieldValue } from '../src/types';
 
 // @ts-expect-error It will not be `null` after the `beforeEach`.
-let container: HTMLElement = null;
+let containerElement: HTMLElement = null;
 // @ts-expect-error It will not be `null` after the `beforeEach`.
-let input: HTMLInputElement = null;
+let inputElement: HTMLInputElement = null;
 jest.useFakeTimers();
 
 const getInputElement = (selector: string): HTMLInputElement => {
@@ -48,8 +48,8 @@ beforeEach(() => {
         </div>
     `;
 
-    container = document.querySelector<HTMLElement>('.js-container')!;
-    input = getInputElement('.js-input');
+    containerElement = document.querySelector<HTMLElement>('.js-container')!;
+    inputElement = getInputElement('.js-input');
 });
 
 describe('"validateOnType" and "validateOnChange" options', () => {
@@ -68,11 +68,11 @@ describe('"validateOnType" and "validateOnChange" options', () => {
             field.validate = jest.fn();
             field.listen();
 
-            fireEvent.keyUp(input, { key: 'b', code: 'KeyB' });
-            fireEvent.keyUp(input, { key: 'a', code: 'KeyA' });
-            fireEvent.keyUp(input, { key: 'r', code: 'KeyR' });
+            fireEvent.keyUp(inputElement, { key: 'b', code: 'KeyB' });
+            fireEvent.keyUp(inputElement, { key: 'a', code: 'KeyA' });
+            fireEvent.keyUp(inputElement, { key: 'r', code: 'KeyR' });
             jest.runAllTimers();
-            fireEvent.change(input, { target: { value: 'bar' } });
+            fireEvent.change(inputElement, { target: { value: 'bar' } });
 
             expect(field.validate).toHaveBeenCalledTimes(times);
         },
@@ -93,13 +93,13 @@ describe('"validateOnType" and "validateOnChange" options', () => {
             field.validate = jest.fn();
             field.listen();
 
-            fireEvent.keyUp(input, { key: 'b', code: 'KeyB' });
+            fireEvent.keyUp(inputElement, { key: 'b', code: 'KeyB' });
             jest.runAllTimers();
-            fireEvent.keyUp(input, { key: 'a', code: 'KeyA' });
+            fireEvent.keyUp(inputElement, { key: 'a', code: 'KeyA' });
             jest.runAllTimers();
-            fireEvent.keyUp(input, { key: 'r', code: 'KeyR' });
+            fireEvent.keyUp(inputElement, { key: 'r', code: 'KeyR' });
             jest.runAllTimers();
-            fireEvent.change(input, { target: { value: 'bar' } });
+            fireEvent.change(inputElement, { target: { value: 'bar' } });
 
             expect(field.validate).toHaveBeenCalledTimes(times);
         },
@@ -120,10 +120,10 @@ describe('"validateOnType" and "validateOnChange" options', () => {
             field.validate = jest.fn();
             field.listen();
 
-            fireEvent.keyUp(input, { key: 'b', code: 'KeyB' });
-            fireEvent.keyUp(input, { key: 'a', code: 'KeyA' });
-            fireEvent.keyUp(input, { key: 'r', code: 'KeyR' });
-            fireEvent.change(input, { target: { value: 'bar' } });
+            fireEvent.keyUp(inputElement, { key: 'b', code: 'KeyB' });
+            fireEvent.keyUp(inputElement, { key: 'a', code: 'KeyA' });
+            fireEvent.keyUp(inputElement, { key: 'r', code: 'KeyR' });
+            fireEvent.change(inputElement, { target: { value: 'bar' } });
             jest.runAllTimers();
 
             expect(field.validate).toHaveBeenCalledTimes(times);
@@ -145,12 +145,12 @@ describe('"validateOnType" and "validateOnChange" options', () => {
             field.validate = jest.fn();
             field.listen();
 
-            fireEvent.keyUp(input, { key: 'b', code: 'KeyB' });
+            fireEvent.keyUp(inputElement, { key: 'b', code: 'KeyB' });
             jest.runAllTimers();
-            fireEvent.keyUp(input, { key: 'a', code: 'KeyA' });
+            fireEvent.keyUp(inputElement, { key: 'a', code: 'KeyA' });
             jest.runAllTimers();
-            fireEvent.keyUp(input, { key: 'r', code: 'KeyR' });
-            fireEvent.change(input, { target: { value: 'bar' } });
+            fireEvent.keyUp(inputElement, { key: 'r', code: 'KeyR' });
+            fireEvent.change(inputElement, { target: { value: 'bar' } });
             jest.runAllTimers();
 
             expect(field.validate).toHaveBeenCalledTimes(times);
@@ -164,9 +164,9 @@ describe('"validateOnType" and "validateOnChange" options', () => {
         field.validate = jest.fn();
         field.listen();
 
-        fireEvent.keyUp(input, { key: 'b', code: 'KeyB' });
-        fireEvent.keyUp(input, { key: 'a', code: 'KeyA' });
-        fireEvent.keyUp(input, { key: 'r', code: 'KeyR' });
+        fireEvent.keyUp(inputElement, { key: 'b', code: 'KeyB' });
+        fireEvent.keyUp(inputElement, { key: 'a', code: 'KeyA' });
+        fireEvent.keyUp(inputElement, { key: 'r', code: 'KeyR' });
         jest.runAllTimers();
 
         expect(field.validate).not.toHaveBeenCalled();
@@ -179,7 +179,7 @@ describe('"validateOnType" and "validateOnChange" options', () => {
         field.validate = jest.fn();
         field.listen();
 
-        fireEvent.change(input, { target: { value: 'bar' } });
+        fireEvent.change(inputElement, { target: { value: 'bar' } });
 
         expect(field.validate).not.toHaveBeenCalled();
     });
@@ -202,10 +202,10 @@ describe('"validateOnType" and "validateOnChange" options', () => {
 
         await field.validate();
 
-        fireEvent.keyUp(input, { key: 'b', code: 'KeyB' });
-        fireEvent.keyUp(input, { key: 'a', code: 'KeyA' });
-        fireEvent.keyUp(input, { key: 'r', code: 'KeyR' });
-        input.value = 'bar';
+        fireEvent.keyUp(inputElement, { key: 'b', code: 'KeyB' });
+        fireEvent.keyUp(inputElement, { key: 'a', code: 'KeyA' });
+        fireEvent.keyUp(inputElement, { key: 'r', code: 'KeyR' });
+        inputElement.value = 'bar';
         jest.runAllTimers();
 
         await waitFor(() => {
@@ -224,8 +224,8 @@ describe('validation callback options', () => {
         await field.validate();
 
         expect(onBeforeValidate).toHaveBeenCalledTimes(1);
-        expect(onBeforeValidate.mock.calls[0][0]).toBe(input);
-        expect(onBeforeValidate.mock.calls[0][1]).toBe(container);
+        expect(onBeforeValidate.mock.calls[0][0]).toBe(inputElement);
+        expect(onBeforeValidate.mock.calls[0][1]).toBe(containerElement);
     });
 
     test('"onBeforeValidate" is not called because of no validators', async () => {
@@ -249,8 +249,8 @@ describe('validation callback options', () => {
 
         expect(onAfterValidate).toHaveBeenCalledTimes(1);
         expect(onAfterValidate.mock.calls[0][0]).toBeInstanceOf(ValidationResult);
-        expect(onAfterValidate.mock.calls[0][1]).toBe(input);
-        expect(onAfterValidate.mock.calls[0][2]).toBe(container);
+        expect(onAfterValidate.mock.calls[0][1]).toBe(inputElement);
+        expect(onAfterValidate.mock.calls[0][2]).toBe(containerElement);
     });
 
     test('"onAfterValidate" is not called because of no validators', async () => {
@@ -285,8 +285,8 @@ describe('validation callback options', () => {
         await expect(field.validate()).rejects.toThrow(error);
         expect(onValidationError).toHaveBeenCalledTimes(1);
         expect(onValidationError.mock.calls[0][0]).toBe(error);
-        expect(onValidationError.mock.calls[0][1]).toBe(input);
-        expect(onValidationError.mock.calls[0][2]).toBe(container);
+        expect(onValidationError.mock.calls[0][1]).toBe(inputElement);
+        expect(onValidationError.mock.calls[0][2]).toBe(containerElement);
         expect(onResetStatus).toHaveBeenCalledTimes(1);
     });
 });
@@ -299,13 +299,13 @@ describe('callback options', () => {
         });
         field.listen();
 
-        fireEvent.keyUp(input, { key: 'b', code: 'KeyB' });
-        fireEvent.keyUp(input, { key: 'a', code: 'KeyA' });
-        fireEvent.keyUp(input, { key: 'r', code: 'KeyR' });
+        fireEvent.keyUp(inputElement, { key: 'b', code: 'KeyB' });
+        fireEvent.keyUp(inputElement, { key: 'a', code: 'KeyA' });
+        fireEvent.keyUp(inputElement, { key: 'r', code: 'KeyR' });
 
         expect(onTypingStart).toHaveBeenCalledTimes(1);
-        expect(onTypingStart.mock.calls[0][0]).toBe(input);
-        expect(onTypingStart.mock.calls[0][1]).toBe(container);
+        expect(onTypingStart.mock.calls[0][0]).toBe(inputElement);
+        expect(onTypingStart.mock.calls[0][1]).toBe(containerElement);
     });
 
     test('"onTypingEnd" is called  on key up', () => {
@@ -315,17 +315,17 @@ describe('callback options', () => {
         });
         field.listen();
 
-        fireEvent.keyUp(input, { key: 'b', code: 'KeyB' });
-        fireEvent.keyUp(input, { key: 'a', code: 'KeyA' });
-        fireEvent.keyUp(input, { key: 'r', code: 'KeyR' });
+        fireEvent.keyUp(inputElement, { key: 'b', code: 'KeyB' });
+        fireEvent.keyUp(inputElement, { key: 'a', code: 'KeyA' });
+        fireEvent.keyUp(inputElement, { key: 'r', code: 'KeyR' });
 
         expect(onTypingEnd).not.toHaveBeenCalled();
 
         jest.runAllTimers();
 
         expect(onTypingEnd).toHaveBeenCalledTimes(1);
-        expect(onTypingEnd.mock.calls[0][1]).toBe(input);
-        expect(onTypingEnd.mock.calls[0][2]).toBe(container);
+        expect(onTypingEnd.mock.calls[0][1]).toBe(inputElement);
+        expect(onTypingEnd.mock.calls[0][2]).toBe(containerElement);
     });
 
     test('"onTypingEnd" is called on change', () => {
@@ -334,14 +334,14 @@ describe('callback options', () => {
             onTypingEnd,
         });
         field.listen();
-        input.value = 'Leo';
-        fireEvent.keyUp(input, { key: 'n', code: 'KeyN' });
-        fireEvent.change(input, { target: { value: 'Leon' } });
+        inputElement.value = 'Leo';
+        fireEvent.keyUp(inputElement, { key: 'n', code: 'KeyN' });
+        fireEvent.change(inputElement, { target: { value: 'Leon' } });
 
         expect(onTypingEnd).toHaveBeenCalledTimes(1);
         expect(onTypingEnd.mock.calls[0][0]).toBe('Leon');
-        expect(onTypingEnd.mock.calls[0][1]).toBe(input);
-        expect(onTypingEnd.mock.calls[0][2]).toBe(container);
+        expect(onTypingEnd.mock.calls[0][1]).toBe(inputElement);
+        expect(onTypingEnd.mock.calls[0][2]).toBe(containerElement);
     });
 
     test('"onChange" is called on text input change', () => {
@@ -350,13 +350,13 @@ describe('callback options', () => {
             onChange,
         });
         field.listen();
-        input.value = 'foo';
-        fireEvent.change(input, { target: { value: 'bar' } });
+        inputElement.value = 'foo';
+        fireEvent.change(inputElement, { target: { value: 'bar' } });
 
         expect(onChange).toHaveBeenCalledTimes(1);
         expect(onChange.mock.calls[0][0]).toBe('bar');
-        expect(onChange.mock.calls[0][1]).toBe(input);
-        expect(onChange.mock.calls[0][2]).toBe(container);
+        expect(onChange.mock.calls[0][1]).toBe(inputElement);
+        expect(onChange.mock.calls[0][2]).toBe(containerElement);
     });
 
     test('"onChange" is called on text input (which is added programmatically) change', () => {
@@ -373,14 +373,14 @@ describe('callback options', () => {
                 '<input class="js-dynamic-input" name="dynamic-input-name" />',
             );
 
-        const dynamicInput = getInputElement('.js-dynamic-input');
-        dynamicInput.value = 'foo';
-        fireEvent.change(dynamicInput, { target: { value: 'bar' } });
+        const dynamicInputElement = getInputElement('.js-dynamic-input');
+        dynamicInputElement.value = 'foo';
+        fireEvent.change(dynamicInputElement, { target: { value: 'bar' } });
 
         expect(onChange).toHaveBeenCalledTimes(1);
         expect(onChange.mock.calls[0][0]).toBe('bar');
-        expect(onChange.mock.calls[0][1]).toBe(dynamicInput);
-        expect(onChange.mock.calls[0][2]).toBe(container);
+        expect(onChange.mock.calls[0][1]).toBe(dynamicInputElement);
+        expect(onChange.mock.calls[0][2]).toBe(containerElement);
     });
 
     test('"onChange" is called on text input (which is one of the list) change', () => {
@@ -390,15 +390,15 @@ describe('callback options', () => {
         });
         field.listen();
 
-        const listInput = getInputElement('.js-list-input-3');
-        listInput.value = 'foo';
+        const listInputElement = getInputElement('.js-list-input-3');
+        listInputElement.value = 'foo';
 
-        fireEvent.change(listInput, { target: { value: 'bar' } });
+        fireEvent.change(listInputElement, { target: { value: 'bar' } });
 
         expect(onChange).toHaveBeenCalledTimes(1);
         expect(onChange.mock.calls[0][0]).toBe('bar');
-        expect(onChange.mock.calls[0][1]).toBe(listInput);
-        expect(onChange.mock.calls[0][2]).toBe(container);
+        expect(onChange.mock.calls[0][1]).toBe(listInputElement);
+        expect(onChange.mock.calls[0][2]).toBe(containerElement);
     });
 
     test('"onChange" is called on text input (which is one of the list and added programmatically) change', () => {
@@ -423,7 +423,7 @@ describe('callback options', () => {
         expect(onChange).toHaveBeenCalledTimes(1);
         expect(onChange.mock.calls[0][0]).toBe('bar');
         expect(onChange.mock.calls[0][1]).toBe(dynamicListInput);
-        expect(onChange.mock.calls[0][2]).toBe(container);
+        expect(onChange.mock.calls[0][2]).toBe(containerElement);
     });
 
     test('"onChange" is called on radio input change', () => {
@@ -433,14 +433,14 @@ describe('callback options', () => {
         });
         field.listen();
 
-        const radio = getInputElement('.js-radio-2');
+        const radioElement = getInputElement('.js-radio-2');
 
-        fireEvent.click(radio);
+        fireEvent.click(radioElement);
 
         expect(onChange).toHaveBeenCalledTimes(1);
         expect(onChange.mock.calls[0][0]).toBe('2');
-        expect(onChange.mock.calls[0][1]).toBe(radio);
-        expect(onChange.mock.calls[0][2]).toBe(container);
+        expect(onChange.mock.calls[0][1]).toBe(radioElement);
+        expect(onChange.mock.calls[0][2]).toBe(containerElement);
     });
 
     test('"onChange" is called on radio input (which is added programmatically) change', () => {
@@ -456,14 +456,14 @@ describe('callback options', () => {
              <input class="js-dynamic-radio js-dynamic-radio-2" type="radio" name="dynamic-radio-name" value="2" />`,
         );
 
-        const dynamicRadio = getInputElement('.js-dynamic-radio-2');
+        const dynamicRadioElement = getInputElement('.js-dynamic-radio-2');
 
-        fireEvent.click(dynamicRadio);
+        fireEvent.click(dynamicRadioElement);
 
         expect(onChange).toHaveBeenCalledTimes(1);
         expect(onChange.mock.calls[0][0]).toBe('2');
-        expect(onChange.mock.calls[0][1]).toBe(dynamicRadio);
-        expect(onChange.mock.calls[0][2]).toBe(container);
+        expect(onChange.mock.calls[0][1]).toBe(dynamicRadioElement);
+        expect(onChange.mock.calls[0][2]).toBe(containerElement);
     });
 });
 
@@ -507,7 +507,7 @@ describe('other options', () => {
             '.js-container',
             [
                 (value) => {
-                    return ValidationResult.make(value === input.value);
+                    return ValidationResult.make(value === inputElement.value);
                 },
             ],
             {
@@ -517,13 +517,13 @@ describe('other options', () => {
         field1.listen();
         field2.listen();
 
-        input.value = 'foo';
+        inputElement.value = 'foo';
 
         let validationResult = await field2.validate();
 
         expect(validationResult.isValid()).toBe(false);
 
-        fireEvent.change(input, { target: { value: '' } });
+        fireEvent.change(inputElement, { target: { value: '' } });
 
         validationResult = await field2.validate();
 
@@ -541,7 +541,7 @@ describe('validation result', () => {
             onAfterValidate,
         });
 
-        input.value = 'foo';
+        inputElement.value = 'foo';
 
         await field.validate();
     });
@@ -561,7 +561,7 @@ describe('validation result', () => {
     test('"validate" positive', async () => {
         const field = new Field('.js-input', '.js-container', ['required']);
 
-        input.value = 'foo';
+        inputElement.value = 'foo';
 
         const validationResult = await field.validate();
 
@@ -583,11 +583,11 @@ describe('some validators', () => {
 
         const field = new Field('.js-input', '.js-container');
 
-        input.value = '';
+        inputElement.value = '';
         validationResult = await field.validate(true);
         expect(validationResult.isValid()).toBe(true);
 
-        input.value = 'foo';
+        inputElement.value = 'foo';
         validationResult = await field.validate(true);
         expect(validationResult.isValid()).toBe(true);
     });
@@ -597,15 +597,15 @@ describe('some validators', () => {
 
         const field = new Field('.js-input', '.js-container', ['isEmail']);
 
-        input.value = '';
+        inputElement.value = '';
         validationResult = await field.validate(true);
         expect(validationResult.isValid()).toBe(true);
 
-        input.value = 'foo';
+        inputElement.value = 'foo';
         validationResult = await field.validate(true);
         expect(validationResult.isValid()).toBe(false);
 
-        input.value = 'example@example.com';
+        inputElement.value = 'example@example.com';
         validationResult = await field.validate(true);
 
         expect(validationResult.isValid()).toBe(true);
@@ -616,15 +616,15 @@ describe('some validators', () => {
 
         const field = new Field('.js-input', '.js-container', ['required', 'isEmail']);
 
-        input.value = '';
+        inputElement.value = '';
         validationResult = await field.validate(true);
         expect(validationResult.isValid()).toBe(false);
 
-        input.value = 'foo';
+        inputElement.value = 'foo';
         validationResult = await field.validate(true);
         expect(validationResult.isValid()).toBe(false);
 
-        input.value = 'example@example.com';
+        inputElement.value = 'example@example.com';
         validationResult = await field.validate(true);
         expect(validationResult.isValid()).toBe(true);
     });
@@ -638,15 +638,15 @@ describe('some validators', () => {
             },
         ]);
 
-        input.value = '';
+        inputElement.value = '';
         validationResult = await field.validate(true);
         expect(validationResult.isValid()).toBe(false);
 
-        input.value = 'foo';
+        inputElement.value = 'foo';
         validationResult = await field.validate(true);
         expect(validationResult.isValid()).toBe(false);
 
-        input.value = '12345';
+        inputElement.value = '12345';
         validationResult = await field.validate(true);
         expect(validationResult.isValid()).toBe(true);
     });
@@ -662,15 +662,15 @@ describe('some validators', () => {
 
         const field = new Field('.js-input', '.js-container', [validator]);
 
-        input.value = '';
+        inputElement.value = '';
         validationResult = await field.validate(true);
         expect(validationResult.isValid()).toBe(false);
 
-        input.value = 'foo';
+        inputElement.value = 'foo';
         validationResult = await field.validate(true);
         expect(validationResult.isValid()).toBe(false);
 
-        input.value = '12345';
+        inputElement.value = '12345';
         validationResult = await field.validate(true);
         expect(validationResult.isValid()).toBe(true);
     });
@@ -684,15 +684,15 @@ describe('some validators', () => {
             },
         ]);
 
-        input.value = '';
+        inputElement.value = '';
         validationResult = await field.validate(true);
         expect(validationResult.isValid()).toBe(false);
 
-        input.value = 'foo';
+        inputElement.value = 'foo';
         validationResult = await field.validate(true);
         expect(validationResult.isValid()).toBe(false);
 
-        input.value = '12345';
+        inputElement.value = '12345';
         validationResult = await field.validate(true);
         expect(validationResult.isValid()).toBe(true);
     });
@@ -707,15 +707,15 @@ describe('some validators', () => {
             },
         ]);
 
-        input.value = '';
+        inputElement.value = '';
         validationResult = await field.validate(true);
         expect(validationResult.isValid()).toBe(false);
 
-        input.value = 'foo';
+        inputElement.value = 'foo';
         validationResult = await field.validate(true);
         expect(validationResult.isValid()).toBe(false);
 
-        input.value = '12345';
+        inputElement.value = '12345';
         validationResult = await field.validate(true);
         expect(validationResult.isValid()).toBe(true);
     });
@@ -729,11 +729,11 @@ describe('some validators', () => {
             },
         });
 
-        input.value = '23';
+        inputElement.value = '23';
         validationResult = await field.validate(true);
         expect(validationResult.isValid()).toBe(false);
 
-        input.value = '$23';
+        inputElement.value = '$23';
         validationResult = await field.validate(true);
         expect(validationResult.isValid()).toBe(true);
     });
@@ -746,7 +746,7 @@ describe('some validators', () => {
             trimEnabled: false,
         });
 
-        input.value = ' foo ';
+        inputElement.value = ' foo ';
         getTextareaElement('.js-textarea').value = ' foo ';
 
         await fieldInput.validate();
@@ -876,7 +876,7 @@ describe('init field', () => {
 describe('"getValue"', () => {
     test('get input value', () => {
         const field = new Field('.js-input', '.js-container');
-        input.value = 'foo';
+        inputElement.value = 'foo';
         expect(field.getValue()).toBe('foo');
     });
 
@@ -937,34 +937,34 @@ describe('statuses', () => {
     test('validating', async () => {
         const field = new Field('.js-input', '.js-container', [
             (value) => {
-                expect(input.classList.contains('ff-field-validating')).toBe(true);
+                expect(inputElement.classList.contains('ff-field-validating')).toBe(true);
                 return ValidationResult.make(value === 'bar');
             },
         ]);
 
-        input.value = 'foo';
+        inputElement.value = 'foo';
 
         await field.validate();
     });
 
     test('valid', async () => {
         const field = new Field('.js-input', '.js-container', ['required']);
-        input.value = 'foo';
+        inputElement.value = 'foo';
         await field.validate();
-        expect(input.classList.contains('ff-field-valid')).toBe(true);
+        expect(inputElement.classList.contains('ff-field-valid')).toBe(true);
     });
 
     test('invalid', async () => {
         const field = new Field('.js-input', '.js-container', ['required']);
         await field.validate();
-        expect(input.classList.contains('ff-field-invalid')).toBe(true);
+        expect(inputElement.classList.contains('ff-field-invalid')).toBe(true);
     });
 
     test('with wrapper', async () => {
         const field = new Field('.js-radio', '.js-container', ['required']);
-        const wrapper = document.querySelector('.js-wrapper');
+        const wrapperElement = document.querySelector('.js-wrapper');
         await field.validate();
-        expect(wrapper!.classList.contains('ff-field-invalid')).toBe(true);
+        expect(wrapperElement!.classList.contains('ff-field-invalid')).toBe(true);
     });
 
     test('no status when error', async () => {
@@ -976,8 +976,8 @@ describe('statuses', () => {
 
         await field.validate().catch(() => {});
 
-        expect(input.classList.contains('ff-field-invalid')).toBe(false);
-        expect(input.classList.contains('ff-field-valid')).toBe(false);
+        expect(inputElement.classList.contains('ff-field-invalid')).toBe(false);
+        expect(inputElement.classList.contains('ff-field-valid')).toBe(false);
     });
 
     test.each([
@@ -992,20 +992,21 @@ describe('statuses', () => {
         await field.validate();
 
         const element = document.querySelector(selector);
-        const wrapper = expectedElementSelector && document.querySelector(expectedElementSelector);
+        const wrapperElement =
+            expectedElementSelector && document.querySelector(expectedElementSelector);
 
         expect(setStatus).toHaveBeenCalledTimes(2);
         expect(setStatus.mock.calls[0][0]).toBe('ff-field-validating');
         expect(setStatus.mock.calls[0][1]).toBe(element);
-        expect(setStatus.mock.calls[0][2]).toBe(container);
-        expect(setStatus.mock.calls[0][3]).toBe(wrapper);
+        expect(setStatus.mock.calls[0][2]).toBe(containerElement);
+        expect(setStatus.mock.calls[0][3]).toBe(wrapperElement);
         expect(setStatus.mock.calls[1][0]).toBe('ff-field-valid');
         expect(setStatus.mock.calls[1][1]).toBe(element);
-        expect(setStatus.mock.calls[1][2]).toBe(container);
-        expect(setStatus.mock.calls[1][3]).toBe(wrapper);
+        expect(setStatus.mock.calls[1][2]).toBe(containerElement);
+        expect(setStatus.mock.calls[1][3]).toBe(wrapperElement);
 
         expect(element!.classList.contains('ff-field-valid')).toBe(false);
-        expect(wrapper && wrapper.classList.contains('ff-field-valid')).toBeFalsy();
+        expect(wrapperElement && wrapperElement?.classList.contains('ff-field-valid')).toBeFalsy();
     });
 
     test('status is not reset on change input', () => {
@@ -1019,7 +1020,7 @@ describe('statuses', () => {
 
         field.validationResult = ValidationResult.valid();
 
-        fireEvent.change(input);
+        fireEvent.change(inputElement);
 
         expect(setStatus).not.toHaveBeenCalled();
         expect(onResetStatus).not.toHaveBeenCalled();
@@ -1042,7 +1043,7 @@ describe('statuses', () => {
         expect(setStatus).toHaveBeenCalledTimes(1);
         expect(setStatus.mock.calls[0][0]).toBe('');
         expect(setStatus.mock.calls[0][1]).toBe(getInputElement('.js-radio'));
-        expect(setStatus.mock.calls[0][2]).toBe(container);
+        expect(setStatus.mock.calls[0][2]).toBe(containerElement);
         expect(setStatus.mock.calls[0][3]).toBe(document.querySelector('.js-wrapper'));
         expect(onResetStatus).toHaveBeenCalledTimes(1);
         expect(field.validationResult).toBeNull();
@@ -1059,12 +1060,12 @@ describe('statuses', () => {
 
         field.validationResult = ValidationResult.valid();
 
-        fireEvent.keyUp(input, { key: 'b', code: 'KeyB' });
+        fireEvent.keyUp(inputElement, { key: 'b', code: 'KeyB' });
 
         expect(setStatus).toHaveBeenCalledTimes(1);
         expect(setStatus.mock.calls[0][0]).toBe('');
-        expect(setStatus.mock.calls[0][1]).toBe(input);
-        expect(setStatus.mock.calls[0][2]).toBe(container);
+        expect(setStatus.mock.calls[0][1]).toBe(inputElement);
+        expect(setStatus.mock.calls[0][2]).toBe(containerElement);
         expect(setStatus.mock.calls[0][3]).toBeNull();
         expect(onResetStatus).toHaveBeenCalledTimes(1);
         expect(field.validationResult).toBeNull();
@@ -1081,7 +1082,7 @@ describe('statuses', () => {
         field.setStatus(FieldStatus.No);
         expect(onResetStatus).toHaveBeenCalledTimes(1);
         expect(onResetStatus.mock.calls[0][0]).toBe(document.querySelector(selector));
-        expect(onResetStatus.mock.calls[0][1]).toBe(container);
+        expect(onResetStatus.mock.calls[0][1]).toBe(containerElement);
         expect(onResetStatus.mock.calls[0][2]).toBe(
             expectedElementSelector && document.querySelector(expectedElementSelector),
         );
