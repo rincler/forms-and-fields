@@ -116,8 +116,8 @@ When a user submits a form, validation is performed first. If the form passes va
 | Method                                                    | Description                                                                      |
 |-----------------------------------------------------------|----------------------------------------------------------------------------------|
 | valid()                                                   | Static method. Creates a new valid result.                                       |
-| invalid(message?: `string` = '')                          | Static method. Creates a new invalid result with a message.                      |
-| make(result: `boolean`, message?: `string` = '')          | Static method. Creates a new valid or invalid result depending on the `result`.  |
+| invalid(message: `string` = '')                           | Static method. Creates a new invalid result with a message.                      |
+| make(result: `boolean`, message: `string` = '')           | Static method. Creates a new valid or invalid result depending on the `result`.  |
 | isValid(): `bool`                                         | Returns `true` if valid.                                                         |
 | areValid(validationResults: `ValidationResult[]`): `bool` | Static method. Returns `true` if all the specified validation results are valid. |
 | hasMessage(): `bool`                                      | Returns `true` if a message exists.                                              |
@@ -125,22 +125,22 @@ When a user submits a form, validation is performed first. If the form passes va
 
 #### `SubmissionResult` class
 
-| Method                                                                                | Description                                                                                    |
-|---------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------|
-| positive(result: `boolean`, data?: ` object` = {})                                    | Static method. Creates a new positive submission result.                                       |
-| negative(result: `boolean`, data?: ` object` = {})                                    | Static method. Creates a new negative submission result.                                       |
-| make(result: `boolean`, positiveData?: ` object` = {}, negativeData?: ` object` = {}) | Static method. Creates a new positive or negative submission result depending on the `result`. |
-| isPositive(): `boolean`                                                               | Returns `true` if submission result is positive.                                               |
-| getData(): `object`                                                                   | Retrieves the submission data.                                                                 |
+| Method                                                                              | Description                                                                                    |
+|-------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------|
+| positive(result: `boolean`, data: ` object` = {})                                   | Static method. Creates a new positive submission result.                                       |
+| negative(result: `boolean`, data: ` object` = {})                                   | Static method. Creates a new negative submission result.                                       |
+| make(result: `boolean`, positiveData: ` object` = {}, negativeData: ` object` = {}) | Static method. Creates a new positive or negative submission result depending on the `result`. |
+| isPositive(): `boolean`                                                             | Returns `true` if submission result is positive.                                               |
+| getData(): `object`                                                                 | Retrieves the submission data.                                                                 |
 
 ### Fields
 
 #### `Field` class
 
-| Method                                                                                                            | Description                                                                                                                                                                                                                                                                                                                   |
-|-------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| constructor (fieldSelector: `string`, containerSelector: `string`, validators?: `array`, options?: `object` = {}) | -`fieldSelector`: A selector to find the field element.<br/> -`containerSelector`: A selector to find the container element that contains the field element. Typically, this is the form selector.<br/>-`validators`: See the [Field validators](#field-validators).<br/>-`options`: See the [Field options](#field-options). |
-| listen(): `void`                                                                                                  | Starts listening to events on the field element. This method must be called if the field is used outside of a form.                                                                                                                                                                                                           |
+| Method                                                                                                               | Description                                                                                                                                                                                                                                                                                                                   |
+|----------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| constructor (fieldSelector: `string`, containerSelector: `string`, validators: `array` = [], options: `object` = {}) | -`fieldSelector`: A selector to find the field element.<br/> -`containerSelector`: A selector to find the container element that contains the field element. Typically, this is the form selector.<br/>-`validators`: See the [Field validators](#field-validators).<br/>-`options`: See the [Field options](#field-options). |
+| listen(): `void`                                                                                                     | Starts listening to events on the field element. This method must be called if the field is used outside of a form.                                                                                                                                                                                                           |
 
 You must specify a CSS class for the field element and use it when specifying the `fieldSelector`.
 For elements with the same name (e.g., radio buttons or a group of text input elements), use the same CSS class for all elements and a single `Field` object.
@@ -180,10 +180,10 @@ An array of validators. Each validator can be:
 
 #### `Form` class
 
-| Method                                                                                            | Description                                                                                                                                                                                                                                                                          |
-|---------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| constructor(formSelector: `string`, fields: `array`, submit: `function`, options?: `object` = {}) | -`formSelector`: A selector to find the form element.<br/> -`fields`: An array of `Field` objects.<br/> - `submit`: A submit function, (a `FormData` object is passed as argument, must return a `SubmissionResult` object),<br/> - `options`: See the [Form options](#form-options) |
-| listen(): `void`                                                                                  | Executes the `listen` method for all fields specified in the `Form` constructor and starts listening for the form submission event. This method must be called.                                                                                                                      |
+| Method                                                                                           | Description                                                                                                                                                                                                                                                                          |
+|--------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| constructor(formSelector: `string`, fields: `array`, submit: `function`, options: `object` = {}) | -`formSelector`: A selector to find the form element.<br/> -`fields`: An array of `Field` objects.<br/> - `submit`: A submit function, (a `FormData` object is passed as argument, must return a `SubmissionResult` object),<br/> - `options`: See the [Form options](#form-options) |
+| listen(): `void`                                                                                 | Executes the `listen` method for all fields specified in the `Form` constructor and starts listening for the form submission event. This method must be called.                                                                                                                      |
 
 You must specify a CSS class for the form element and use it when specifying the `formSelector`.
 
