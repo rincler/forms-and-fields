@@ -194,8 +194,8 @@ export default class Field {
         return this.options[name] !== undefined;
     }
 
-    async validate(force: boolean = false): Promise<ValidationResult> {
-        if (this.getOption('validationCacheEnabled') && this.validationResult !== null && !force) {
+    async validate(): Promise<ValidationResult> {
+        if (this.getOption('validationCacheEnabled') && this.validationResult !== null) {
             return this.validationResult;
         }
 

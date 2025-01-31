@@ -23,6 +23,12 @@ const getTextareaElement = (selector: string): HTMLTextAreaElement => {
     return document.querySelector<HTMLTextAreaElement>(selector)!;
 };
 
+const validateField = async (field: Field) => {
+    // eslint-disable-next-line no-param-reassign
+    field.validationResult = null;
+    return field.validate();
+};
+
 beforeEach(() => {
     document.body.innerHTML = `
         <div class="js-container">
@@ -598,11 +604,11 @@ describe('some validators', () => {
         const field = new Field('.js-input', '.js-container');
 
         inputElement.value = '';
-        validationResult = await field.validate(true);
+        validationResult = await validateField(field);
         expect(validationResult.isValid()).toBe(true);
 
         inputElement.value = 'foo';
-        validationResult = await field.validate(true);
+        validationResult = await validateField(field);
         expect(validationResult.isValid()).toBe(true);
     });
 
@@ -612,15 +618,15 @@ describe('some validators', () => {
         const field = new Field('.js-input', '.js-container', ['isEmail']);
 
         inputElement.value = '';
-        validationResult = await field.validate(true);
+        validationResult = await validateField(field);
         expect(validationResult.isValid()).toBe(true);
 
         inputElement.value = 'foo';
-        validationResult = await field.validate(true);
+        validationResult = await validateField(field);
         expect(validationResult.isValid()).toBe(false);
 
         inputElement.value = 'example@example.com';
-        validationResult = await field.validate(true);
+        validationResult = await validateField(field);
 
         expect(validationResult.isValid()).toBe(true);
     });
@@ -631,15 +637,15 @@ describe('some validators', () => {
         const field = new Field('.js-input', '.js-container', ['required', 'isEmail']);
 
         inputElement.value = '';
-        validationResult = await field.validate(true);
+        validationResult = await validateField(field);
         expect(validationResult.isValid()).toBe(false);
 
         inputElement.value = 'foo';
-        validationResult = await field.validate(true);
+        validationResult = await validateField(field);
         expect(validationResult.isValid()).toBe(false);
 
         inputElement.value = 'example@example.com';
-        validationResult = await field.validate(true);
+        validationResult = await validateField(field);
         expect(validationResult.isValid()).toBe(true);
     });
 
@@ -653,15 +659,15 @@ describe('some validators', () => {
         ]);
 
         inputElement.value = '';
-        validationResult = await field.validate(true);
+        validationResult = await validateField(field);
         expect(validationResult.isValid()).toBe(false);
 
         inputElement.value = 'foo';
-        validationResult = await field.validate(true);
+        validationResult = await validateField(field);
         expect(validationResult.isValid()).toBe(false);
 
         inputElement.value = '12345';
-        validationResult = await field.validate(true);
+        validationResult = await validateField(field);
         expect(validationResult.isValid()).toBe(true);
     });
 
@@ -677,15 +683,15 @@ describe('some validators', () => {
         const field = new Field('.js-input', '.js-container', [validator]);
 
         inputElement.value = '';
-        validationResult = await field.validate(true);
+        validationResult = await validateField(field);
         expect(validationResult.isValid()).toBe(false);
 
         inputElement.value = 'foo';
-        validationResult = await field.validate(true);
+        validationResult = await validateField(field);
         expect(validationResult.isValid()).toBe(false);
 
         inputElement.value = '12345';
-        validationResult = await field.validate(true);
+        validationResult = await validateField(field);
         expect(validationResult.isValid()).toBe(true);
     });
 
@@ -699,15 +705,15 @@ describe('some validators', () => {
         ]);
 
         inputElement.value = '';
-        validationResult = await field.validate(true);
+        validationResult = await validateField(field);
         expect(validationResult.isValid()).toBe(false);
 
         inputElement.value = 'foo';
-        validationResult = await field.validate(true);
+        validationResult = await validateField(field);
         expect(validationResult.isValid()).toBe(false);
 
         inputElement.value = '12345';
-        validationResult = await field.validate(true);
+        validationResult = await validateField(field);
         expect(validationResult.isValid()).toBe(true);
     });
 
@@ -722,15 +728,15 @@ describe('some validators', () => {
         ]);
 
         inputElement.value = '';
-        validationResult = await field.validate(true);
+        validationResult = await validateField(field);
         expect(validationResult.isValid()).toBe(false);
 
         inputElement.value = 'foo';
-        validationResult = await field.validate(true);
+        validationResult = await validateField(field);
         expect(validationResult.isValid()).toBe(false);
 
         inputElement.value = '12345';
-        validationResult = await field.validate(true);
+        validationResult = await validateField(field);
         expect(validationResult.isValid()).toBe(true);
     });
 
@@ -744,11 +750,11 @@ describe('some validators', () => {
         });
 
         inputElement.value = '23';
-        validationResult = await field.validate(true);
+        validationResult = await validateField(field);
         expect(validationResult.isValid()).toBe(false);
 
         inputElement.value = '$23';
-        validationResult = await field.validate(true);
+        validationResult = await validateField(field);
         expect(validationResult.isValid()).toBe(true);
     });
 
