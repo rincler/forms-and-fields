@@ -17,59 +17,72 @@ the `FileValidator` or your own custom validators (including AJAX-based validati
 ```HTML
 <form class="js-form">
     <div>
-        <input type="text" name="email" class="js-email"/>
+        <label for="email">Email:</label>
+        <br />
+        <input id="email" type="text" name="email" class="js-email" />
     </div>
-    <button type="submit">Submit</button>
+    <div>
+        <label for="password">Password:</label>
+        <br />
+        <input id="password" type="password" name="password" class="js-password" />
+    </div>
+    <br />
+    <button type="submit">Login</button>
 </form>
 ```
 
 **JS:**
 ```JS
-import Form from 'forms-and-fields';
-import Field from 'forms-and-fields';
-import SubmissionResult from 'forms-and-fields';
+import { Form, Field, SubmissionResult } from "forms-and-fields"
 
 const form = new Form(
-    '.js-form',
+    ".js-form",
     [
-        new Field('.js-email', '.js-form', ['required', 'isEmail'], {
-            invalidMessages: {
-                required: 'Email is required',
-                isEmail: 'Invalid email'
-            }
-        })
-    ], 
+        new Field(".js-email", ".js-form", ["required", "isEmail"]),
+        new Field(".js-password", ".js-form", ["required"]),
+    ],
     (formData) => {
-        console.log(formData);
-        // here can be an AJAX-request
-        return SubmissionResult.positive();
-    }, 
-    {
-        onAfterValidateField: (validationResult) => {
-            console.log(validationResult);
+        const isOk =
+            formData.get("email") === "test@example.com" &&
+            formData.get("password") === "123456";
+        return SubmissionResult.make(isOk, "Incorrect the credentials");
     },
-});
+    {
+        invalidMessages: {
+            required: "This field is required",
+            isEmail: "Invalid email",
+        },
+        onAfterValidateField: (validationResult, fieldElement) => {
+            if (!validationResult.isValid()) {
+                fieldElement.insertAdjacentHTML(
+                    "afterend",
+                    `<div class="error">${validationResult.getMessage()}</div>`,
+                );
+            }
+        },
+        onFieldStatusReset: (fieldElement) => {
+            fieldElement.parentNode.querySelector(".error")?.remove();
+        },
+        onAfterSubmit: (submissionResult, formElement) => {
+            if (submissionResult.isPositive()) {
+                formElement.replaceWith("You are logged in.");
+            } else {
+                formElement.insertAdjacentHTML(
+                    "beforeend",
+                    `<div class="form-error"><br />${submissionResult.getMessage()}</div>`,
+                );
+            }
+        },
+        onStatusReset: (formElement) => {
+            formElement.querySelector(".form-error")?.remove();
+        },
+    },
+)
 
-form.listen();
+form.listen()
 ```
 
-**Console output:**
-
-When you submit the form with an empty email:
-```
-ValidationResult {result: false, message: "Email is required"}
-```
-
-When you submit the form with an invalid email:
-```
-ValidationResult {result: false, message: "Invalid email"}
-```
-
-When you submit the form with a valid email:
-```
-ValidationResult {result: true, message: ""}
-FormData { ... }
-```
+You can test the code above on [JSFiddle](https://jsfiddle.net/rincler/sw94da1b/).
 
 **More examples:**
 
@@ -79,20 +92,28 @@ Find more examples in the [sandbox](./sandbox).
 
     npm install forms-and-fields
 
-The library can be loaded either as a standalone script with the `FF` global name:
+Or without installation and build tools:
+
+- As a standalone script with the `FF` global name:
 
 ```HTML
-<div class="js-email-container">
-    <input type="text" name="email" class="js-email"/> 
-</div>
-
-<script type="text/javascript" src="https://unpkg.com/browse/forms-and-fields@latest/dist/forms-and-fields.min.js"></script>
+<script type="text/javascript" src="https://unpkg.com/forms-and-fields@latest/dist/forms-and-fields.min.js"></script>
 <script type="text/javascript">
-  const field = new FF.Field('.js-email', '.js-email-container', ['required', 'isEmail']);
-  field.listen();
+    const field = new FF.Field(".js-email", ".js-email-container", ["required", "isEmail"]);
+    field.listen();
 </script>
 ```
 
+- As a module:
+
+```HTML
+<script type="module">
+    import { Field } from 'https://cdn.skypack.dev/forms-and-fields@latest';
+    
+    const field = new Field(".js-email", ".js-email-container", ["required", "isEmail"]);
+    field.listen();
+</script>
+```
 ## Documentation
 
 ### Common
@@ -154,7 +175,7 @@ You must also specify a CSS class for the container element containing the field
 #### `Field` validators
 
 An array of validators. Each validator can be: 
-- A `string`: The name of the validator (e.g., `required` or any validator from the validator library, such as `isEmail`). 
+- A `string`: The name of the validator (e.g., `required` or any validator from the [validator](https://www.npmjs.com/package/validator) library, such as `isEmail`). 
 - A `function`: A custom validator function that must return a `ValidationResult` object. Can be promised.
 - An `object` with a `validate` method (that must return a `ValidationResult` object), such as the `FileValidator` (see [Validation of files](#validation-of-files)) or another custom object. Can be promised.
 
