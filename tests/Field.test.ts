@@ -9,6 +9,7 @@ import { FieldValue } from '../src/types';
 let containerElement: HTMLElement = null;
 // @ts-expect-error It will not be `null` after the `beforeEach`.
 let inputElement: HTMLInputElement = null;
+const defaultInvalidValueMessage = 'Invalid value.';
 jest.useFakeTimers();
 
 const getInputElement = (selector: string): HTMLInputElement => {
@@ -247,14 +248,14 @@ describe('validation callback options', () => {
 
     test('"onAfterValidate" is called', async () => {
         const onAfterValidate = jest.fn();
-        const field = new Field('.js-input', '.js-container', ['required'], {
+        const field = new Field('.js-input', '.js-container', ['isEmail'], {
             onAfterValidate,
         });
 
         await field.validate();
 
         expect(onAfterValidate).toHaveBeenCalledTimes(1);
-        expect(onAfterValidate.mock.calls[0][0]).toBeInstanceOf(ValidationResult);
+        expect(onAfterValidate.mock.calls[0][0]).toStrictEqual(ValidationResult.valid());
         expect(onAfterValidate.mock.calls[0][1]).toBe(inputElement);
         expect(onAfterValidate.mock.calls[0][2]).toBe(containerElement);
     });
@@ -490,7 +491,7 @@ describe('callback options', () => {
 describe('message options', () => {
     test('default invalid message', async () => {
         const onAfterValidate = (validationResult: ValidationResult) => {
-            expect(validationResult.getMessage()).toBe('Invalid value.');
+            expect(validationResult.getMessage()).toBe(defaultInvalidValueMessage);
         };
 
         const field = new Field('.js-input', '.js-container', ['required'], {
@@ -593,7 +594,9 @@ describe('validation result', () => {
 
         const validationResult = await field.validate();
 
-        expect(validationResult).toStrictEqual(ValidationResult.invalid('Invalid value.'));
+        expect(validationResult).toStrictEqual(
+            ValidationResult.invalid(defaultInvalidValueMessage),
+        );
     });
 });
 
@@ -1010,7 +1013,7 @@ describe('statuses', () => {
         expect(onStatusChange).toHaveBeenCalledTimes(2);
         expect(onStatusChange.mock.calls[1][0]).toBe('ff-field-invalid');
         expect(onStatusChange.mock.calls[1][1]).toStrictEqual(
-            ValidationResult.invalid('Invalid value.'),
+            ValidationResult.invalid(defaultInvalidValueMessage),
         );
         expect(onStatusChange.mock.calls[1][2]).toBe(inputElement);
         expect(onStatusChange.mock.calls[1][3]).toBe(containerElement);

@@ -12,8 +12,6 @@ const DEFAULT_OPTIONS: FormOptions = {
     onValidationError: NOOP,
     onBeforeSubmit: NOOP,
     onAfterSubmit: NOOP,
-    onAfterPositiveSubmit: NOOP,
-    onAfterNegativeSubmit: NOOP,
     onSubmissionError: NOOP,
     onStatusChange: NOOP,
     onStatusReset: NOOP,
@@ -254,18 +252,6 @@ export default class Form {
         );
 
         this.getOption('onAfterSubmit')(this.submissionResult, this.formElement);
-
-        if (submissionResult.isPositive()) {
-            this.getOption('onAfterPositiveSubmit')(
-                this.submissionResult.getData(),
-                this.formElement,
-            );
-        } else {
-            this.getOption('onAfterNegativeSubmit')(
-                this.submissionResult.getData(),
-                this.formElement,
-            );
-        }
     }
 
     getData(): FormData {

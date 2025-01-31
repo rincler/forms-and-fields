@@ -1,32 +1,43 @@
 export default class SubmissionResult {
     result: boolean;
+    message: string;
     data: object;
 
-    constructor(result: boolean, data: object = {}) {
+    constructor(result: boolean, { message = '', data = {} }: { data?: object; message?: string }) {
         this.result = result;
+        this.message = message;
         this.data = data;
     }
 
     static positive(data: object = {}): SubmissionResult {
-        return new SubmissionResult(true, data);
+        return new SubmissionResult(true, { data });
     }
 
-    static negative(data: object = {}): SubmissionResult {
-        return new SubmissionResult(false, data);
+    static negative(message: string = '', data: object = {}): SubmissionResult {
+        return new SubmissionResult(false, { message, data });
     }
 
     static make(
         result: boolean,
-        positiveData: object = {},
-        negativeData: object = {},
+        messageForNegative: string = '',
+        dataForPositive: object = {},
+        dataForNegative: object = {},
     ): SubmissionResult {
         return result
-            ? SubmissionResult.positive(positiveData)
-            : SubmissionResult.negative(negativeData);
+            ? SubmissionResult.positive(dataForPositive)
+            : SubmissionResult.negative(messageForNegative, dataForNegative);
     }
 
     isPositive(): boolean {
         return this.result;
+    }
+
+    hasMessage(): boolean {
+        return this.message !== '';
+    }
+
+    getMessage(): string {
+        return this.message;
     }
 
     getData(): object {

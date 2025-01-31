@@ -113,25 +113,28 @@ When a user submits a form, validation is performed first. If the form passes va
 
 #### `ValidationResult` class
 
-| Method                                                    | Description                                                                      |
-|-----------------------------------------------------------|----------------------------------------------------------------------------------|
-| valid()                                                   | Static method. Creates a new valid result.                                       |
-| invalid(message: `string` = '')                           | Static method. Creates a new invalid result with a message.                      |
-| make(result: `boolean`, message: `string` = '')           | Static method. Creates a new valid or invalid result depending on the `result`.  |
-| isValid(): `bool`                                         | Returns `true` if valid.                                                         |
-| areValid(validationResults: `ValidationResult[]`): `bool` | Static method. Returns `true` if all the specified validation results are valid. |
-| hasMessage(): `bool`                                      | Returns `true` if a message exists.                                              |
-| getMessage(): `string`                                    | Retrieves the validation message.                                                |
+| Method                                                                                                                | Description                                                                      |
+|-----------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------|
+| valid(data: `object` = {})                                                                                            | Static method. Creates a new valid result.                                       |
+| invalid(message: `string` = '', data: `object` = {})                                                                  | Static method. Creates a new invalid result.                                     |
+| make(result: `boolean`, messageForInvalid: `string` = '', dataForValid: `object` = {}, dataForInvalid: `object` = {}) | Static method. Creates a new valid or invalid result depending on the `result`.  |
+| isValid(): `bool`                                                                                                     | Returns `true` if valid.                                                         |
+| areValid(validationResults: `ValidationResult[]`): `bool`                                                             | Static method. Returns `true` if all the specified validation results are valid. |
+| hasMessage(): `bool`                                                                                                  | Returns `true` if a message exists.                                              |
+| getMessage(): `string`                                                                                                | Retrieves the message.                                                           |
+| getData(): `object`                                                                                                   | Retrieves the data.                                                              |
 
 #### `SubmissionResult` class
 
-| Method                                                                              | Description                                                                                    |
-|-------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------|
-| positive(result: `boolean`, data: ` object` = {})                                   | Static method. Creates a new positive submission result.                                       |
-| negative(result: `boolean`, data: ` object` = {})                                   | Static method. Creates a new negative submission result.                                       |
-| make(result: `boolean`, positiveData: ` object` = {}, negativeData: ` object` = {}) | Static method. Creates a new positive or negative submission result depending on the `result`. |
-| isPositive(): `boolean`                                                             | Returns `true` if submission result is positive.                                               |
-| getData(): `object`                                                                 | Retrieves the submission data.                                                                 |
+| Method                                                                                                                     | Description                                                                         |
+|----------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------|
+| positive(data: `object` = {})                                                                                              | Static method. Creates a new positive result.                                       |
+| negative(message: `string`, data: `object` = {})                                                                           | Static method. Creates a new negative result.                                       |
+| make(result: `boolean`, messageForNegative: `string` = '', dataForPositive: `object` = {}, dataForNegative: `object` = {}) | Static method. Creates a new positive or negative result depending on the `result`. |
+| isPositive(): `boolean`                                                                                                    | Returns `true` if positive.                                                         |
+| hasMessage(): `boolean`                                                                                                    | Returns `true` if a message exists.                                                 |
+| getMessage(): `boolean`                                                                                                    | Retrieves the message.                                                              |
+| getData(): `object`                                                                                                        | Retrieves the data.                                                                 |
 
 ### Fields
 
@@ -201,8 +204,6 @@ Additionally, the `Form` class supports the following options:
 | onValidationError      | `function` | `NOOP`  | Triggered when an error occurs during validation. Passed as arguments: `error: any, formElement: HTMLFormElement`.                                                                                                                                      |
 | onBeforeSubmit         | `function` | `NOOP`  | Triggered before form submission. Passed as arguments: `formData: FormData, formElement: HTMLFormElement`.                                                                                                                                              |
 | onAfterSubmit          | `function` | `NOOP`  | Triggered after form submission.  Passed as arguments: `submissionResult: SubmissionResult, formElement: HTMLFormElement`.                                                                                                                              |
-| onAfterPositiveSubmit  | `function` | `NOOP`  | Triggered after positive submission when the `submit` function returns a `SubmissionResult` object with a `true` value. Passed as arguments: `submissionResultData: object, formElement: HTMLFormElement`.                                              |
-| onAfterNegativeSubmit  | `function` | `NOOP`  | Triggered after negative submission when the `submit` function returns a `SubmissionResult` object with a `false` value. Passed as arguments: `submissionResultData: object, formElement: HTMLFormElement`.                                             |
 | onSubmissionError      | `function` | `NOOP`  | Triggered when an error occurs during submission. Passed as arguments: `error: any, formElement: HTMLFormElement`.                                                                                                                                      |
 | onStatusChange         | `function` | `NOOP`  | Triggered when the form status changes. Passed as arguments: `status: string, validationResults: ValidationResult[], submissionResult: SubmissionResult, formElement: HTMLFormElement`.                                                                 |
 | onStatusReset          | `function` | `NOOP`  | Triggered when the form status resets. Passed as arguments: `formElement: HTMLFormElement`.                                                                                                                                                             |

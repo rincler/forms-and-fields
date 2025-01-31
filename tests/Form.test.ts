@@ -9,6 +9,7 @@ let formElement: HTMLFormElement = null;
 // @ts-expect-error It will not be `null` after the `beforeEach`.
 let inputElement: HTMLInputElement = null;
 const submit = () => SubmissionResult.positive();
+const defaultInvalidValueMessage = 'Invalid value.';
 jest.useFakeTimers();
 
 const getInputElement = (selector: string): HTMLInputElement => {
@@ -271,10 +272,14 @@ describe('validation callback options', () => {
         const checkboxElement = document.querySelector('.js-checkbox');
 
         expect(onAfterValidateField).toHaveBeenCalledTimes(2);
-        expect(onAfterValidateField.mock.calls[0][0]).toBeInstanceOf(ValidationResult);
+        expect(onAfterValidateField.mock.calls[0][0]).toStrictEqual(
+            ValidationResult.invalid(defaultInvalidValueMessage),
+        );
         expect(onAfterValidateField.mock.calls[0][1]).toBe(inputElement);
         expect(onAfterValidateField.mock.calls[0][2]).toBe(formElement);
-        expect(onAfterValidateField.mock.calls[1][0]).toBeInstanceOf(ValidationResult);
+        expect(onAfterValidateField.mock.calls[1][0]).toStrictEqual(
+            ValidationResult.invalid(defaultInvalidValueMessage),
+        );
         expect(onAfterValidateField.mock.calls[1][1]).toBe(checkboxElement);
         expect(onAfterValidateField.mock.calls[1][2]).toBe(formElement);
     });
@@ -384,8 +389,8 @@ describe('validation callback options', () => {
 
         expect(onAfterValidate).toHaveBeenCalledTimes(1);
         expect(onAfterValidate.mock.calls[0][0]).toStrictEqual([
-            ValidationResult.invalid('Invalid value.'),
-            ValidationResult.invalid('Invalid value.'),
+            ValidationResult.invalid(defaultInvalidValueMessage),
+            ValidationResult.invalid(defaultInvalidValueMessage),
             ValidationResult.valid(),
             ValidationResult.invalid(),
         ]);
@@ -519,7 +524,7 @@ describe('submit callback options', () => {
 
         await waitFor(() => {
             expect(onAfterSubmit).toHaveBeenCalledTimes(1);
-            expect(onAfterSubmit.mock.calls[0][0]).toBeInstanceOf(SubmissionResult);
+            expect(onAfterSubmit.mock.calls[0][0]).toStrictEqual(SubmissionResult.positive());
             expect(onAfterSubmit.mock.calls[0][1]).toBe(formElement);
         });
     });
@@ -544,46 +549,6 @@ describe('submit callback options', () => {
 
         await waitFor(() => {
             expect(onAfterSubmit).not.toHaveBeenCalled();
-        });
-    });
-
-    test('"onAfterPositiveSubmit" is called and "onAfterNegativeSubmit" is not called', async () => {
-        const onAfterPositiveSubmit = jest.fn();
-        const onAfterNegativeSubmit = jest.fn();
-        const form = new Form('.js-form', [], () => SubmissionResult.positive({ foo: 'bar' }), {
-            onAfterPositiveSubmit,
-            onAfterNegativeSubmit,
-        });
-
-        form.listen();
-
-        fireEvent.submit(formElement);
-
-        await waitFor(() => {
-            expect(onAfterPositiveSubmit).toHaveBeenCalledTimes(1);
-            expect(onAfterPositiveSubmit.mock.calls[0][0]).toStrictEqual({ foo: 'bar' });
-            expect(onAfterPositiveSubmit.mock.calls[0][1]).toBe(formElement);
-            expect(onAfterNegativeSubmit).not.toHaveBeenCalled();
-        });
-    });
-
-    test('"onAfterPositiveSubmit" is not called and "onAfterNegativeSubmit" is called', async () => {
-        const onAfterPositiveSubmit = jest.fn();
-        const onAfterNegativeSubmit = jest.fn();
-        const form = new Form('.js-form', [], () => SubmissionResult.negative({ foo: 'bar' }), {
-            onAfterPositiveSubmit,
-            onAfterNegativeSubmit,
-        });
-
-        form.listen();
-
-        fireEvent.submit(formElement);
-
-        await waitFor(() => {
-            expect(onAfterPositiveSubmit).not.toHaveBeenCalled();
-            expect(onAfterNegativeSubmit).toHaveBeenCalledTimes(1);
-            expect(onAfterNegativeSubmit.mock.calls[0][0]).toStrictEqual({ foo: 'bar' });
-            expect(onAfterNegativeSubmit.mock.calls[0][1]).toBe(formElement);
         });
     });
 
@@ -886,7 +851,7 @@ describe('statuses', () => {
         expect(onStatusChange.mock.calls[1][0]).toBe('ff-form-invalid');
         expect(onStatusChange.mock.calls[1][1]).toStrictEqual([
             ValidationResult.valid(),
-            ValidationResult.invalid('Invalid value.'),
+            ValidationResult.invalid(defaultInvalidValueMessage),
             ValidationResult.invalid(),
         ]);
         expect(onStatusChange.mock.calls[1][2]).toBeNull();

@@ -170,8 +170,6 @@ export type FormOptions = FieldOptions & {
     onValidationError?: (error: unknown, formElement: HTMLFormElement) => void;
     onBeforeSubmit?: (formData: FormData, formElement: HTMLFormElement) => void;
     onAfterSubmit?: (submissionResult: SubmissionResult, formElement: HTMLFormElement) => void;
-    onAfterPositiveSubmit?: (data: object, formElement: HTMLFormElement) => void;
-    onAfterNegativeSubmit?: (data: object, formElement: HTMLFormElement) => void;
     onSubmissionError?: (error: unknown, formElement: HTMLFormElement) => void;
     onStatusChange?: (
         status: FormStatus,

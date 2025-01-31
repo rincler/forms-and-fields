@@ -1,22 +1,31 @@
 export default class ValidationResult {
     result: boolean;
     message: string;
+    data: object;
 
-    constructor(result: boolean, message: string = '') {
+    constructor(result: boolean, { message = '', data = {} }: { message?: string; data?: object }) {
         this.result = result;
         this.message = message;
+        this.data = data;
     }
 
-    static valid(): ValidationResult {
-        return new ValidationResult(true);
+    static valid(data: object = {}): ValidationResult {
+        return new ValidationResult(true, { data });
     }
 
-    static invalid(message: string = ''): ValidationResult {
-        return new ValidationResult(false, message);
+    static invalid(message: string = '', data: object = {}): ValidationResult {
+        return new ValidationResult(false, { message, data });
     }
 
-    static make(result: boolean, message: string = ''): ValidationResult {
-        return result ? ValidationResult.valid() : ValidationResult.invalid(message);
+    static make(
+        result: boolean,
+        messageForInvalid: string = '',
+        dataForValid: object = {},
+        dataForInvalid: object = {},
+    ): ValidationResult {
+        return result
+            ? ValidationResult.valid(dataForValid)
+            : ValidationResult.invalid(messageForInvalid, dataForInvalid);
     }
 
     isValid(): boolean {
@@ -33,5 +42,9 @@ export default class ValidationResult {
 
     getMessage(): string {
         return this.message;
+    }
+
+    getData(): object {
+        return this.data;
     }
 }
