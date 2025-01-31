@@ -43,6 +43,7 @@ export default class Field {
     validators: Validator[];
     options: FieldOptions;
     validationResult: ValidationResult | null;
+    cachedFieldElement: HTMLElement | null;
     virtualFieldsCache: { [key: string]: Field };
     actionId: number;
     typingDelayId: number | null;
@@ -72,6 +73,7 @@ export default class Field {
         this.setOptions(options);
 
         this.validationResult = null;
+        this.cachedFieldElement = null;
         this.virtualFieldsCache = {};
         this.actionId = 0;
         this.typingDelayId = null;
@@ -290,35 +292,42 @@ export default class Field {
     }
 
     getValue(): FieldValue {
-        const fieldElement = this.getFieldElement();
+        return this.withCachedFieldElement(() => {
+            const fieldElement = this.getFieldElement();
 
-        if (this.isTextable() || this.isSelect()) {
-            return (fieldElement as ValueableElement).value;
-        }
+            if (this.isTextable() || this.isSelect()) {
+                return (fieldElement as ValueableElement).value;
+            }
 
-        if (this.isCheckbox()) {
-            return (fieldElement as HTMLInputElement).checked;
-        }
+            if (this.isCheckbox()) {
+                return (fieldElement as HTMLInputElement).checked;
+            }
 
-        if (this.isRadio()) {
-            const checkedElement = this.getCheckedRadioElement();
+            if (this.isRadio()) {
+                const checkedElement = this.getCheckedRadioElement();
 
-            return checkedElement ? checkedElement.value : null;
-        }
+                return checkedElement ? checkedElement.value : null;
+            }
 
-        if (this.isMultipleSelect()) {
-            return this.getCheckedOptionElements().map((element) => element.value);
-        }
+            if (this.isMultipleSelect()) {
+                return this.getCheckedOptionElements().map((element) => element.value);
+            }
 
-        if (this.isFile()) {
-            return (fieldElement as HTMLInputElement).files;
-        }
+            if (this.isFile()) {
+                return (fieldElement as HTMLInputElement).files;
+            }
 
-        // @ts-expect-error The unexpected case, try to use the value.
-        return fieldElement.value;
+            // @ts-expect-error The unexpected case, try to use the value.
+            return fieldElement.value;
+        });
     }
 
     getFieldElement<E extends HTMLElement = HTMLElement>(): E {
+        if (this.cachedFieldElement !== null) {
+            // @ts-expect-error It's ok.
+            return this.cachedFieldElement;
+        }
+
         const fieldElement = this.containerElement.querySelector<E>(this.fieldSelector);
 
         if (!fieldElement) {
@@ -332,6 +341,13 @@ export default class Field {
         }
 
         return fieldElement;
+    }
+
+    withCachedFieldElement<T>(fn: () => T): T {
+        this.cachedFieldElement = this.getFieldElement();
+        const result = fn();
+        this.cachedFieldElement = null;
+        return result;
     }
 
     getFieldWrapperElement(): HTMLElement | null {
