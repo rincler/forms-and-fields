@@ -77,6 +77,8 @@ export default class Form {
     async onSubmit(e: Event): Promise<void> {
         e.preventDefault();
 
+        this.reset();
+
         await ignoreRejects(async () => {
             const validationResults = await this.validate();
 
@@ -185,8 +187,6 @@ export default class Form {
 
         const actionId = startAction(this);
 
-        this.validationResults = [];
-        this.submissionResult = null;
         this.setStatus(FormStatus.Validating);
 
         let validationResults = [];
@@ -227,7 +227,6 @@ export default class Form {
 
         const actionId = startAction(this);
 
-        this.submissionResult = null;
         this.setStatus(FormStatus.Submitting);
 
         let submissionResult;

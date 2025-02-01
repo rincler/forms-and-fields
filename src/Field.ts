@@ -215,7 +215,6 @@ export default class Field {
 
         const actionId = startAction(this);
 
-        this.validationResult = null;
         this.setStatus(FieldStatus.Validating);
 
         const value = this.getValue();

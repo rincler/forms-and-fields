@@ -261,7 +261,7 @@ const addressForm = new Form(
         return SubmissionResult.make(result.isSuccess);
     },
     {
-        onBeforeValidate: (formElement) => {
+        onStatusReset: (formElement) => {
             clearFormError(formElement);
         },
         onSubmissionError: (error, formElement) => {
