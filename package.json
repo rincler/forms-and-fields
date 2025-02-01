@@ -29,7 +29,6 @@
     },
     "homepage": "https://github.com/rincler/forms-and-fields#readme",
     "dependencies": {
-        "@babel/runtime": "^7.26.0",
         "validator": "^13.12.0"
     },
     "devDependencies": {
