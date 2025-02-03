@@ -38,21 +38,14 @@ const form = new Form(
     '.js-form',
     [
         new Field('.js-email', '.js-form', ['required', 'isEmail']),
-        new Field('.js-secret-word', '.js-form', ['equals'], {
-            validatorParams: {
-                equals: ['sun'],
-            },
-        }),
+        new Field('.js-comment', '.js-form'),
         new Field('.js-sex', '.js-form', ['required']),
         new Field('.js-agree', '.js-form', ['required']),
         new Field('.js-city', '.js-form', ['required']),
         new Field('.js-movie', '.js-form', ['required']),
         new Field('.js-file', '.js-form', ['required']),
     ],
-    () => {
-        // here can be AJAX-request
-        return SubmissionResult.positive();
-    },
+    () => SubmissionResult.positive(),
 );
 
 form.listen();
@@ -173,9 +166,7 @@ const emailListForm = new Form(
             },
         ]),
     ],
-    () => {
-        return SubmissionResult.positive();
-    },
+    () => SubmissionResult.positive(),
 );
 
 emailListForm.listen();
@@ -215,9 +206,7 @@ const uploadForm = new Form(
             },
         ),
     ],
-    async () => {
-        return SubmissionResult.positive();
-    },
+    () => SubmissionResult.positive(),
 );
 
 uploadForm.listen();

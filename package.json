@@ -56,7 +56,7 @@
         "prepack": "npm run build",
         "check": "tsc --noEmit && eslint .",
         "sandbox": "npm run sandbox:build && npm run sandbox:start",
-        "sandbox:build": "esbuild sandbox/sandbox.js --outfile=sandbox/bundle.js --format=iife  --sourcemap=inline --bundle",
+        "sandbox:build": "esbuild sandbox/sandbox.js --outfile=sandbox/bundle.js --format=iife --sourcemap=inline --bundle",
         "sandbox:start": "node sandbox/server.js",
         "test": "jest"
     }

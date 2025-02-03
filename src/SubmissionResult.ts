@@ -3,7 +3,7 @@ export default class SubmissionResult {
     message: string;
     data: object;
 
-    constructor(result: boolean, { message = '', data = {} }: { data?: object; message?: string }) {
+    constructor(result: boolean, { message = '', data = {} }: { message?: string; data?: object }) {
         this.result = result;
         this.message = message;
         this.data = data;

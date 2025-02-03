@@ -105,7 +105,7 @@ export default class Field {
                 let field = this;
                 if (this.isList()) {
                     const virtualFields = this.getVirtualFieldsOfList();
-                    // @ts-expect-error It's ok, `this` is a `Field`.
+                    // @ts-expect-error It's ok.
                     field = virtualFields[this.findElementIndexInList(target)];
                 }
 
@@ -119,8 +119,7 @@ export default class Field {
             this.reset();
         }
 
-        // @ts-expect-error The `event.target` is always an `HTMLElement` here.
-        const fieldElement: HTMLElement = event.target;
+        const fieldElement = event.target as HTMLElement;
         const value = this.getValue();
 
         if (this.typingDelayId) {
@@ -143,8 +142,7 @@ export default class Field {
     async onKeyUp(event: Event): Promise<void> {
         this.reset();
 
-        // @ts-expect-error The `event.target` is always an `Element` here.
-        const fieldElement: HTMLElement = event.target;
+        const fieldElement = event.target as HTMLElement;
 
         if (this.getOption('validateOnType')) {
             // This fixes the next case:
@@ -172,7 +170,7 @@ export default class Field {
 
     setOptions(options: FieldOptions): void {
         // eslint-disable-next-line no-restricted-syntax
-        for (const name of Object.keys(options) as Array<keyof FieldOptions>) {
+        for (const name of Object.keys(options) as Array<FieldOptionName>) {
             if (ALLOWED_OPTIONS.includes(name) && options[name] !== undefined) {
                 // @ts-expect-error The same type.
                 this.options[name] = options[name];
@@ -201,14 +199,6 @@ export default class Field {
             return this.validationResult;
         }
 
-        this.trim();
-
-        if (this.validators.length === 0) {
-            this.validationResult = ValidationResult.valid();
-            this.setStatus(FieldStatus.Valid);
-            return ValidationResult.valid();
-        }
-
         const fieldElement = this.getFieldElement();
 
         this.getOption('onBeforeValidate')(fieldElement, this.containerElement);
@@ -217,9 +207,11 @@ export default class Field {
 
         this.setStatus(FieldStatus.Validating);
 
+        this.trimIfRequired();
+
         const value = this.getValue();
 
-        let validationResult;
+        let validationResult = ValidationResult.valid();
 
         // eslint-disable-next-line no-restricted-syntax
         for (const validatorItem of this.validators) {
@@ -241,11 +233,11 @@ export default class Field {
 
         finishAction(this, actionId);
 
-        if (!validationResult!.isValid() && !validationResult!.hasMessage()) {
+        if (!validationResult.isValid() && !validationResult.hasMessage()) {
             validationResult = ValidationResult.invalid(this.getOption('defaultInvalidMessage'));
         }
 
-        this.validationResult = validationResult!;
+        this.validationResult = validationResult;
 
         this.setStatus(this.validationResult.isValid() ? FieldStatus.Valid : FieldStatus.Invalid);
 
@@ -261,9 +253,10 @@ export default class Field {
     getValidateFnByValidatorItem(validatorItem: Validator): ValidateFn {
         if (validatorItem === 'required') {
             return (value) => {
-                const isValid = !this.isEmpty(value);
-
-                return ValidationResult.make(isValid, this.getInvalidErrorMessage('required'));
+                return ValidationResult.make(
+                    !this.isEmpty(value),
+                    this.getInvalidErrorMessage('required'),
+                );
             };
         }
 
@@ -287,7 +280,7 @@ export default class Field {
             };
         }
 
-        throw new Error('Invalid validator item.');
+        throw new Error('Invalid validator.');
     }
 
     getValue(): FieldValue {
@@ -316,8 +309,7 @@ export default class Field {
                 return (fieldElement as HTMLInputElement).files;
             }
 
-            // @ts-expect-error The unexpected case, try to use the value.
-            return fieldElement.value;
+            return (fieldElement as ValueableElement).value;
         });
     }
 
@@ -523,7 +515,7 @@ export default class Field {
         this.setStatus(FieldStatus.No);
     }
 
-    trim(): void {
+    trimIfRequired(): void {
         if (this.getOption('trimEnabled') && this.isTextable()) {
             const fieldElement = this.getFieldElement<ValueableElement>();
             if (fieldElement.value.startsWith(' ') || fieldElement.value.endsWith(' ')) {
@@ -543,9 +535,7 @@ export default class Field {
 
         if (status === FieldStatus.No) {
             this.getOption('onStatusReset')(fieldElement, this.containerElement, wrapperElement);
-        }
-
-        if (status !== FieldStatus.No) {
+        } else {
             element.classList.add(status);
         }
 

@@ -20,7 +20,7 @@ export default class FileValidator {
 
     validate(files: FieldValue): ValidationResult {
         if (!(files instanceof FileList)) {
-            throw new Error('Files are not an instance of the FileList class.');
+            throw new Error('Value is not an instance of the FileList class.');
         }
 
         if (this.rules.maxCount !== undefined && files.length > this.rules.maxCount) {
@@ -31,16 +31,17 @@ export default class FileValidator {
         for (const file of files) {
             if (this.rules.maxSize !== undefined && file.size > this.rules.maxSize) {
                 return ValidationResult.invalid(
-                    this.prepareMessage(this.prepareMessage(this.invalidMessages.maxSize, file)),
+                    this.prepareMessage(this.invalidMessages.maxSize, file),
                 );
             }
 
-            if (this.rules.allowedExtensions !== undefined) {
-                if (!this.rules.allowedExtensions.some((e) => file.name.endsWith(e))) {
-                    return ValidationResult.invalid(
-                        this.prepareMessage(this.invalidMessages.allowedExtensions, file),
-                    );
-                }
+            if (
+                this.rules.allowedExtensions !== undefined &&
+                !this.rules.allowedExtensions.some((e) => file.name.endsWith(e))
+            ) {
+                return ValidationResult.invalid(
+                    this.prepareMessage(this.invalidMessages.allowedExtensions, file),
+                );
             }
 
             if (

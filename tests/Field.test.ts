@@ -3,7 +3,7 @@ import { userEvent } from '@testing-library/user-event';
 import Field from '../src/Field';
 import ValidationResult from '../src/ValidationResult';
 import FileValidator from '../src/validators/FileValidator';
-import { FieldValue } from '../src/types';
+import { FieldValue } from '../src';
 
 // @ts-expect-error It will not be `null` after the `beforeEach`.
 let containerElement: HTMLElement = null;
@@ -24,7 +24,7 @@ const getTextareaElement = (selector: string): HTMLTextAreaElement => {
     return document.querySelector<HTMLTextAreaElement>(selector)!;
 };
 
-const validateField = async (field: Field) => {
+const validateField = (field: Field) => {
     // eslint-disable-next-line no-param-reassign
     field.validationResult = null;
     return field.validate();
@@ -235,17 +235,6 @@ describe('validation callback options', () => {
         expect(onBeforeValidate.mock.calls[0][1]).toBe(containerElement);
     });
 
-    test('"onBeforeValidate" is not called because of no validators', async () => {
-        const onBeforeValidate = jest.fn();
-        const field = new Field('.js-input', '.js-container', [], {
-            onBeforeValidate,
-        });
-
-        await field.validate();
-
-        expect(onBeforeValidate).not.toHaveBeenCalled();
-    });
-
     test('"onAfterValidate" is called', async () => {
         const onAfterValidate = jest.fn();
         const field = new Field('.js-input', '.js-container', ['isEmail'], {
@@ -258,17 +247,6 @@ describe('validation callback options', () => {
         expect(onAfterValidate.mock.calls[0][0]).toStrictEqual(ValidationResult.valid());
         expect(onAfterValidate.mock.calls[0][1]).toBe(inputElement);
         expect(onAfterValidate.mock.calls[0][2]).toBe(containerElement);
-    });
-
-    test('"onAfterValidate" is not called because of no validators', async () => {
-        const onAfterValidate = jest.fn();
-        const field = new Field('.js-input', '.js-container', [], {
-            onAfterValidate,
-        });
-
-        await field.validate();
-
-        expect(onAfterValidate).not.toHaveBeenCalled();
     });
 
     test('"onValidationError" is called', async () => {
@@ -363,7 +341,7 @@ describe('callback options', () => {
         expect(onChange.mock.calls[0][2]).toBe(containerElement);
     });
 
-    test('"onChange" is called on trimming', async () => {
+    test('"onChange" is called when trimming', async () => {
         const onChange = jest.fn();
         const field = new Field('.js-input', '.js-container', [], {
             onChange,
@@ -579,7 +557,7 @@ describe('validation result', () => {
         await field.validate();
     });
 
-    test('"validate" positive', async () => {
+    test('"validate" is positive', async () => {
         const field = new Field('.js-input', '.js-container', ['required']);
 
         inputElement.value = 'foo';
@@ -589,7 +567,7 @@ describe('validation result', () => {
         expect(validationResult).toStrictEqual(ValidationResult.valid());
     });
 
-    test('"validate" negative', async () => {
+    test('"validate" is negative', async () => {
         const field = new Field('.js-input', '.js-container', ['required']);
 
         const validationResult = await field.validate();
@@ -1031,12 +1009,12 @@ describe('statuses', () => {
         await field.validate();
 
         expect(wrapperElement!.classList.contains('ff-field-valid')).toBe(true);
-        expect(onStatusChange).toHaveBeenCalledTimes(1);
-        expect(onStatusChange.mock.calls[0][0]).toBe('ff-field-valid');
-        expect(onStatusChange.mock.calls[0][1]).toStrictEqual(ValidationResult.valid());
-        expect(onStatusChange.mock.calls[0][2]).toBe(getInputElement('.js-radio'));
-        expect(onStatusChange.mock.calls[0][3]).toBe(containerElement);
-        expect(onStatusChange.mock.calls[0][4]).toBe(wrapperElement);
+        expect(onStatusChange).toHaveBeenCalledTimes(2);
+        expect(onStatusChange.mock.calls[1][0]).toBe('ff-field-valid');
+        expect(onStatusChange.mock.calls[1][1]).toStrictEqual(ValidationResult.valid());
+        expect(onStatusChange.mock.calls[1][2]).toBe(getInputElement('.js-radio'));
+        expect(onStatusChange.mock.calls[1][3]).toBe(containerElement);
+        expect(onStatusChange.mock.calls[1][4]).toBe(wrapperElement);
     });
 
     test('status is not reset on change input', () => {

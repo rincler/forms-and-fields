@@ -82,13 +82,9 @@ export default class Form {
         await ignoreRejects(async () => {
             const validationResults = await this.validate();
 
-            const isValid = ValidationResult.areValid(validationResults);
-
-            if (!isValid) {
-                return;
+            if (ValidationResult.areValid(validationResults)) {
+                await this.runSubmitProcess();
             }
-
-            await this.runSubmitProcess();
         });
     }
 
@@ -176,13 +172,6 @@ export default class Form {
     }
 
     async validate(): Promise<ValidationResult[]> {
-        if (
-            this.fields.every((field) => field.validators.length === 0) &&
-            !this.hasOption('validate')
-        ) {
-            return Promise.resolve([]);
-        }
-
         this.getOption('onBeforeValidate')(this.formElement);
 
         const actionId = startAction(this);
@@ -283,10 +272,6 @@ export default class Form {
     }
 
     setStatus(status: FormStatus): void {
-        if (status === FormStatus.No) {
-            this.getOption('onStatusReset')(this.formElement);
-        }
-
         this.formElement.classList.remove(
             FormStatus.Validating,
             FormStatus.Valid,
@@ -296,7 +281,9 @@ export default class Form {
             FormStatus.NegativeSubmit,
         );
 
-        if (status !== FormStatus.No) {
+        if (status === FormStatus.No) {
+            this.getOption('onStatusReset')(this.formElement);
+        } else {
             this.formElement.classList.add(status);
         }
 
