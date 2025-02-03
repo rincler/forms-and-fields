@@ -163,7 +163,15 @@ export enum FormStatus {
     NegativeSubmit = 'ff-form-negative-submit',
 }
 
-export type FormOptions = FieldOptions & {
+export interface FormOptions
+    extends Omit<
+        FieldOptions,
+        | 'onBeforeValidate'
+        | 'onAfterValidate'
+        | 'onValidationError'
+        | 'onStatusChange'
+        | 'onStatusReset'
+    > {
     onBeforeValidate?: (formElement: HTMLFormElement) => void;
     validate?: (formData: FormData) => ValidationResult | Promise<ValidationResult>;
     onAfterValidate?: (validationResults: ValidationResult[], formElement: HTMLFormElement) => void;
@@ -183,7 +191,7 @@ export type FormOptions = FieldOptions & {
     onFieldValidationError?: FieldOptions['onValidationError'];
     onFieldStatusChange?: FieldOptions['onStatusChange'];
     onFieldStatusReset?: FieldOptions['onStatusReset'];
-};
+}
 
 export type FormOptionName = keyof FormOptions;
 
