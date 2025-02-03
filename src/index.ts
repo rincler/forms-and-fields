@@ -5,3 +5,4 @@ import SubmissionResult from './SubmissionResult';
 import FileValidator from './validators/FileValidator';
 
 export { Form, Field, ValidationResult, SubmissionResult, FileValidator };
+export * from './types';
