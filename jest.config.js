@@ -1,4 +1,13 @@
 export default {
     testEnvironment: 'jsdom',
-    preset: 'ts-jest',
+    transform: {
+        '\\.ts$': [
+            'ts-jest',
+            {
+                tsconfig: {
+                    sourceMap: true,
+                },
+            },
+        ],
+    },
 };
