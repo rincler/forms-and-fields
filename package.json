@@ -13,7 +13,6 @@
     ],
     "type": "module",
     "module": "dist/index.js",
-    "main": "dist/index.js",
     "types": "dist/index.d.ts",
     "files": [
         "dist"
@@ -53,7 +52,7 @@
         "typescript": "^5.7.3"
     },
     "scripts": {
-        "build": "tsc && esbuild src/index.ts --outfile=dist/forms-and-fields.min.js --format=iife --global-name=FF  --sourcemap --minify --bundle",
+        "build": "tsc",
         "prepack": "npm run build",
         "check": "tsc --noEmit && eslint .",
         "sandbox": "npm run sandbox:build && npm run sandbox:start",

@@ -94,24 +94,9 @@ Find more examples in the [sandbox](./sandbox).
 
 Or without installation and build tools:
 
-- As a standalone script with the `FF` global name:
-
-```HTML
-<script type="text/javascript" src="https://unpkg.com/forms-and-fields@latest/dist/forms-and-fields.min.js"></script>
-<script type="text/javascript">
-    const field = new FF.Field(".js-email", ".js-email-container", ["required", "isEmail"]);
-    field.listen();
-</script>
-```
-
-- As a module:
-
 ```HTML
 <script type="module">
     import { Field } from 'https://cdn.skypack.dev/forms-and-fields@latest';
-    
-    const field = new Field(".js-email", ".js-email-container", ["required", "isEmail"]);
-    field.listen();
 </script>
 ```
 ## Documentation
