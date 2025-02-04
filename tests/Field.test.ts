@@ -744,17 +744,17 @@ describe('some validators', () => {
             trimEnabled: true,
         });
         const fieldTextarea = new Field('.js-textarea', '.js-container', [], {
-            trimEnabled: false,
+            trimEnabled: true,
         });
 
         inputElement.value = ' foo ';
-        getTextareaElement('.js-textarea').value = ' foo ';
+        getTextareaElement('.js-textarea').value = 'bar\n\n';
 
         await fieldInput.validate();
         await fieldTextarea.validate();
 
         expect(fieldInput.getValue()).toBe('foo');
-        expect(fieldTextarea.getValue()).toBe(' foo ');
+        expect(fieldTextarea.getValue()).toBe('bar');
     });
 });
 

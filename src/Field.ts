@@ -518,8 +518,9 @@ export default class Field {
     trimIfRequired(): void {
         if (this.getOption('trimEnabled') && this.isTextable()) {
             const fieldElement = this.getFieldElement<ValueableElement>();
-            if (fieldElement.value.startsWith(' ') || fieldElement.value.endsWith(' ')) {
-                fieldElement.value = fieldElement.value.trim();
+            const trimmedValue = fieldElement.value.trim();
+            if (fieldElement.value !== trimmedValue) {
+                fieldElement.value = trimmedValue;
                 this.getOption('onChange')(fieldElement.value, fieldElement, this.containerElement);
             }
         }
