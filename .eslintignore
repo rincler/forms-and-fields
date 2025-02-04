@@ -1,2 +1,2 @@
-lib/*
-sandbox/*
+dist/*
+sandbox/bundle.js

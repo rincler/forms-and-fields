@@ -1,6 +1,6 @@
 .idea
-lib
+dist
 node_modules
 package-lock.json
-sandbox
 yarn.lock
+sandbox/bundle.js

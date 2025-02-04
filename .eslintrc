@@ -1,26 +1,40 @@
 {
+    "root": true,
     "env": {
         "browser": true,
         "es6": true,
         "jest/globals": true
     },
-    "extends": ["airbnb-base", "plugin:prettier/recommended",  "plugin:jest/recommended"],
+    "extends": [
+        "airbnb-base",
+        "airbnb-typescript/base",
+        "plugin:prettier/recommended",
+        "plugin:jest/recommended",
+        "plugin:@typescript-eslint/recommended"
+    ],
     "globals": {
         "Atomics": "readonly",
         "SharedArrayBuffer": "readonly"
     },
+    "parser": "@typescript-eslint/parser",
     "parserOptions": {
-        "ecmaVersion": 2018,
+        "project": "./tsconfig.eslint.json",
+        "ecmaVersion": "latest",
         "sourceType": "module"
     },
     "rules": {
-        "indent": ["error", 4],
-        "no-use-before-define": ["off"],
-        "import/no-extraneous-dependencies": ["error", {"devDependencies": true}],
-        "max-len": ["error", { "code": 180 }],
-        "no-restricted-syntax": ["warn"],
-        "no-await-in-loop": ["warn"],
-        "import/export": ["warn"],
-        "no-new": ["warn"]
-    }
+        "no-continue": ["off"],
+        "prefer-destructuring": ["off"],
+        "no-plusplus": ["off"],
+        "@typescript-eslint/lines-between-class-members": ["off"],
+        "@typescript-eslint/explicit-function-return-type": ["error"]
+    },
+    "overrides": [
+        {
+            "files": ["*.js", "*.test.ts"],
+            "rules": {
+                "@typescript-eslint/explicit-function-return-type": ["off"]
+            }
+        }
+    ]
 }
