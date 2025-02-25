@@ -152,7 +152,7 @@ When a user submits a form, validation is performed first. If the form passes va
 | listen(): `() => void`                                                                                               | Starts listening to events on the field element. This method must be called if the field is used outside of a form. Returns a function that stops listening.                                                                                                                                                                  |
 
 You can specify a CSS class for the field element and use it in the `fieldSelector` parameter.
-For elements with the same name (e.g., radio buttons or a group of text input elements), use the same CSS class for all elements and a single `Field` object.
+For elements with the same name (e.g., radio buttons or a group of text input elements), use a single `Field` object and specify a selector to find the first element.
 You can find examples in the [sandbox](./sandbox).
 
 You can also specify a CSS class for the container element containing the field element and use it in the `containerSelector` parameter. If the field element is inside a form, the container element should be the form itself.
@@ -256,6 +256,77 @@ new Field('.js-file', '.js-container', [
     new FileValidator({ maxSize: 536870912, allowedMimeTypes: ['image/jpg'] }, { maxSize: 'The size of {file} must be less than {maxSizeInMiB} MiB.' })
 ])
 ```
+
+### Radio buttons
+
+Use a single `Field` object for radio buttons with the same name:
+
+HTML:
+```HTML
+<form class="js-form">
+    <input id="sex-man" type="radio" name="sex" class="js-sex" value="man" />
+    <label for="sex-man">Man</label>
+    <input id="sex-woman" type="radio" name="sex" class="js-sex" value="woman" />
+    <label for="sex-woman">Woman</label>
+    <button type="submit">Submit</button>
+</form>
+```
+
+JS:
+```JS
+import { Form, Field, SubmissionResult } from "forms-and-fields"
+
+const form = new Form(
+    ".js-form",
+    [
+        new Field(".js-sex", ".js-form", ["required"]),
+    ],
+    (formData) => SubmissionResult.positive()},
+)
+
+form.listen()
+```
+
+### Groups
+
+Sometimes it's necessary to add fields with the same name, for example, a group of addresses. In this case, use the `groug-field` attribute and a single `Field` object:
+
+HTML:
+```HTML
+<form class="js-form">
+    <div>
+        <label for="address-1">Address 1:</label>
+        <br />
+        <input id="address-1" type="text" name="address" class="js-address" data-group-field="" />
+    </div>
+    <div>
+        <label for="address-2">Address 2:</label>
+        <br />
+        <input id="address-2" type="text" name="address" class="js-address" data-group-field="" />
+    </div>
+    <br />
+    <button type="button">Add an address</button>
+    <br />
+    <button type="submit">Submit</button>
+</form>
+```
+
+JS:
+```JS
+import { Form, Field, SubmissionResult } from "forms-and-fields"
+
+const form = new Form(
+    ".js-form",
+    [
+        new Field(".js-address", ".js-form", ["required"]),
+    ],
+    (formData) => SubmissionResult.positive()},
+)
+
+form.listen()
+```
+
+**Important!** Don't use the `group-field` attribute for radio buttons.
 
 ### Statuses
 

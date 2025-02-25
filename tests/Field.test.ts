@@ -34,9 +34,9 @@ beforeEach(() => {
     document.body.innerHTML = `
         <div class="js-container">
             <input class="js-input" id="input" />
-            <input class="js-list-input js-list-input-1" name="list-input-name[0]" />
-            <input class="js-list-input js-list-input-2" name="list-input-name[1]" />
-            <input class="js-list-input js-list-input-3" name="list-input-name[2]" />
+            <input class="js-group-input js-group-input-1" name="group-input-name" />
+            <input class="js-group-input js-group-input-2" name="group-input-name" />
+            <input class="js-group-input js-group-input-3" name="group-input-name" />
             <input class="js-checkbox" type="checkbox" />
             <div class="js-wrapper" data-field-wrapper>
                 <input class="js-radio js-radio-1" type="radio" name="radio" value="1">
@@ -394,27 +394,27 @@ describe('callback options', () => {
         expect(onChange.mock.calls[0][2]).toBe(containerElement);
     });
 
-    test('"onChange" is called on text input (which is one of the list) change', () => {
+    test('"onChange" is called on text input (which is one of the group) change', () => {
         const onChange = jest.fn();
-        const field = new Field('.js-list-input', '.js-container', [], {
+        const field = new Field('.js-group-input', '.js-container', [], {
             onChange,
         });
         field.listen();
 
-        const listInputElement = getInputElement('.js-list-input-3');
-        listInputElement.value = 'foo';
+        const groupInputElement = getInputElement('.js-group-input-3');
+        groupInputElement.value = 'foo';
 
-        fireEvent.change(listInputElement, { target: { value: 'bar' } });
+        fireEvent.change(groupInputElement, { target: { value: 'bar' } });
 
         expect(onChange).toHaveBeenCalledTimes(1);
         expect(onChange.mock.calls[0][0]).toBe('bar');
-        expect(onChange.mock.calls[0][1]).toBe(listInputElement);
+        expect(onChange.mock.calls[0][1]).toBe(groupInputElement);
         expect(onChange.mock.calls[0][2]).toBe(containerElement);
     });
 
-    test('"onChange" is called on text input (which is one of the list and added programmatically) change', () => {
+    test('"onChange" is called on text input (which is one of the group and added programmatically) change', () => {
         const onChange = jest.fn();
-        const field = new Field('.js-list-input', '.js-container', [], {
+        const field = new Field('.js-group-input', '.js-container', [], {
             onChange,
         });
         field.listen();
@@ -423,17 +423,17 @@ describe('callback options', () => {
             .querySelector('.js-container')!
             .insertAdjacentHTML(
                 'beforeend',
-                `<input class="js-list-input js-dynamic-input-x" name="list-input-name[x]" />`,
+                `<input class="js-group-input js-dynamic-input-x" name="group-input-name" />`,
             );
 
-        const dynamicListInput = getInputElement('.js-dynamic-input-x');
-        dynamicListInput.value = 'foo';
+        const dynamicGroupInput = getInputElement('.js-dynamic-input-x');
+        dynamicGroupInput.value = 'foo';
 
-        fireEvent.change(dynamicListInput, { target: { value: 'bar' } });
+        fireEvent.change(dynamicGroupInput, { target: { value: 'bar' } });
 
         expect(onChange).toHaveBeenCalledTimes(1);
         expect(onChange.mock.calls[0][0]).toBe('bar');
-        expect(onChange.mock.calls[0][1]).toBe(dynamicListInput);
+        expect(onChange.mock.calls[0][1]).toBe(dynamicGroupInput);
         expect(onChange.mock.calls[0][2]).toBe(containerElement);
     });
 
@@ -525,9 +525,9 @@ describe('other options', () => {
         [true, false],
         [false, true],
     ])('"validationCacheEnabled" is %s', async (validationCacheEnabled, expectedIsValid) => {
-        const field1 = new Field('.js-list-input-1', '.js-container');
+        const field1 = new Field('.js-group-input-1', '.js-container');
         const field2 = new Field(
-            '.js-list-input-2',
+            '.js-group-input-2',
             '.js-container',
             [
                 (value) => {

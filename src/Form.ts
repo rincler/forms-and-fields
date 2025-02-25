@@ -258,8 +258,8 @@ export default class Form {
                 continue;
             }
 
-            if (field.isList()) {
-                fields.push(...field.getVirtualFieldsOfList());
+            if (field.isGroup()) {
+                fields.push(...field.getVirtualFieldsOfGroup());
             } else {
                 fields.push(field);
             }

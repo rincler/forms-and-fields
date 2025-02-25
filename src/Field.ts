@@ -101,10 +101,10 @@ export default class Field {
             if (target.matches(this.fieldSelector)) {
                 // eslint-disable-next-line @typescript-eslint/no-this-alias
                 let field = this;
-                if (this.isList()) {
-                    const virtualFields = this.getVirtualFieldsOfList();
+                if (this.isGroup()) {
+                    const virtualFields = this.getVirtualFieldsOfGroup();
                     // @ts-expect-error It's ok.
-                    field = virtualFields[this.findElementIndexInList(target)];
+                    field = virtualFields[this.findElementIndexInGroup(target)];
                 }
                 listener.call(field, event);
             }
@@ -355,12 +355,12 @@ export default class Field {
         return this.containerElement.querySelector(this.fieldSelector) !== null;
     }
 
-    getListElements(): Element[] {
+    getGroupElements(): Element[] {
         return Array.from(this.containerElement.querySelectorAll(this.fieldSelector));
     }
 
-    findElementIndexInList(element: Element): number {
-        return this.getListElements().findIndex((e) => e.isSameNode(element));
+    findElementIndexInGroup(element: Element): number {
+        return this.getGroupElements().findIndex((e) => e.isSameNode(element));
     }
 
     getCheckedRadioElement(): HTMLInputElement | null {
@@ -381,29 +381,29 @@ export default class Field {
         return Array.from(this.getFieldElement().querySelectorAll('option:checked'));
     }
 
-    getVirtualFieldsOfList(): Field[] {
-        return this.getListElements().map((listElement) =>
-            this.getVirtualFieldForElement(listElement as HTMLElement),
+    getVirtualFieldsOfGroup(): Field[] {
+        return this.getGroupElements().map((groupElement) =>
+            this.getVirtualFieldForElement(groupElement as HTMLElement),
         );
     }
 
     getVirtualFieldForElement(element: HTMLElement): Field {
-        if (!element.dataset.fieldId) {
+        if (!element.dataset.groupField) {
             // eslint-disable-next-line no-param-reassign
-            element.dataset.fieldId = Math.random().toString(36).substring(2);
+            element.dataset.groupField = Math.random().toString(36).substring(2);
         }
 
-        if (this.virtualFieldsCache[element.dataset.fieldId]) {
-            return this.virtualFieldsCache[element.dataset.fieldId];
+        if (this.virtualFieldsCache[element.dataset.groupField]) {
+            return this.virtualFieldsCache[element.dataset.groupField];
         }
 
         const field = new Field(
-            `${this.fieldSelector}[data-field-id="${element.dataset.fieldId}"]`,
+            `${this.fieldSelector}[data-group-field="${element.dataset.groupField}"]`,
             this.containerSelector,
             this.validators,
             this.options,
         );
-        this.virtualFieldsCache[element.dataset.fieldId] = field;
+        this.virtualFieldsCache[element.dataset.groupField] = field;
 
         return field;
     }
@@ -416,13 +416,10 @@ export default class Field {
         return fieldElement.type === 'text';
     }
 
-    isList(): boolean {
+    isGroup(): boolean {
         const fieldElement = this.getFieldElement();
-        if (!(fieldElement instanceof HTMLInputElement)) {
-            return false;
-        }
 
-        if ('fieldId' in fieldElement.dataset) {
+        if ('groupField' in fieldElement.dataset) {
             return true;
         }
 

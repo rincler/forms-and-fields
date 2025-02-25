@@ -23,7 +23,7 @@ const clearFieldError = (fieldElement) => {
 };
 
 const setFormError = (formElement, error) => {
-    const submitButton = formElement.querySelector(['button[type="submit"]']);
+    const submitButton = formElement.querySelector('button[type="submit"]');
     submitButton.insertAdjacentHTML(
         'beforebegin',
         `<div class="form-error">${error}<br /><br /></div>`,
@@ -151,10 +151,10 @@ const registrationForm = new Form(
 
 registrationForm.listen();
 
-const emailListForm = new Form(
-    '.js-email-list-form',
+const emailGroupForm = new Form(
+    '.js-email-group-form',
     [
-        new Field('.js-email', '.js-email-list-form', [
+        new Field('.js-email', '.js-email-group-form', [
             'required',
             'isEmail',
             () => {
@@ -169,7 +169,7 @@ const emailListForm = new Form(
     () => SubmissionResult.positive(),
 );
 
-emailListForm.listen();
+emailGroupForm.listen();
 
 const uploadForm = new Form(
     '.js-upload-file-form',
