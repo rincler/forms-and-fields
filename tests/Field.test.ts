@@ -1156,6 +1156,26 @@ describe('statuses', () => {
         expect(onStatusReset.mock.calls[0][1]).toBe(containerElement);
         expect(onStatusReset.mock.calls[0][2]).toBeNull();
     });
+
+    test('valid, CSS status disabled', async () => {
+        const onStatusChange = jest.fn();
+        const field = new Field('.js-input', '.js-container', ['required'], {
+            onStatusChange,
+            cssStatusEnabled: false,
+        });
+
+        inputElement.value = 'foo';
+
+        await field.validate();
+
+        expect(inputElement.classList.contains('ff-field-valid')).toBe(false);
+        expect(onStatusChange).toHaveBeenCalledTimes(2);
+        expect(onStatusChange.mock.calls[1][0]).toBe('ff-field-valid');
+        expect(onStatusChange.mock.calls[1][1]).toStrictEqual(ValidationResult.valid());
+        expect(onStatusChange.mock.calls[1][2]).toBe(inputElement);
+        expect(onStatusChange.mock.calls[1][3]).toBe(containerElement);
+        expect(onStatusChange.mock.calls[1][4]).toBeNull();
+    });
 });
 
 describe('rejection', () => {

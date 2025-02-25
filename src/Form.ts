@@ -7,6 +7,7 @@ import SubmissionResult from './SubmissionResult.js';
 const NOOP = (): void => {};
 
 const DEFAULT_OPTIONS: FormOptions = {
+    cssStatusEnabled: true,
     onBeforeValidate: NOOP,
     onAfterValidate: NOOP,
     onValidationError: NOOP,
@@ -143,6 +144,9 @@ export default class Form {
                 validationCacheEnabled: field.hasOption('validationCacheEnabled')
                     ? field.getOption('validationCacheEnabled')
                     : options.validationCacheEnabled,
+                cssStatusEnabled: field.hasOption('cssStatusEnabled')
+                    ? field.getOption('cssStatusEnabled')
+                    : options.cssStatusEnabled,
                 validatorParams: field.hasOption('validatorParams')
                     ? field.getOption('validatorParams')
                     : options.validatorParams,
@@ -275,6 +279,25 @@ export default class Form {
     }
 
     setStatus(status: FormStatus): void {
+        this.setCssClass(status);
+
+        if (status === FormStatus.No) {
+            this.getOption('onStatusReset')(this.formElement);
+        }
+
+        this.getOption('onStatusChange')(
+            status,
+            this.validationResults,
+            this.submissionResult,
+            this.formElement,
+        );
+    }
+
+    setCssClass(cssClass: string): void {
+        if (!this.getOption('cssStatusEnabled')) {
+            return;
+        }
+
         this.formElement.classList.remove(
             FormStatus.Validating,
             FormStatus.Valid,
@@ -284,17 +307,8 @@ export default class Form {
             FormStatus.NegativeSubmit,
         );
 
-        if (status === FormStatus.No) {
-            this.getOption('onStatusReset')(this.formElement);
-        } else {
-            this.formElement.classList.add(status);
+        if (cssClass !== '') {
+            this.formElement.classList.add(cssClass);
         }
-
-        this.getOption('onStatusChange')(
-            status,
-            this.validationResults,
-            this.submissionResult,
-            this.formElement,
-        );
     }
 }

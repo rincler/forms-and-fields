@@ -20,6 +20,7 @@ export interface FieldOptions {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     validatorParams?: { [K in VendorValidatorName]?: any[] };
     validationCacheEnabled?: boolean;
+    cssStatusEnabled?: boolean;
     onChange?: (
         fieldValue: FieldValue,
         fieldElement: FieldElement,
@@ -172,6 +173,7 @@ export interface FormOptions
         | 'onStatusChange'
         | 'onStatusReset'
     > {
+    cssStatusEnabled?: boolean;
     onBeforeValidate?: (formElement: HTMLFormElement) => void;
     validate?: (formData: FormData) => ValidationResult | Promise<ValidationResult>;
     onAfterValidate?: (validationResults: ValidationResult[], formElement: HTMLFormElement) => void;

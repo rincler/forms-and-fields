@@ -1,6 +1,6 @@
 # Forms and Fields
 
-![NPM Version](https://img.shields.io/npm/v/forms-and-fields)
+[![NPM Version](https://img.shields.io/npm/v/forms-and-fields)](https://www.npmjs.com/package/forms-and-fields)
 ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/rincler/forms-and-fields/ci.yml?branch=master)
 
 A library for validating fields and submitting forms.
@@ -178,6 +178,7 @@ An array of validators. Each validator can be:
 | validateOnType         | `boolean`  | `false`            | Specifies whether to validate the field during typing.                                                                                                                                                                 |
 | validatorParams        | `object`   | `{}`               | Parameters for [validator](https://www.npmjs.com/package/validator). For example: `{ isEmail: [{ allow_utf8_local_part: false }] }`.                                                                                   |
 | validationCacheEnabled | `boolean`  | `true`             | Specifies whether to cache the validation result until the value changes.                                                                                                                                              |
+| cssStatusEnabled       | `boolean`  | `true`             | Specifies whether to add CSS classes when the status changes.                                                                                                                                                          |
 | onChange               | `function` | `NOOP`             | Triggered when the field value changes. Passed as arguments: `value: any, fieldElement: HTMLElement, containerElement: Element`.                                                                                       |
 | onTypingStart          | `function` | `NOOP`             | Triggered when the user starts typing. Passed as arguments: `value: any, fieldElement: HTMLElement, containerElement: Element`.                                                                                        |
 | onTypingEnd            | `function` | `NOOP`             | Triggered when the user stops typing. Passed as arguments: `value: any, fieldElement: HTMLElement, containerElement: Element`.                                                                                         |
@@ -206,6 +207,7 @@ Additionally, the `Form` class supports the following options:
 
 | Option                 | Type       | Default | Description                                                                                                                                                                                                                                                     |
 |------------------------|------------|---------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| cssStatusEnabled       | `boolean`  | `true`  | Specifies whether to add CSS classes when the status changes.                                                                                                                                                                                                   |
 | onBeforeValidate       | `function` | `NOOP`  | Triggered before form validation. Passed as argument: `formElement: HTMLFormElement`.                                                                                                                                                                           |
 | validate               | `function` | `NOOP`  | An additional custom validation function, which must return a `ValidationResult` object.  Passed as argument: `formData: FormData`. This is executed after field validation when all fields are valid. Can be promised.                                         |
 | onAfterValidate        | `function` | `NOOP`  | Triggered after form validation. Passed as arguments: `validationResults: ValidationReslut[], formElement: HTMLFormElement`. `validationResults` contains the results for each field and the form itself.                                                       |
@@ -332,7 +334,9 @@ form.listen()
 
 ### Statuses
 
-Special CSS classes are dynamically added to form and field elements during validation and submission:
+The statuses of forms and fields change during validation and submission. You can subscribe to these events via `onStatusChange`.
+
+Also, by default, statuses are dynamically added as CSS classes to form and field elements:
 
 - `ff-field-validating`
 - `ff-field-valid`
@@ -344,8 +348,9 @@ Special CSS classes are dynamically added to form and field elements during vali
 - `ff-form-positive-submit`
 - `ff-form-negative-submit`
 
-You can wrap any field element in a container with the `data-field-wrapper` attribute.
-The special classes will then be applied to this wrapper instead of the field element itself. This is particularly useful for checkboxes and radio buttons.
+You can wrap any field element in a container with the `data-field-wrapper` attribute then
+the classes will then be applied to this wrapper instead of the field element itself. This is particularly useful for checkboxes and radio buttons.
+To disable adding CSS classes, set `cssStatusEnabled` to `false`.
 
 The `onResetStatus` callback can be useful for clearing form or field errors that were set using the `onAfterValidate` or `onAfterSubmit` callbacks, for example.
 

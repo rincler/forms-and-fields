@@ -24,6 +24,7 @@ const DEFAULT_OPTIONS: FieldOptions = {
     validateOnType: false,
     validatorParams: {},
     validationCacheEnabled: true,
+    cssStatusEnabled: true,
     onChange: NOOP,
     onTypingStart: NOOP,
     onTypingEnd: NOOP,
@@ -532,14 +533,10 @@ export default class Field {
         const fieldElement = this.getFieldElement();
         const wrapperElement = this.getFieldWrapperElement();
 
-        const element = wrapperElement || fieldElement;
-
-        element.classList.remove(FieldStatus.Validating, FieldStatus.Valid, FieldStatus.Invalid);
+        this.setCssClass(status);
 
         if (status === FieldStatus.No) {
             this.getOption('onStatusReset')(fieldElement, this.containerElement, wrapperElement);
-        } else {
-            element.classList.add(status);
         }
 
         this.getOption('onStatusChange')(
@@ -549,5 +546,19 @@ export default class Field {
             this.containerElement,
             wrapperElement,
         );
+    }
+
+    setCssClass(cssClass: string): void {
+        if (!this.getOption('cssStatusEnabled')) {
+            return;
+        }
+
+        const element = this.getFieldWrapperElement() || this.getFieldElement();
+
+        element.classList.remove(FieldStatus.Validating, FieldStatus.Valid, FieldStatus.Invalid);
+
+        if (cssClass !== '') {
+            element.classList.add(cssClass);
+        }
     }
 }

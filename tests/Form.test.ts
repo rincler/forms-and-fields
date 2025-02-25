@@ -45,12 +45,13 @@ describe('field options', () => {
     test('pass options to fields', () => {
         const invalidMessages = { required: 'this is required' };
         const defaultInvalidMessage = 'some default invalid message';
+        const trimEnabled = false;
+        const typingDelay = 3;
         const validateOnChange = true;
         const validateOnType = true;
-        const typingDelay = 3;
         const validatorParams = { isEmail: [{ allow_utf8_local_part: false }] };
         const validationCacheEnabled = false;
-        const trimEnabled = false;
+        const cssStatusEnabled = false;
         const onChange = jest.fn();
         const onTypingStart = jest.fn();
         const onTypingEnd = jest.fn();
@@ -73,6 +74,7 @@ describe('field options', () => {
             validateOnType,
             validatorParams,
             validationCacheEnabled,
+            cssStatusEnabled,
             onChange,
             onTypingStart,
             onTypingEnd,
@@ -106,6 +108,9 @@ describe('field options', () => {
 
         expect(inputField.getOption('validationCacheEnabled')).toBe(validationCacheEnabled);
         expect(checkboxField.getOption('validationCacheEnabled')).toBe(validationCacheEnabled);
+
+        expect(inputField.getOption('cssStatusEnabled')).toBe(cssStatusEnabled);
+        expect(checkboxField.getOption('cssStatusEnabled')).toBe(cssStatusEnabled);
 
         expect(inputField.getOption('onChange')).toBe(onChange);
         expect(checkboxField.getOption('onChange')).toBe(onChange);
@@ -141,6 +146,7 @@ describe('field options', () => {
         const validateOnType = true;
         const validatorParams = { isEmail: [{ allow_utf8_local_part: false }] };
         const validationCacheEnabled = false;
+        const cssStatusEnabled = false;
         const onChange = jest.fn();
         const onTypingStart = jest.fn();
         const onTypingEnd = jest.fn();
@@ -159,6 +165,7 @@ describe('field options', () => {
             validateOnType,
             validatorParams,
             validationCacheEnabled,
+            cssStatusEnabled,
             onChange,
             onTypingStart,
             onTypingEnd,
@@ -179,6 +186,7 @@ describe('field options', () => {
             validateOnType: false,
             validatorParams: { isEmail: [{ allow_utf8_local_part: false }] },
             validationCacheEnabled: true,
+            cssStatusEnabled: true,
             onChange: jest.fn(),
             onTypingStart: jest.fn(),
             onTypingEnd: jest.fn(),
@@ -197,6 +205,7 @@ describe('field options', () => {
         expect(inputField.getOption('validateOnType')).toBe(validateOnType);
         expect(inputField.getOption('validatorParams')).toBe(validatorParams);
         expect(inputField.getOption('validationCacheEnabled')).toBe(validationCacheEnabled);
+        expect(inputField.getOption('cssStatusEnabled')).toBe(cssStatusEnabled);
         expect(inputField.getOption('onChange')).toBe(onChange);
         expect(inputField.getOption('onTypingStart')).toBe(onTypingStart);
         expect(inputField.getOption('onTypingEnd')).toBe(onTypingEnd);
@@ -1069,6 +1078,36 @@ describe('statuses', () => {
             expect(onStatusChange.mock.calls[1][2]).toBeNull();
             expect(onStatusChange.mock.calls[1][3]).toBe(formElement);
             expect(onStatusReset).not.toHaveBeenCalled();
+        });
+    });
+
+    test('positive submit, CSS status disabled', async () => {
+        const onStatusChange = jest.fn();
+        const form = new Form(
+            '.js-form',
+            [new Field('.js-input', '.js-form', ['required'])],
+            () => SubmissionResult.positive(),
+            {
+                onStatusChange,
+                cssStatusEnabled: false,
+            },
+        );
+        form.listen();
+
+        inputElement.value = 'foo';
+
+        fireEvent.submit(formElement);
+
+        await waitFor(() => {
+            expect(formElement.classList.contains('ff-form-positive-submit')).toBe(false);
+            expect(onStatusChange).toHaveBeenCalledTimes(5);
+            expect(onStatusChange.mock.calls[4][0]).toBe('ff-form-positive-submit');
+            expect(onStatusChange.mock.calls[4][1]).toStrictEqual([
+                ValidationResult.valid(),
+                ValidationResult.valid(),
+            ]);
+            expect(onStatusChange.mock.calls[4][2]).toStrictEqual(SubmissionResult.positive());
+            expect(onStatusChange.mock.calls[4][3]).toBe(formElement);
         });
     });
 });
