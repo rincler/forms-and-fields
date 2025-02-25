@@ -2,6 +2,7 @@ import validator from 'validator';
 import ValidationResult from './ValidationResult';
 import { ignoreRejects, startAction, finishAction } from './Reject';
 import {
+    FieldElement,
     FieldOptionName,
     FieldOptions,
     FieldStatus,
@@ -9,7 +10,6 @@ import {
     ValidateFn,
     Validator,
     ValidatorName,
-    ValueableElement,
     VendorValidateFn,
 } from './types';
 
@@ -43,7 +43,7 @@ export default class Field {
     validators: Validator[];
     options: FieldOptions;
     validationResult: ValidationResult | null;
-    cachedFieldElement: HTMLElement | null;
+    cachedFieldElement: FieldElement | null;
     virtualFieldsCache: { [key: string]: Field };
     actionId: number;
     typingDelayId: number | null;
@@ -94,10 +94,10 @@ export default class Field {
 
     createListener(listener: EventListener) {
         return (event: Event): void => {
-            const target = event.target;
-            if (!(target instanceof HTMLElement)) {
+            if (!this.isFieldElement(event.target as Element)) {
                 return;
             }
+            const target = event.target as FieldElement;
             if (target.matches(this.fieldSelector)) {
                 // eslint-disable-next-line @typescript-eslint/no-this-alias
                 let field = this;
@@ -116,7 +116,7 @@ export default class Field {
             this.reset();
         }
 
-        const fieldElement = event.target as HTMLElement;
+        const fieldElement = event.target as FieldElement;
         const value = this.getValue();
 
         if (this.typingDelayId) {
@@ -139,7 +139,7 @@ export default class Field {
     async onKeyUp(event: Event): Promise<void> {
         this.reset();
 
-        const fieldElement = event.target as HTMLElement;
+        const fieldElement = event.target as FieldElement;
 
         if (this.getOption('validateOnType')) {
             // This fixes the next case:
@@ -285,7 +285,7 @@ export default class Field {
             const fieldElement = this.getFieldElement();
 
             if (this.isTextable() || this.isSelect()) {
-                return (fieldElement as ValueableElement).value;
+                return fieldElement.value;
             }
 
             if (this.isCheckbox()) {
@@ -306,29 +306,37 @@ export default class Field {
                 return (fieldElement as HTMLInputElement).files;
             }
 
-            return (fieldElement as ValueableElement).value;
+            return fieldElement.value;
         });
     }
 
-    getFieldElement<E extends HTMLElement = HTMLElement>(): E {
+    isFieldElement(element: Element): boolean {
+        return (
+            element instanceof HTMLInputElement ||
+            element instanceof HTMLTextAreaElement ||
+            element instanceof HTMLSelectElement
+        );
+    }
+
+    getFieldElement<E extends FieldElement = FieldElement>(): E {
         if (this.cachedFieldElement !== null) {
             // @ts-expect-error It's ok.
             return this.cachedFieldElement;
         }
 
-        const fieldElement = this.containerElement.querySelector<E>(this.fieldSelector);
+        const fieldElement = this.containerElement.querySelector(this.fieldSelector);
 
         if (!fieldElement) {
             throw new Error(`A field element with the "${this.fieldSelector}" selector not found.`);
         }
 
-        if (!(fieldElement instanceof HTMLElement)) {
+        if (!this.isFieldElement(fieldElement)) {
             throw new Error(
-                `A field element with the "${this.fieldSelector}" selector is not instance of the HTMLElement.`,
+                `A field element with the "${this.fieldSelector}" selector is not field element.`,
             );
         }
 
-        return fieldElement;
+        return fieldElement as E;
     }
 
     withCachedFieldElement<T>(fn: () => T): T {
@@ -355,11 +363,11 @@ export default class Field {
         return this.containerElement.querySelector(this.fieldSelector) !== null;
     }
 
-    getGroupElements(): Element[] {
+    getGroupElements(): FieldElement[] {
         return Array.from(this.containerElement.querySelectorAll(this.fieldSelector));
     }
 
-    findElementIndexInGroup(element: Element): number {
+    findElementIndexInGroup(element: FieldElement): number {
         return this.getGroupElements().findIndex((e) => e.isSameNode(element));
     }
 
@@ -383,11 +391,11 @@ export default class Field {
 
     getVirtualFieldsOfGroup(): Field[] {
         return this.getGroupElements().map((groupElement) =>
-            this.getVirtualFieldForElement(groupElement as HTMLElement),
+            this.getVirtualFieldForElement(groupElement),
         );
     }
 
-    getVirtualFieldForElement(element: HTMLElement): Field {
+    getVirtualFieldForElement(element: FieldElement): Field {
         if (!element.dataset.groupField) {
             // eslint-disable-next-line no-param-reassign
             element.dataset.groupField = Math.random().toString(36).substring(2);
@@ -511,7 +519,7 @@ export default class Field {
 
     trimIfRequired(): void {
         if (this.getOption('trimEnabled') && this.isTextable()) {
-            const fieldElement = this.getFieldElement<ValueableElement>();
+            const fieldElement = this.getFieldElement();
             const trimmedValue = fieldElement.value.trim();
             if (fieldElement.value !== trimmedValue) {
                 fieldElement.value = trimmedValue;
