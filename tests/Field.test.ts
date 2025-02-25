@@ -33,7 +33,7 @@ const validateField = (field: Field) => {
 beforeEach(() => {
     document.body.innerHTML = `
         <div class="js-container">
-            <input class="js-input" />
+            <input class="js-input" id="input" />
             <input class="js-list-input js-list-input-1" name="list-input-name[0]" />
             <input class="js-list-input js-list-input-2" name="list-input-name[1]" />
             <input class="js-list-input js-list-input-3" name="list-input-name[2]" />
@@ -339,6 +339,18 @@ describe('callback options', () => {
         expect(onChange.mock.calls[0][0]).toBe('bar');
         expect(onChange.mock.calls[0][1]).toBe(inputElement);
         expect(onChange.mock.calls[0][2]).toBe(containerElement);
+    });
+
+    test('"onChange" is called on text input change, selector is not class', () => {
+        const onChange = jest.fn();
+        const field = new Field('#input', '.js-container', [], {
+            onChange,
+        });
+        field.listen();
+        inputElement.value = 'foo';
+        fireEvent.change(inputElement, { target: { value: 'bar' } });
+
+        expect(onChange).toHaveBeenCalledTimes(1);
     });
 
     test('"onChange" is called when trimming', async () => {

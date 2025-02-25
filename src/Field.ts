@@ -100,7 +100,7 @@ export default class Field {
                 throw new Error('The event target is not an instance of the HTMLElement.');
             }
 
-            if (target.classList.contains(selector.substring(1))) {
+            if (target.matches(selector)) {
                 // eslint-disable-next-line @typescript-eslint/no-this-alias
                 let field = this;
                 if (this.isList()) {
