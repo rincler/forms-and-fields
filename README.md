@@ -125,6 +125,7 @@ When a user submits a form, validation is performed first. If the form passes va
 | invalid(message: `string` = '', data: `object` = {})                                                                  | Static method. Creates a new invalid result.                                     |
 | make(result: `boolean`, messageForInvalid: `string` = '', dataForValid: `object` = {}, dataForInvalid: `object` = {}) | Static method. Creates a new valid or invalid result depending on the `result`.  |
 | isValid(): `bool`                                                                                                     | Returns `true` if valid.                                                         |
+| isInvalid(): `bool`                                                                                                   | Returns `true` if invalid.                                                       |
 | areValid(validationResults: `ValidationResult[]`): `bool`                                                             | Static method. Returns `true` if all the specified validation results are valid. |
 | hasMessage(): `bool`                                                                                                  | Returns `true` if a message exists.                                              |
 | getMessage(): `string`                                                                                                | Retrieves the message.                                                           |
@@ -138,6 +139,7 @@ When a user submits a form, validation is performed first. If the form passes va
 | negative(message: `string`, data: `object` = {})                                                                           | Static method. Creates a new negative result.                                       |
 | make(result: `boolean`, messageForNegative: `string` = '', dataForPositive: `object` = {}, dataForNegative: `object` = {}) | Static method. Creates a new positive or negative result depending on the `result`. |
 | isPositive(): `boolean`                                                                                                    | Returns `true` if positive.                                                         |
+| isNegative(): `boolean`                                                                                                    | Returns `true` if negative.                                                         |
 | hasMessage(): `boolean`                                                                                                    | Returns `true` if a message exists.                                                 |
 | getMessage(): `boolean`                                                                                                    | Retrieves the message.                                                              |
 | getData(): `object`                                                                                                        | Retrieves the data.                                                                 |

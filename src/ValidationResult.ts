@@ -32,6 +32,10 @@ export default class ValidationResult {
         return this.result;
     }
 
+    isInvalid(): boolean {
+        return !this.result;
+    }
+
     static areValid(validationResults: ValidationResult[]): boolean {
         return validationResults.every((validationResult) => validationResult.isValid());
     }
