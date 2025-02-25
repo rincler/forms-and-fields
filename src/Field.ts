@@ -79,28 +79,26 @@ export default class Field {
         this.typingDelayId = null;
     }
 
-    listen(): void {
-        this.addEventListenerDelegatedToContainerElement(
-            'change',
-            this.onChange,
-            this.fieldSelector,
-        );
-        this.addEventListenerDelegatedToContainerElement('keyup', this.onKeyUp, this.fieldSelector);
+    listen(): () => void {
+        const onChangeListener = this.createListener(this.onChange);
+        const onKeyUpListener = this.createListener(this.onKeyUp);
+
+        this.containerElement.addEventListener('change', onChangeListener);
+        this.containerElement.addEventListener('keyup', onKeyUpListener);
+
+        return () => {
+            this.containerElement.removeEventListener('change', onChangeListener);
+            this.containerElement.removeEventListener('keyup', onKeyUpListener);
+        };
     }
 
-    addEventListenerDelegatedToContainerElement(
-        type: string,
-        listener: EventListener,
-        selector: string,
-    ): void {
-        this.containerElement.addEventListener(type, (event) => {
+    createListener(listener: EventListener) {
+        return (event: Event): void => {
             const target = event.target;
-
             if (!(target instanceof HTMLElement)) {
-                throw new Error('The event target is not an instance of the HTMLElement.');
+                return;
             }
-
-            if (target.matches(selector)) {
+            if (target.matches(this.fieldSelector)) {
                 // eslint-disable-next-line @typescript-eslint/no-this-alias
                 let field = this;
                 if (this.isList()) {
@@ -108,10 +106,9 @@ export default class Field {
                     // @ts-expect-error It's ok.
                     field = virtualFields[this.findElementIndexInList(target)];
                 }
-
                 listener.call(field, event);
             }
-        });
+        };
     }
 
     async onChange(event: Event): Promise<void> {

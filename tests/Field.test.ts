@@ -476,6 +476,19 @@ describe('callback options', () => {
         expect(onChange.mock.calls[0][1]).toBe(dynamicRadioElement);
         expect(onChange.mock.calls[0][2]).toBe(containerElement);
     });
+
+    test('"onChange" is not called after stopping listening', () => {
+        const onChange = jest.fn();
+        const field = new Field('.js-input', '.js-container', [], {
+            onChange,
+        });
+        const stopListening = field.listen();
+        stopListening();
+
+        fireEvent.change(inputElement, { target: { value: 'bar' } });
+
+        expect(onChange).not.toHaveBeenCalled();
+    });
 });
 
 describe('message options', () => {

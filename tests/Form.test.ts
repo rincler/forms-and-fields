@@ -223,6 +223,19 @@ describe('field options', () => {
         expect(onChange.mock.calls[0][1]).toBe(inputElement);
         expect(onChange.mock.calls[0][2]).toBe(formElement);
     });
+
+    test('"onChange" is not called after stopping listening', () => {
+        const onChange = jest.fn();
+        const form = new Form('.js-form', [new Field('.js-input', '.js-form')], submit, {
+            onChange,
+        });
+        const stopListening = form.listen();
+        stopListening();
+
+        fireEvent.change(inputElement, { target: { value: 'bar' } });
+
+        expect(onChange).not.toHaveBeenCalled();
+    });
 });
 
 describe('validation callback options', () => {

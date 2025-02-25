@@ -59,19 +59,22 @@ export default class Form {
         this.actionId = 0;
     }
 
-    listen(): void {
-        this.formElement.addEventListener('change', () => {
-            this.reset();
-        });
-        this.formElement.addEventListener('keyup', () => {
-            this.reset();
-        });
-        this.formElement.addEventListener('submit', this.onSubmit.bind(this));
+    listen(): () => void {
+        const resetListener = this.reset.bind(this);
+        const onSubmitListener = this.onSubmit.bind(this);
 
-        // eslint-disable-next-line no-restricted-syntax
-        for (const field of this.fields) {
-            field.listen();
-        }
+        this.formElement.addEventListener('change', resetListener);
+        this.formElement.addEventListener('keyup', resetListener);
+        this.formElement.addEventListener('submit', onSubmitListener);
+
+        const stopListeningFields = this.fields.map((field) => field.listen());
+
+        return () => {
+            this.formElement.removeEventListener('change', resetListener);
+            this.formElement.removeEventListener('keyup', resetListener);
+            this.formElement.removeEventListener('submit', onSubmitListener);
+            stopListeningFields.forEach((stopListeningField) => stopListeningField());
+        };
     }
 
     async onSubmit(e: Event): Promise<void> {
