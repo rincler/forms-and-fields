@@ -2,6 +2,7 @@ import validator from 'validator';
 import ValidationResult from './ValidationResult';
 import { ignoreRejects, startAction, finishAction } from './Reject';
 import {
+    FieldElement,
     FieldOptionName,
     FieldOptions,
     FieldStatus,
@@ -9,7 +10,6 @@ import {
     ValidateFn,
     Validator,
     ValidatorName,
-    ValueableElement,
     VendorValidateFn,
 } from './types';
 
@@ -24,6 +24,7 @@ const DEFAULT_OPTIONS: FieldOptions = {
     validateOnType: false,
     validatorParams: {},
     validationCacheEnabled: true,
+    cssStatusEnabled: true,
     onChange: NOOP,
     onTypingStart: NOOP,
     onTypingEnd: NOOP,
@@ -43,7 +44,7 @@ export default class Field {
     validators: Validator[];
     options: FieldOptions;
     validationResult: ValidationResult | null;
-    cachedFieldElement: HTMLElement | null;
+    cachedFieldElement: FieldElement | null;
     virtualFieldsCache: { [key: string]: Field };
     actionId: number;
     typingDelayId: number | null;
@@ -79,39 +80,36 @@ export default class Field {
         this.typingDelayId = null;
     }
 
-    listen(): void {
-        this.addEventListenerDelegatedToContainerElement(
-            'change',
-            this.onChange,
-            this.fieldSelector,
-        );
-        this.addEventListenerDelegatedToContainerElement('keyup', this.onKeyUp, this.fieldSelector);
+    listen(): () => void {
+        const onChangeListener = this.createListener(this.onChange);
+        const onKeyUpListener = this.createListener(this.onKeyUp);
+
+        this.containerElement.addEventListener('change', onChangeListener);
+        this.containerElement.addEventListener('keyup', onKeyUpListener);
+
+        return () => {
+            this.containerElement.removeEventListener('change', onChangeListener);
+            this.containerElement.removeEventListener('keyup', onKeyUpListener);
+        };
     }
 
-    addEventListenerDelegatedToContainerElement(
-        type: string,
-        listener: EventListener,
-        selector: string,
-    ): void {
-        this.containerElement.addEventListener(type, (event) => {
-            const target = event.target;
-
-            if (!(target instanceof HTMLElement)) {
-                throw new Error('The event target is not an instance of the HTMLElement.');
+    createListener(listener: EventListener) {
+        return (event: Event): void => {
+            if (!this.isFieldElement(event.target as Element)) {
+                return;
             }
-
-            if (target.classList.contains(selector.substring(1))) {
+            const target = event.target as FieldElement;
+            if (target.matches(this.fieldSelector)) {
                 // eslint-disable-next-line @typescript-eslint/no-this-alias
                 let field = this;
-                if (this.isList()) {
-                    const virtualFields = this.getVirtualFieldsOfList();
+                if (this.isGroup()) {
+                    const virtualFields = this.getVirtualFieldsOfGroup();
                     // @ts-expect-error It's ok.
-                    field = virtualFields[this.findElementIndexInList(target)];
+                    field = virtualFields[this.findElementIndexInGroup(target)];
                 }
-
                 listener.call(field, event);
             }
-        });
+        };
     }
 
     async onChange(event: Event): Promise<void> {
@@ -119,7 +117,7 @@ export default class Field {
             this.reset();
         }
 
-        const fieldElement = event.target as HTMLElement;
+        const fieldElement = event.target as FieldElement;
         const value = this.getValue();
 
         if (this.typingDelayId) {
@@ -142,7 +140,7 @@ export default class Field {
     async onKeyUp(event: Event): Promise<void> {
         this.reset();
 
-        const fieldElement = event.target as HTMLElement;
+        const fieldElement = event.target as FieldElement;
 
         if (this.getOption('validateOnType')) {
             // This fixes the next case:
@@ -288,7 +286,7 @@ export default class Field {
             const fieldElement = this.getFieldElement();
 
             if (this.isTextable() || this.isSelect()) {
-                return (fieldElement as ValueableElement).value;
+                return fieldElement.value;
             }
 
             if (this.isCheckbox()) {
@@ -309,29 +307,37 @@ export default class Field {
                 return (fieldElement as HTMLInputElement).files;
             }
 
-            return (fieldElement as ValueableElement).value;
+            return fieldElement.value;
         });
     }
 
-    getFieldElement<E extends HTMLElement = HTMLElement>(): E {
+    isFieldElement(element: Element): boolean {
+        return (
+            element instanceof HTMLInputElement ||
+            element instanceof HTMLTextAreaElement ||
+            element instanceof HTMLSelectElement
+        );
+    }
+
+    getFieldElement<E extends FieldElement = FieldElement>(): E {
         if (this.cachedFieldElement !== null) {
             // @ts-expect-error It's ok.
             return this.cachedFieldElement;
         }
 
-        const fieldElement = this.containerElement.querySelector<E>(this.fieldSelector);
+        const fieldElement = this.containerElement.querySelector(this.fieldSelector);
 
         if (!fieldElement) {
             throw new Error(`A field element with the "${this.fieldSelector}" selector not found.`);
         }
 
-        if (!(fieldElement instanceof HTMLElement)) {
+        if (!this.isFieldElement(fieldElement)) {
             throw new Error(
-                `A field element with the "${this.fieldSelector}" selector is not instance of the HTMLElement.`,
+                `A field element with the "${this.fieldSelector}" selector is not field element.`,
             );
         }
 
-        return fieldElement;
+        return fieldElement as E;
     }
 
     withCachedFieldElement<T>(fn: () => T): T {
@@ -358,12 +364,12 @@ export default class Field {
         return this.containerElement.querySelector(this.fieldSelector) !== null;
     }
 
-    getListElements(): Element[] {
+    getGroupElements(): FieldElement[] {
         return Array.from(this.containerElement.querySelectorAll(this.fieldSelector));
     }
 
-    findElementIndexInList(element: Element): number {
-        return this.getListElements().findIndex((e) => e.isSameNode(element));
+    findElementIndexInGroup(element: FieldElement): number {
+        return this.getGroupElements().findIndex((e) => e.isSameNode(element));
     }
 
     getCheckedRadioElement(): HTMLInputElement | null {
@@ -384,29 +390,29 @@ export default class Field {
         return Array.from(this.getFieldElement().querySelectorAll('option:checked'));
     }
 
-    getVirtualFieldsOfList(): Field[] {
-        return this.getListElements().map((listElement) =>
-            this.getVirtualFieldForElement(listElement as HTMLElement),
+    getVirtualFieldsOfGroup(): Field[] {
+        return this.getGroupElements().map((groupElement) =>
+            this.getVirtualFieldForElement(groupElement),
         );
     }
 
-    getVirtualFieldForElement(element: HTMLElement): Field {
-        if (!element.dataset.fieldId) {
+    getVirtualFieldForElement(element: FieldElement): Field {
+        if (!element.dataset.groupField) {
             // eslint-disable-next-line no-param-reassign
-            element.dataset.fieldId = Math.random().toString(36).substring(2);
+            element.dataset.groupField = Math.random().toString(36).substring(2);
         }
 
-        if (this.virtualFieldsCache[element.dataset.fieldId]) {
-            return this.virtualFieldsCache[element.dataset.fieldId];
+        if (this.virtualFieldsCache[element.dataset.groupField]) {
+            return this.virtualFieldsCache[element.dataset.groupField];
         }
 
         const field = new Field(
-            `${this.fieldSelector}[data-field-id="${element.dataset.fieldId}"]`,
+            `${this.fieldSelector}[data-group-field="${element.dataset.groupField}"]`,
             this.containerSelector,
             this.validators,
             this.options,
         );
-        this.virtualFieldsCache[element.dataset.fieldId] = field;
+        this.virtualFieldsCache[element.dataset.groupField] = field;
 
         return field;
     }
@@ -419,13 +425,10 @@ export default class Field {
         return fieldElement.type === 'text';
     }
 
-    isList(): boolean {
+    isGroup(): boolean {
         const fieldElement = this.getFieldElement();
-        if (!(fieldElement instanceof HTMLInputElement)) {
-            return false;
-        }
 
-        if ('fieldId' in fieldElement.dataset) {
+        if ('groupField' in fieldElement.dataset) {
             return true;
         }
 
@@ -517,7 +520,7 @@ export default class Field {
 
     trimIfRequired(): void {
         if (this.getOption('trimEnabled') && this.isTextable()) {
-            const fieldElement = this.getFieldElement<ValueableElement>();
+            const fieldElement = this.getFieldElement();
             const trimmedValue = fieldElement.value.trim();
             if (fieldElement.value !== trimmedValue) {
                 fieldElement.value = trimmedValue;
@@ -530,14 +533,10 @@ export default class Field {
         const fieldElement = this.getFieldElement();
         const wrapperElement = this.getFieldWrapperElement();
 
-        const element = wrapperElement || fieldElement;
-
-        element.classList.remove(FieldStatus.Validating, FieldStatus.Valid, FieldStatus.Invalid);
+        this.setCssClass(status);
 
         if (status === FieldStatus.No) {
             this.getOption('onStatusReset')(fieldElement, this.containerElement, wrapperElement);
-        } else {
-            element.classList.add(status);
         }
 
         this.getOption('onStatusChange')(
@@ -547,5 +546,19 @@ export default class Field {
             this.containerElement,
             wrapperElement,
         );
+    }
+
+    setCssClass(cssClass: string): void {
+        if (!this.getOption('cssStatusEnabled')) {
+            return;
+        }
+
+        const element = this.getFieldWrapperElement() || this.getFieldElement();
+
+        element.classList.remove(FieldStatus.Validating, FieldStatus.Valid, FieldStatus.Invalid);
+
+        if (cssClass !== '') {
+            element.classList.add(cssClass);
+        }
     }
 }

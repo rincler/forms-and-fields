@@ -1,6 +1,6 @@
 # Forms and Fields
 
-![NPM Version](https://img.shields.io/npm/v/forms-and-fields)
+[![NPM Version](https://img.shields.io/npm/v/forms-and-fields)](https://www.npmjs.com/package/forms-and-fields)
 ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/rincler/forms-and-fields/ci.yml?branch=master)
 
 A library for validating fields and submitting forms.
@@ -125,6 +125,7 @@ When a user submits a form, validation is performed first. If the form passes va
 | invalid(message: `string` = '', data: `object` = {})                                                                  | Static method. Creates a new invalid result.                                     |
 | make(result: `boolean`, messageForInvalid: `string` = '', dataForValid: `object` = {}, dataForInvalid: `object` = {}) | Static method. Creates a new valid or invalid result depending on the `result`.  |
 | isValid(): `bool`                                                                                                     | Returns `true` if valid.                                                         |
+| isInvalid(): `bool`                                                                                                   | Returns `true` if invalid.                                                       |
 | areValid(validationResults: `ValidationResult[]`): `bool`                                                             | Static method. Returns `true` if all the specified validation results are valid. |
 | hasMessage(): `bool`                                                                                                  | Returns `true` if a message exists.                                              |
 | getMessage(): `string`                                                                                                | Retrieves the message.                                                           |
@@ -138,6 +139,7 @@ When a user submits a form, validation is performed first. If the form passes va
 | negative(message: `string`, data: `object` = {})                                                                           | Static method. Creates a new negative result.                                       |
 | make(result: `boolean`, messageForNegative: `string` = '', dataForPositive: `object` = {}, dataForNegative: `object` = {}) | Static method. Creates a new positive or negative result depending on the `result`. |
 | isPositive(): `boolean`                                                                                                    | Returns `true` if positive.                                                         |
+| isNegative(): `boolean`                                                                                                    | Returns `true` if negative.                                                         |
 | hasMessage(): `boolean`                                                                                                    | Returns `true` if a message exists.                                                 |
 | getMessage(): `boolean`                                                                                                    | Retrieves the message.                                                              |
 | getData(): `object`                                                                                                        | Retrieves the data.                                                                 |
@@ -149,10 +151,10 @@ When a user submits a form, validation is performed first. If the form passes va
 | Method                                                                                                               | Description                                                                                                                                                                                                                                                                                                                   |
 |----------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | constructor (fieldSelector: `string`, containerSelector: `string`, validators: `array` = [], options: `object` = {}) | -`fieldSelector`: A selector to find the field element.<br/> -`containerSelector`: A selector to find the container element that contains the field element. Typically, this is the form selector.<br/>-`validators`: See the [Field validators](#field-validators).<br/>-`options`: See the [Field options](#field-options). |
-| listen(): `void`                                                                                                     | Starts listening to events on the field element. This method must be called if the field is used outside of a form.                                                                                                                                                                                                           |
+| listen(): `() => void`                                                                                               | Starts listening to events on the field element. This method must be called if the field is used outside of a form. Returns a function that stops listening.                                                                                                                                                                  |
 
 You can specify a CSS class for the field element and use it in the `fieldSelector` parameter.
-For elements with the same name (e.g., radio buttons or a group of text input elements), use the same CSS class for all elements and a single `Field` object.
+For elements with the same name (e.g., radio buttons or a group of text input elements), use a single `Field` object and specify a selector to find the first element.
 You can find examples in the [sandbox](./sandbox).
 
 You can also specify a CSS class for the container element containing the field element and use it in the `containerSelector` parameter. If the field element is inside a form, the container element should be the form itself.
@@ -176,6 +178,7 @@ An array of validators. Each validator can be:
 | validateOnType         | `boolean`  | `false`            | Specifies whether to validate the field during typing.                                                                                                                                                                 |
 | validatorParams        | `object`   | `{}`               | Parameters for [validator](https://www.npmjs.com/package/validator). For example: `{ isEmail: [{ allow_utf8_local_part: false }] }`.                                                                                   |
 | validationCacheEnabled | `boolean`  | `true`             | Specifies whether to cache the validation result until the value changes.                                                                                                                                              |
+| cssStatusEnabled       | `boolean`  | `true`             | Specifies whether to add CSS classes when the status changes.                                                                                                                                                          |
 | onChange               | `function` | `NOOP`             | Triggered when the field value changes. Passed as arguments: `value: any, fieldElement: HTMLElement, containerElement: Element`.                                                                                       |
 | onTypingStart          | `function` | `NOOP`             | Triggered when the user starts typing. Passed as arguments: `value: any, fieldElement: HTMLElement, containerElement: Element`.                                                                                        |
 | onTypingEnd            | `function` | `NOOP`             | Triggered when the user stops typing. Passed as arguments: `value: any, fieldElement: HTMLElement, containerElement: Element`.                                                                                         |
@@ -192,7 +195,7 @@ An array of validators. Each validator can be:
 | Method                                                                                           | Description                                                                                                                                                                                                                                                                          |
 |--------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | constructor(formSelector: `string`, fields: `array`, submit: `function`, options: `object` = {}) | -`formSelector`: A selector to find the form element.<br/> -`fields`: An array of `Field` objects.<br/> - `submit`: A submit function, (a `FormData` object is passed as argument, must return a `SubmissionResult` object),<br/> - `options`: See the [Form options](#form-options) |
-| listen(): `void`                                                                                 | Executes the `listen` method for all fields specified in the `Form` constructor and starts listening for the form submission event. This method must be called.                                                                                                                      |
+| listen(): `() => void`                                                                           | Executes the `listen` method for all fields specified in the `Form` constructor and starts listening for the form submission event. This method must be called. Returns a function that stops listening.                                                                             |
 
 You can specify a CSS class for the form element and use it in the `formSelector` parameter.
 
@@ -204,6 +207,7 @@ Additionally, the `Form` class supports the following options:
 
 | Option                 | Type       | Default | Description                                                                                                                                                                                                                                                     |
 |------------------------|------------|---------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| cssStatusEnabled       | `boolean`  | `true`  | Specifies whether to add CSS classes when the status changes.                                                                                                                                                                                                   |
 | onBeforeValidate       | `function` | `NOOP`  | Triggered before form validation. Passed as argument: `formElement: HTMLFormElement`.                                                                                                                                                                           |
 | validate               | `function` | `NOOP`  | An additional custom validation function, which must return a `ValidationResult` object.  Passed as argument: `formData: FormData`. This is executed after field validation when all fields are valid. Can be promised.                                         |
 | onAfterValidate        | `function` | `NOOP`  | Triggered after form validation. Passed as arguments: `validationResults: ValidationReslut[], formElement: HTMLFormElement`. `validationResults` contains the results for each field and the form itself.                                                       |
@@ -257,9 +261,82 @@ new Field('.js-file', '.js-container', [
 ])
 ```
 
+### Radio buttons
+
+Use a single `Field` object for radio buttons with the same name:
+
+HTML:
+```HTML
+<form class="js-form">
+    <input id="sex-man" type="radio" name="sex" class="js-sex" value="man" />
+    <label for="sex-man">Man</label>
+    <input id="sex-woman" type="radio" name="sex" class="js-sex" value="woman" />
+    <label for="sex-woman">Woman</label>
+    <button type="submit">Submit</button>
+</form>
+```
+
+JS:
+```JS
+import { Form, Field, SubmissionResult } from "forms-and-fields"
+
+const form = new Form(
+    ".js-form",
+    [
+        new Field(".js-sex", ".js-form", ["required"]),
+    ],
+    (formData) => SubmissionResult.positive()},
+)
+
+form.listen()
+```
+
+### Groups
+
+Sometimes it's necessary to add fields with the same name, for example, a group of addresses. In this case, use the `groug-field` attribute and a single `Field` object:
+
+HTML:
+```HTML
+<form class="js-form">
+    <div>
+        <label for="address-1">Address 1:</label>
+        <br />
+        <input id="address-1" type="text" name="address" class="js-address" data-group-field="" />
+    </div>
+    <div>
+        <label for="address-2">Address 2:</label>
+        <br />
+        <input id="address-2" type="text" name="address" class="js-address" data-group-field="" />
+    </div>
+    <br />
+    <button type="button">Add an address</button>
+    <br />
+    <button type="submit">Submit</button>
+</form>
+```
+
+JS:
+```JS
+import { Form, Field, SubmissionResult } from "forms-and-fields"
+
+const form = new Form(
+    ".js-form",
+    [
+        new Field(".js-address", ".js-form", ["required"]),
+    ],
+    (formData) => SubmissionResult.positive()},
+)
+
+form.listen()
+```
+
+**Important!** Don't use the `group-field` attribute for radio buttons.
+
 ### Statuses
 
-Special CSS classes are dynamically added to form and field elements during validation and submission:
+The statuses of forms and fields change during validation and submission. You can subscribe to these events via `onStatusChange`.
+
+Also, by default, statuses are dynamically added as CSS classes to form and field elements:
 
 - `ff-field-validating`
 - `ff-field-valid`
@@ -271,8 +348,9 @@ Special CSS classes are dynamically added to form and field elements during vali
 - `ff-form-positive-submit`
 - `ff-form-negative-submit`
 
-You can wrap any field element in a container with the `data-field-wrapper` attribute.
-The special classes will then be applied to this wrapper instead of the field element itself. This is particularly useful for checkboxes and radio buttons.
+You can wrap any field element in a container with the `data-field-wrapper` attribute then
+the classes will then be applied to this wrapper instead of the field element itself. This is particularly useful for checkboxes and radio buttons.
+To disable adding CSS classes, set `cssStatusEnabled` to `false`.
 
 The `onResetStatus` callback can be useful for clearing form or field errors that were set using the `onAfterValidate` or `onAfterSubmit` callbacks, for example.
 

@@ -32,6 +32,10 @@ export default class SubmissionResult {
         return this.result;
     }
 
+    isNegative(): boolean {
+        return !this.result;
+    }
+
     hasMessage(): boolean {
         return this.message !== '';
     }

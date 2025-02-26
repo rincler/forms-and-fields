@@ -7,6 +7,7 @@ import SubmissionResult from './SubmissionResult.js';
 const NOOP = (): void => {};
 
 const DEFAULT_OPTIONS: FormOptions = {
+    cssStatusEnabled: true,
     onBeforeValidate: NOOP,
     onAfterValidate: NOOP,
     onValidationError: NOOP,
@@ -59,19 +60,22 @@ export default class Form {
         this.actionId = 0;
     }
 
-    listen(): void {
-        this.formElement.addEventListener('change', () => {
-            this.reset();
-        });
-        this.formElement.addEventListener('keyup', () => {
-            this.reset();
-        });
-        this.formElement.addEventListener('submit', this.onSubmit.bind(this));
+    listen(): () => void {
+        const resetListener = this.reset.bind(this);
+        const onSubmitListener = this.onSubmit.bind(this);
 
-        // eslint-disable-next-line no-restricted-syntax
-        for (const field of this.fields) {
-            field.listen();
-        }
+        this.formElement.addEventListener('change', resetListener);
+        this.formElement.addEventListener('keyup', resetListener);
+        this.formElement.addEventListener('submit', onSubmitListener);
+
+        const stopListeningFields = this.fields.map((field) => field.listen());
+
+        return () => {
+            this.formElement.removeEventListener('change', resetListener);
+            this.formElement.removeEventListener('keyup', resetListener);
+            this.formElement.removeEventListener('submit', onSubmitListener);
+            stopListeningFields.forEach((stopListeningField) => stopListeningField());
+        };
     }
 
     async onSubmit(e: Event): Promise<void> {
@@ -140,6 +144,9 @@ export default class Form {
                 validationCacheEnabled: field.hasOption('validationCacheEnabled')
                     ? field.getOption('validationCacheEnabled')
                     : options.validationCacheEnabled,
+                cssStatusEnabled: field.hasOption('cssStatusEnabled')
+                    ? field.getOption('cssStatusEnabled')
+                    : options.cssStatusEnabled,
                 validatorParams: field.hasOption('validatorParams')
                     ? field.getOption('validatorParams')
                     : options.validatorParams,
@@ -255,8 +262,8 @@ export default class Form {
                 continue;
             }
 
-            if (field.isList()) {
-                fields.push(...field.getVirtualFieldsOfList());
+            if (field.isGroup()) {
+                fields.push(...field.getVirtualFieldsOfGroup());
             } else {
                 fields.push(field);
             }
@@ -272,6 +279,25 @@ export default class Form {
     }
 
     setStatus(status: FormStatus): void {
+        this.setCssClass(status);
+
+        if (status === FormStatus.No) {
+            this.getOption('onStatusReset')(this.formElement);
+        }
+
+        this.getOption('onStatusChange')(
+            status,
+            this.validationResults,
+            this.submissionResult,
+            this.formElement,
+        );
+    }
+
+    setCssClass(cssClass: string): void {
+        if (!this.getOption('cssStatusEnabled')) {
+            return;
+        }
+
         this.formElement.classList.remove(
             FormStatus.Validating,
             FormStatus.Valid,
@@ -281,17 +307,8 @@ export default class Form {
             FormStatus.NegativeSubmit,
         );
 
-        if (status === FormStatus.No) {
-            this.getOption('onStatusReset')(this.formElement);
-        } else {
-            this.formElement.classList.add(status);
+        if (cssClass !== '') {
+            this.formElement.classList.add(cssClass);
         }
-
-        this.getOption('onStatusChange')(
-            status,
-            this.validationResults,
-            this.submissionResult,
-            this.formElement,
-        );
     }
 }

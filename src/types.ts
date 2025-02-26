@@ -20,37 +20,38 @@ export interface FieldOptions {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     validatorParams?: { [K in VendorValidatorName]?: any[] };
     validationCacheEnabled?: boolean;
+    cssStatusEnabled?: boolean;
     onChange?: (
         fieldValue: FieldValue,
-        fieldElement: HTMLElement,
+        fieldElement: FieldElement,
         containerElement: Element,
     ) => void;
-    onTypingStart?: (fieldElement: HTMLElement, containerElement: Element) => void;
+    onTypingStart?: (fieldElement: FieldElement, containerElement: Element) => void;
     onTypingEnd?: (
         fieldValue: FieldValue,
-        fieldElement: HTMLElement,
+        fieldElement: FieldElement,
         containerElement: Element,
     ) => void;
-    onBeforeValidate?: (fieldElement: HTMLElement, containerElement: Element) => void;
+    onBeforeValidate?: (fieldElement: FieldElement, containerElement: Element) => void;
     onAfterValidate?: (
         validationResult: ValidationResult,
-        fieldElement: HTMLElement,
+        fieldElement: FieldElement,
         containerElement: Element,
     ) => void;
     onValidationError?: (
         error: unknown,
-        fieldElement: HTMLElement,
+        fieldElement: FieldElement,
         containerElement: Element,
     ) => void;
     onStatusChange?: (
         status: FieldStatus,
         validationResult: ValidationResult | null,
-        fieldElement: HTMLElement,
+        fieldElement: FieldElement,
         containerElement: Element,
         wrapperElement: HTMLElement | null,
     ) => void;
     onStatusReset?: (
-        fieldElement: HTMLElement,
+        fieldElement: FieldElement,
         containerElement: Element,
         wrapperElement: HTMLElement | null,
     ) => void;
@@ -151,7 +152,7 @@ export type ValidateFn = (value: FieldValue) => ValidationResult | Promise<Valid
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type VendorValidateFn = (...params: any[]) => boolean;
 export type Validator = ValidatorName | ValidateFn | { validate: ValidateFn };
-export type ValueableElement = HTMLInputElement | HTMLTextAreaElement | HTMLOptionElement;
+export type FieldElement = HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement;
 
 export enum FormStatus {
     No = '',
@@ -172,6 +173,7 @@ export interface FormOptions
         | 'onStatusChange'
         | 'onStatusReset'
     > {
+    cssStatusEnabled?: boolean;
     onBeforeValidate?: (formElement: HTMLFormElement) => void;
     validate?: (formData: FormData) => ValidationResult | Promise<ValidationResult>;
     onAfterValidate?: (validationResults: ValidationResult[], formElement: HTMLFormElement) => void;
