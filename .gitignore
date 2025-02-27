@@ -3,4 +3,4 @@ dist
 node_modules
 package-lock.json
 yarn.lock
-sandbox/bundle.js
+sandbox/web/bundle.js

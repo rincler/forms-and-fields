@@ -1,8 +1,8 @@
-import Form from '../src/Form';
-import Field from '../src/Field';
-import SubmissionResult from '../src/SubmissionResult';
-import ValidationResult from '../src/ValidationResult';
-import FileValidator from '../src/validators/FileValidator';
+import Form from '../../src/Form';
+import Field from '../../src/Field';
+import SubmissionResult from '../../src/SubmissionResult';
+import ValidationResult from '../../src/ValidationResult';
+import FileValidator from '../../src/validators/FileValidator';
 
 const fetchOk = async (input, init) => {
     const response = await fetch(input, init);

@@ -2,7 +2,7 @@
 import express from 'express';
 
 const app = express();
-app.use(express.static('sandbox'));
+app.use(express.static('sandbox/web'));
 
 const SERVER_DELAY = 1500;
 

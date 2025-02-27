@@ -1,2 +1,2 @@
 dist/*
-sandbox/bundle.js
+sandbox/web/bundle.js
