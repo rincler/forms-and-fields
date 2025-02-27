@@ -1,7 +1,7 @@
 {
     "name": "forms-and-fields",
     "version": "2.1.0",
-    "description": "A library for validating fields and submitting forms.",
+    "description": "A library for field validation and form submission.",
     "keywords": [
         "form",
         "forms",

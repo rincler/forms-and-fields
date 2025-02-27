@@ -3,7 +3,7 @@
 [![NPM Version](https://img.shields.io/npm/v/forms-and-fields)](https://www.npmjs.com/package/forms-and-fields)
 ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/rincler/forms-and-fields/ci.yml?branch=master)
 
-A library for validating fields and submitting forms.
+A library for field validation and form submission.
 
 Field elements are elements like input (of any type), select, and textarea.
 
@@ -293,7 +293,7 @@ form.listen()
 
 ### Groups
 
-Sometimes it's necessary to add fields with the same name, for example, a group of addresses. In this case, use the `groug-field` attribute and a single `Field` object:
+Sometimes it's necessary to add fields with the same name, for example, a group of addresses. In this case, use the `data-group-field` attribute and a single `Field` object:
 
 HTML:
 ```HTML
