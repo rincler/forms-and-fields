@@ -34,9 +34,9 @@ beforeEach(() => {
     document.body.innerHTML = `
         <div class="js-container">
             <input class="js-input" id="input" />
-            <input class="js-group-input js-group-input-1" name="group-input-name" />
-            <input class="js-group-input js-group-input-2" name="group-input-name" />
-            <input class="js-group-input js-group-input-3" name="group-input-name" />
+            <input class="js-group-input js-group-input-1" name="group-input-name" data-group-field />
+            <input class="js-group-input js-group-input-2" name="group-input-name" data-group-field />
+            <input class="js-group-input js-group-input-3" name="group-input-name" data-group-field />
             <input class="js-checkbox" type="checkbox" />
             <div class="js-wrapper" data-field-wrapper>
                 <input class="js-radio js-radio-1" type="radio" name="radio" value="1">
@@ -423,7 +423,7 @@ describe('callback options', () => {
             .querySelector('.js-container')!
             .insertAdjacentHTML(
                 'beforeend',
-                `<input class="js-group-input js-dynamic-input-x" name="group-input-name" />`,
+                `<input class="js-group-input js-dynamic-input-x" name="group-input-name" data-group-field />`,
             );
 
         const dynamicGroupInput = getInputElement('.js-dynamic-input-x');

@@ -365,7 +365,9 @@ export default class Field {
     }
 
     getGroupElements(): FieldElement[] {
-        return Array.from(this.containerElement.querySelectorAll(this.fieldSelector));
+        return Array.from(
+            this.containerElement.querySelectorAll(`${this.fieldSelector}[data-group-field]`),
+        );
     }
 
     findElementIndexInGroup(element: FieldElement): number {
@@ -426,15 +428,7 @@ export default class Field {
     }
 
     isGroup(): boolean {
-        const fieldElement = this.getFieldElement();
-
-        if ('groupField' in fieldElement.dataset) {
-            return true;
-        }
-
-        return (
-            this.containerElement.querySelectorAll(this.fieldSelector).length > 1 && !this.isRadio()
-        );
+        return this.getGroupElements().length > 0;
     }
 
     isTextarea(): boolean {

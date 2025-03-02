@@ -20,9 +20,9 @@ beforeEach(() => {
     document.body.innerHTML = `
         <form class="js-form">
             <input class="js-input" name="input-name" />
-            <input class="js-group-input" name="group-input-name" />
-            <input class="js-group-input" name="group-input-name" />
-            <input class="js-group-input" name="group-input-name" />
+            <input class="js-group-input" name="group-input-name" data-group-field />
+            <input class="js-group-input" name="group-input-name" data-group-field />
+            <input class="js-group-input" name="group-input-name" data-group-field />
             <input class="js-checkbox" type="checkbox" name="checkbox-name" />
             <input class="js-radio" type="radio" name="radio-name" value="1" />
             <input class="js-radio" type="radio" name="radio-name" value="2" />
