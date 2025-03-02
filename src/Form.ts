@@ -25,6 +25,7 @@ export default class Form {
     fields: Field[];
     submit: SubmitFn;
     options: FormOptions;
+    status: FormStatus;
     validationResults: ValidationResult[];
     submissionResult: SubmissionResult | null;
     actionId: number;
@@ -55,6 +56,7 @@ export default class Form {
         this.options = {};
         this.setOptions(options);
 
+        this.status = FormStatus.No;
         this.validationResults = [];
         this.submissionResult = null;
         this.actionId = 0;
@@ -280,7 +282,12 @@ export default class Form {
     }
 
     setStatus(status: FormStatus): void {
-        this.setCssClass(status);
+        if (this.status === status) {
+            return;
+        }
+
+        this.status = status;
+        this.updateCssStatus();
 
         if (status === FormStatus.No) {
             this.getOption('onStatusReset')(this.formElement);
@@ -294,7 +301,7 @@ export default class Form {
         );
     }
 
-    setCssClass(cssClass: string): void {
+    updateCssStatus(): void {
         if (!this.getOption('cssStatusEnabled')) {
             return;
         }
@@ -308,8 +315,8 @@ export default class Form {
             FormStatus.NegativeSubmit,
         );
 
-        if (cssClass !== '') {
-            this.formElement.classList.add(cssClass);
+        if (this.status !== FormStatus.No) {
+            this.formElement.classList.add(this.status);
         }
     }
 }

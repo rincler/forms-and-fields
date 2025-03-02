@@ -1,6 +1,6 @@
 import validator from 'validator';
 import ValidationResult from './ValidationResult';
-import { ignoreRejects, startAction, finishAction } from './Reject';
+import { finishAction, ignoreRejects, startAction } from './Reject';
 import {
     FieldElement,
     FieldOptionName,
@@ -43,6 +43,7 @@ export default class Field {
     containerSelector: string;
     validators: Validator[];
     options: FieldOptions;
+    status: FieldStatus;
     validationResult: ValidationResult | null;
     cachedFieldElement: FieldElement | null;
     virtualFieldsCache: { [key: string]: Field };
@@ -73,6 +74,7 @@ export default class Field {
         this.options = {};
         this.setOptions(options);
 
+        this.status = FieldStatus.No;
         this.validationResult = null;
         this.cachedFieldElement = null;
         this.virtualFieldsCache = {};
@@ -524,10 +526,15 @@ export default class Field {
     }
 
     setStatus(status: FieldStatus): void {
+        if (this.status === status) {
+            return;
+        }
+
+        this.status = status;
+        this.updateCssStatus();
+
         const fieldElement = this.getFieldElement();
         const wrapperElement = this.getFieldWrapperElement();
-
-        this.setCssClass(status);
 
         if (status === FieldStatus.No) {
             this.getOption('onStatusReset')(fieldElement, this.containerElement, wrapperElement);
@@ -542,7 +549,7 @@ export default class Field {
         );
     }
 
-    setCssClass(cssClass: string): void {
+    updateCssStatus(): void {
         if (!this.getOption('cssStatusEnabled')) {
             return;
         }
@@ -551,8 +558,8 @@ export default class Field {
 
         element.classList.remove(FieldStatus.Validating, FieldStatus.Valid, FieldStatus.Invalid);
 
-        if (cssClass !== '') {
-            element.classList.add(cssClass);
+        if (this.status !== FieldStatus.No) {
+            element.classList.add(this.status);
         }
     }
 }
