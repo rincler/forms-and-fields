@@ -120,62 +120,63 @@ export default class Form {
     }
 
     setFieldOptions(options: FormOptions): void {
-        // eslint-disable-next-line no-restricted-syntax
-        for (const field of this.fields) {
-            field.setOptions({
-                invalidMessages: field.hasOption('invalidMessages')
-                    ? field.getOption('invalidMessages')
-                    : options.invalidMessages,
-                defaultInvalidMessage: field.hasOption('defaultInvalidMessage')
-                    ? field.getOption('defaultInvalidMessage')
-                    : options.defaultInvalidMessage,
-                trimEnabled: field.hasOption('trimEnabled')
-                    ? field.getOption('trimEnabled')
-                    : options.trimEnabled,
-                typingDelay: field.hasOption('typingDelay')
-                    ? field.getOption('typingDelay')
-                    : options.typingDelay,
-                validateOnChange: field.hasOption('validateOnChange')
-                    ? field.getOption('validateOnChange')
-                    : options.validateOnChange,
-                validateOnType: field.hasOption('validateOnType')
-                    ? field.getOption('validateOnType')
-                    : options.validateOnType,
-                validationCacheEnabled: field.hasOption('validationCacheEnabled')
-                    ? field.getOption('validationCacheEnabled')
-                    : options.validationCacheEnabled,
-                cssStatusEnabled: field.hasOption('cssStatusEnabled')
-                    ? field.getOption('cssStatusEnabled')
-                    : options.cssStatusEnabled,
-                validatorParams: field.hasOption('validatorParams')
-                    ? field.getOption('validatorParams')
-                    : options.validatorParams,
-                onChange: field.hasOption('onChange')
-                    ? field.getOption('onChange')
-                    : options.onChange,
-                onTypingStart: field.hasOption('onTypingStart')
-                    ? field.getOption('onTypingStart')
-                    : options.onTypingStart,
-                onTypingEnd: field.hasOption('onTypingEnd')
-                    ? field.getOption('onTypingEnd')
-                    : options.onTypingEnd,
-                onBeforeValidate: field.hasOption('onBeforeValidate')
-                    ? field.getOption('onBeforeValidate')
-                    : options.onBeforeValidateField,
-                onAfterValidate: field.hasOption('onAfterValidate')
-                    ? field.getOption('onAfterValidate')
-                    : options.onAfterValidateField,
-                onValidationError: field.hasOption('onValidationError')
-                    ? field.getOption('onValidationError')
-                    : options.onFieldValidationError,
-                onStatusChange: field.hasOption('onStatusChange')
-                    ? field.getOption('onStatusChange')
-                    : options.onFieldStatusChange,
-                onStatusReset: field.hasOption('onStatusReset')
-                    ? field.getOption('onStatusReset')
-                    : options.onFieldStatusReset,
-            });
-        }
+        this.fields.forEach((field) => {
+            this.setOptionsToField(options, field);
+        });
+    }
+
+    setOptionsToField(options: FormOptions, field: Field): void {
+        field.setOptions({
+            invalidMessages: field.hasOption('invalidMessages')
+                ? field.getOption('invalidMessages')
+                : options.invalidMessages,
+            defaultInvalidMessage: field.hasOption('defaultInvalidMessage')
+                ? field.getOption('defaultInvalidMessage')
+                : options.defaultInvalidMessage,
+            trimEnabled: field.hasOption('trimEnabled')
+                ? field.getOption('trimEnabled')
+                : options.trimEnabled,
+            typingDelay: field.hasOption('typingDelay')
+                ? field.getOption('typingDelay')
+                : options.typingDelay,
+            validateOnChange: field.hasOption('validateOnChange')
+                ? field.getOption('validateOnChange')
+                : options.validateOnChange,
+            validateOnType: field.hasOption('validateOnType')
+                ? field.getOption('validateOnType')
+                : options.validateOnType,
+            validationCacheEnabled: field.hasOption('validationCacheEnabled')
+                ? field.getOption('validationCacheEnabled')
+                : options.validationCacheEnabled,
+            cssStatusEnabled: field.hasOption('cssStatusEnabled')
+                ? field.getOption('cssStatusEnabled')
+                : options.cssStatusEnabled,
+            validatorParams: field.hasOption('validatorParams')
+                ? field.getOption('validatorParams')
+                : options.validatorParams,
+            onChange: field.hasOption('onChange') ? field.getOption('onChange') : options.onChange,
+            onTypingStart: field.hasOption('onTypingStart')
+                ? field.getOption('onTypingStart')
+                : options.onTypingStart,
+            onTypingEnd: field.hasOption('onTypingEnd')
+                ? field.getOption('onTypingEnd')
+                : options.onTypingEnd,
+            onBeforeValidate: field.hasOption('onBeforeValidate')
+                ? field.getOption('onBeforeValidate')
+                : options.onBeforeValidateField,
+            onAfterValidate: field.hasOption('onAfterValidate')
+                ? field.getOption('onAfterValidate')
+                : options.onAfterValidateField,
+            onValidationError: field.hasOption('onValidationError')
+                ? field.getOption('onValidationError')
+                : options.onFieldValidationError,
+            onStatusChange: field.hasOption('onStatusChange')
+                ? field.getOption('onStatusChange')
+                : options.onFieldStatusChange,
+            onStatusReset: field.hasOption('onStatusReset')
+                ? field.getOption('onStatusReset')
+                : options.onFieldStatusReset,
+        });
     }
 
     async validate(): Promise<ValidationResult[]> {
