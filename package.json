@@ -60,7 +60,7 @@
         "build:cjs": "tsc --module CommonJS --outDir dist/cjs",
         "build:types": "tsc --emitDeclarationOnly --declarationDir dist/types --declaration --declarationMap ",
         "prepack": "npm run build:esm && npm run build:cjs && npm run build:types",
-        "check": "tsc --noEmit && eslint .",
+        "check": "tsc --noEmit --project tsconfig.allFiles.json && eslint .",
         "sandbox": "npm run sandbox:build && npm run sandbox:start",
         "sandbox:build": "esbuild sandbox/src/index.js --outfile=sandbox/web/bundle.js --format=iife --sourcemap=inline --bundle",
         "sandbox:start": "node sandbox/server.js",
