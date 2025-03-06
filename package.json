@@ -14,6 +14,7 @@
     "type": "module",
     "module": "./dist/esm/index.js",
     "exports": {
+        "types": "./dist/types/index.d.ts",
         "import": "./dist/esm/index.js",
         "require": "./dist/cjs/index.js"
     },
@@ -32,13 +33,13 @@
     },
     "homepage": "https://github.com/rincler/forms-and-fields#readme",
     "dependencies": {
-        "@types/validator": "^13.12.2",
         "validator": "^13.12.0"
     },
     "devDependencies": {
         "@testing-library/dom": "^10.4.0",
         "@testing-library/user-event": "^14.6.1",
         "@types/jest": "^29.5.14",
+        "@types/validator": "^13.12.2",
         "@typescript-eslint/eslint-plugin": "^7.18.0",
         "@typescript-eslint/parser": "^7.18.0",
         "esbuild": "^0.24.2",
