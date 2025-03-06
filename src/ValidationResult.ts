@@ -1,31 +1,41 @@
+interface ResultDetails {
+    message: string;
+    data: object;
+}
+
 export default class ValidationResult {
     result: boolean;
     message: string;
     data: object;
 
-    constructor(result: boolean, { message = '', data = {} }: { message?: string; data?: object }) {
+    constructor(result: boolean, { message = '', data = {} }: Partial<ResultDetails>) {
         this.result = result;
         this.message = message;
         this.data = data;
     }
 
-    static valid(data: object = {}): ValidationResult {
-        return new ValidationResult(true, { data });
+    static valid(resultDetails: Partial<ResultDetails> | string = {}): ValidationResult {
+        if (typeof resultDetails === 'string') {
+            return new ValidationResult(true, { message: resultDetails });
+        }
+        return new ValidationResult(true, resultDetails);
     }
 
-    static invalid(message: string = '', data: object = {}): ValidationResult {
-        return new ValidationResult(false, { message, data });
+    static invalid(resultDetails: Partial<ResultDetails> | string = {}): ValidationResult {
+        if (typeof resultDetails === 'string') {
+            return new ValidationResult(false, { message: resultDetails });
+        }
+        return new ValidationResult(false, resultDetails);
     }
 
     static make(
         result: boolean,
-        messageForInvalid: string = '',
-        dataForValid: object = {},
-        dataForInvalid: object = {},
+        resultDetailsForInvalidCase: Partial<ResultDetails> | string = {},
+        resultDetailsForValidCase: Partial<ResultDetails> | string = {},
     ): ValidationResult {
         return result
-            ? ValidationResult.valid(dataForValid)
-            : ValidationResult.invalid(messageForInvalid, dataForInvalid);
+            ? ValidationResult.valid(resultDetailsForValidCase)
+            : ValidationResult.invalid(resultDetailsForInvalidCase);
     }
 
     isValid(): boolean {

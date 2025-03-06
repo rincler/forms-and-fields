@@ -1,31 +1,41 @@
+interface ResultDetails {
+    message: string;
+    data: object;
+}
+
 export default class SubmissionResult {
     result: boolean;
     message: string;
     data: object;
 
-    constructor(result: boolean, { message = '', data = {} }: { message?: string; data?: object }) {
+    constructor(result: boolean, { message = '', data = {} }: Partial<ResultDetails>) {
         this.result = result;
         this.message = message;
         this.data = data;
     }
 
-    static positive(data: object = {}): SubmissionResult {
-        return new SubmissionResult(true, { data });
+    static positive(resultDetails: Partial<ResultDetails> | string = {}): SubmissionResult {
+        if (typeof resultDetails === 'string') {
+            return new SubmissionResult(true, { message: resultDetails });
+        }
+        return new SubmissionResult(true, resultDetails);
     }
 
-    static negative(message: string = '', data: object = {}): SubmissionResult {
-        return new SubmissionResult(false, { message, data });
+    static negative(resultDetails: Partial<ResultDetails> | string = {}): SubmissionResult {
+        if (typeof resultDetails === 'string') {
+            return new SubmissionResult(false, { message: resultDetails });
+        }
+        return new SubmissionResult(false, resultDetails);
     }
 
     static make(
         result: boolean,
-        messageForNegative: string = '',
-        dataForPositive: object = {},
-        dataForNegative: object = {},
+        resultDetailsForNegativeCase: Partial<ResultDetails> | string = {},
+        resultDetailsForPositiveCase: Partial<ResultDetails> | string = {},
     ): SubmissionResult {
         return result
-            ? SubmissionResult.positive(dataForPositive)
-            : SubmissionResult.negative(messageForNegative, dataForNegative);
+            ? SubmissionResult.positive(resultDetailsForPositiveCase)
+            : SubmissionResult.negative(resultDetailsForNegativeCase);
     }
 
     isPositive(): boolean {
