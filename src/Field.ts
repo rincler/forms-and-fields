@@ -234,7 +234,10 @@ export default class Field {
         finishAction(this, actionId);
 
         if (!validationResult.isValid() && !validationResult.hasMessage()) {
-            validationResult = ValidationResult.invalid(this.getOption('defaultInvalidMessage'));
+            validationResult = ValidationResult.invalid({
+                message: this.getOption('defaultInvalidMessage'),
+                data: validationResult.getData(),
+            });
         }
 
         this.validationResult = validationResult;
