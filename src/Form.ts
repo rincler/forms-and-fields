@@ -1,8 +1,8 @@
 import ValidationResult from './ValidationResult';
+import SubmissionResult from './SubmissionResult';
 import { finishAction, ignoreRejects, startAction } from './Reject';
 import Field from './Field';
 import { FormOptionName, FormOptions, FormStatus, SubmitFn } from './types';
-import SubmissionResult from './SubmissionResult.js';
 
 const NOOP = (): void => {};
 
