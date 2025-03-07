@@ -45,8 +45,9 @@ export default class Field {
     options: FieldOptions;
     status: FieldStatus;
     validationResult: ValidationResult | null;
+    name: string | null;
     cachedFieldElement: FieldElement | null;
-    virtualFieldsCache: { [key: string]: Field };
+    virtualFieldsCache: Record<string, Field>;
     actionId: number;
     typingDelayId: number | null;
 
@@ -76,6 +77,7 @@ export default class Field {
 
         this.status = FieldStatus.No;
         this.validationResult = null;
+        this.name = null;
         this.cachedFieldElement = null;
         this.virtualFieldsCache = {};
         this.actionId = 0;
@@ -330,10 +332,25 @@ export default class Field {
             return this.cachedFieldElement;
         }
 
-        const fieldElement = this.containerElement.querySelector(this.fieldSelector);
+        const fieldElement = this.findFieldElement<E>();
 
         if (!fieldElement) {
             throw new Error(`A field element with the "${this.fieldSelector}" selector not found.`);
+        }
+
+        return fieldElement;
+    }
+
+    findFieldElement<E extends FieldElement = FieldElement>(): E | null {
+        if (this.cachedFieldElement !== null) {
+            // @ts-expect-error It's ok.
+            return this.cachedFieldElement;
+        }
+
+        const fieldElement = this.containerElement.querySelector(this.fieldSelector);
+
+        if (!fieldElement) {
+            return null;
         }
 
         if (!this.isFieldElement(fieldElement)) {
@@ -341,6 +358,8 @@ export default class Field {
                 `A field element with the "${this.fieldSelector}" selector is not field element.`,
             );
         }
+
+        this.name = (fieldElement as E).name;
 
         return fieldElement as E;
     }
@@ -366,7 +385,7 @@ export default class Field {
     }
 
     exists(): boolean {
-        return this.containerElement.querySelector(this.fieldSelector) !== null;
+        return this.findFieldElement() !== null;
     }
 
     getGroupElements(): FieldElement[] {
@@ -419,6 +438,7 @@ export default class Field {
             this.validators,
             this.options,
         );
+        field.name = element.name;
         this.virtualFieldsCache[element.dataset.groupField] = field;
 
         return field;

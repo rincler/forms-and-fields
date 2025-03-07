@@ -21,9 +21,9 @@ beforeEach(() => {
     document.body.innerHTML = `
         <form class="js-form">
             <input class="js-input" name="input-name" />
-            <input class="js-group-input" name="group-input-name" data-group-field />
-            <input class="js-group-input" name="group-input-name" data-group-field />
-            <input class="js-group-input" name="group-input-name" data-group-field />
+            <input class="js-group-input js-group-input-1" name="group-input-name" data-group-field />
+            <input class="js-group-input js-group-input-2" name="group-input-name" data-group-field />
+            <input class="js-group-input js-group-input-3" name="group-input-name" data-group-field />
             <input class="js-checkbox" type="checkbox" name="checkbox-name" />
             <input class="js-radio" type="radio" name="radio-name" value="1" />
             <input class="js-radio" type="radio" name="radio-name" value="2" />
@@ -382,12 +382,12 @@ describe('validation callback options', () => {
         await form.validate();
 
         expect(onAfterValidate).toHaveBeenCalledTimes(1);
-        expect(onAfterValidate.mock.calls[0][0]).toStrictEqual([
-            ValidationResult.invalid(defaultInvalidValueMessage),
-            ValidationResult.invalid(defaultInvalidValueMessage),
-            ValidationResult.valid(),
-            ValidationResult.invalid(),
-        ]);
+        expect(onAfterValidate.mock.calls[0][0]).toStrictEqual({
+            'input-name': ValidationResult.invalid(defaultInvalidValueMessage),
+            'checkbox-name': ValidationResult.invalid(defaultInvalidValueMessage),
+            'textarea-name': ValidationResult.valid(),
+            '*': ValidationResult.invalid(),
+        });
         expect(onAfterValidate.mock.calls[0][1]).toBe(formElement);
     });
 
@@ -580,17 +580,17 @@ describe('validation', () => {
                 submit,
             );
 
-            const validationResults = await form.validate();
+            const validationResult = await form.validate();
 
             expect(validateFn).toHaveBeenCalledTimes(5);
-            expect(validationResults).toStrictEqual([
-                expectedFieldValidationResult,
-                expectedFieldValidationResult,
-                expectedFieldValidationResult,
-                expectedFieldValidationResult,
-                expectedFieldValidationResult,
-                expectedFormValidationResult,
-            ]);
+            expect(validationResult).toStrictEqual({
+                'input-name': expectedFieldValidationResult,
+                'radio-name': expectedFieldValidationResult,
+                'group-input-name.0': expectedFieldValidationResult,
+                'group-input-name.1': expectedFieldValidationResult,
+                'group-input-name.2': expectedFieldValidationResult,
+                '*': expectedFormValidationResult,
+            });
         },
     );
 
@@ -644,13 +644,13 @@ describe('validation', () => {
 
             form.listen();
 
-            const validationResults = await form.validate();
+            const validationResult = await form.validate();
 
             await waitFor(() => {
-                expect(validationResults).toStrictEqual([
-                    expectedFieldValidationResult,
-                    expectedFormValidationResult,
-                ]);
+                expect(validationResult).toStrictEqual({
+                    'input-name': expectedFieldValidationResult,
+                    '*': expectedFormValidationResult,
+                });
             });
         },
     );
@@ -750,7 +750,7 @@ describe('statuses', () => {
                 expect(formElement.classList.contains('ff-form-validating')).toBe(true);
                 expect(onStatusChange).toHaveBeenCalledTimes(1);
                 expect(onStatusChange.mock.calls[0][0]).toBe('ff-form-validating');
-                expect(onStatusChange.mock.calls[0][1]).toStrictEqual([]);
+                expect(onStatusChange.mock.calls[0][1]).toBeNull();
                 expect(onStatusChange.mock.calls[0][2]).toBeNull();
                 expect(onStatusChange.mock.calls[0][3]).toBe(formElement);
                 return ValidationResult.valid();
@@ -786,11 +786,11 @@ describe('statuses', () => {
         expect(formElement.classList.contains('ff-form-valid')).toBe(true);
         expect(onStatusChange).toHaveBeenCalledTimes(2);
         expect(onStatusChange.mock.calls[1][0]).toBe('ff-form-valid');
-        expect(onStatusChange.mock.calls[1][1]).toStrictEqual([
-            ValidationResult.valid(),
-            ValidationResult.valid(),
-            ValidationResult.valid(),
-        ]);
+        expect(onStatusChange.mock.calls[1][1]).toStrictEqual({
+            'input-name': ValidationResult.valid(),
+            'checkbox-name': ValidationResult.valid(),
+            '*': ValidationResult.valid(),
+        });
         expect(onStatusChange.mock.calls[1][2]).toBeNull();
         expect(onStatusChange.mock.calls[1][3]).toBe(formElement);
     });
@@ -816,11 +816,11 @@ describe('statuses', () => {
         expect(formElement.classList.contains('ff-form-invalid')).toBe(true);
         expect(onStatusChange).toHaveBeenCalledTimes(2);
         expect(onStatusChange.mock.calls[1][0]).toBe('ff-form-invalid');
-        expect(onStatusChange.mock.calls[1][1]).toStrictEqual([
-            ValidationResult.valid(),
-            ValidationResult.invalid(defaultInvalidValueMessage),
-            ValidationResult.invalid(),
-        ]);
+        expect(onStatusChange.mock.calls[1][1]).toStrictEqual({
+            'input-name': ValidationResult.valid(),
+            'checkbox-name': ValidationResult.invalid(defaultInvalidValueMessage),
+            '*': ValidationResult.invalid(),
+        });
         expect(onStatusChange.mock.calls[1][2]).toBeNull();
         expect(onStatusChange.mock.calls[1][3]).toBe(formElement);
     });
@@ -834,10 +834,10 @@ describe('statuses', () => {
                 expect(formElement.classList.contains('ff-form-submitting')).toBe(true);
                 expect(onStatusChange).toHaveBeenCalledTimes(3);
                 expect(onStatusChange.mock.calls[2][0]).toBe('ff-form-submitting');
-                expect(onStatusChange.mock.calls[2][1]).toStrictEqual([
-                    ValidationResult.valid(),
-                    ValidationResult.valid(),
-                ]);
+                expect(onStatusChange.mock.calls[2][1]).toStrictEqual({
+                    'input-name': ValidationResult.valid(),
+                    '*': ValidationResult.valid(),
+                });
                 expect(onStatusChange.mock.calls[2][2]).toBeNull();
                 expect(onStatusChange.mock.calls[2][3]).toBe(formElement);
                 return SubmissionResult.positive();
@@ -873,12 +873,85 @@ describe('statuses', () => {
             expect(formElement.classList.contains('ff-form-positive-submit')).toBe(true);
             expect(onStatusChange).toHaveBeenCalledTimes(4);
             expect(onStatusChange.mock.calls[3][0]).toBe('ff-form-positive-submit');
-            expect(onStatusChange.mock.calls[3][1]).toStrictEqual([
-                ValidationResult.valid(),
-                ValidationResult.valid(),
-            ]);
+            expect(onStatusChange.mock.calls[3][1]).toStrictEqual({
+                'input-name': ValidationResult.valid(),
+                '*': ValidationResult.valid(),
+            });
             expect(onStatusChange.mock.calls[3][2]).toStrictEqual(SubmissionResult.positive());
             expect(onStatusChange.mock.calls[3][3]).toBe(formElement);
+        });
+    });
+
+    test('invalid submit', async () => {
+        const onStatusChange = jest.fn();
+        const onFieldStatusChange = jest.fn();
+        const invalidSubmissionResult = SubmissionResult.invalid({
+            'input-name': 'Invalid input.',
+            'group-input-name.1': 'Invalid group input 2.',
+            'group-input-name.2': 'Invalid group input 3.',
+        });
+        const form = new Form(
+            '.js-form',
+            [
+                new Field('.js-input', '.js-form'),
+                new Field('.js-checkbox', '.js-form'),
+                new Field('.js-group-input', '.js-form'),
+            ],
+            () => invalidSubmissionResult,
+            {
+                onStatusChange,
+                onFieldStatusChange,
+            },
+        );
+        form.listen();
+
+        fireEvent.submit(formElement);
+
+        await waitFor(() => {
+            expect(formElement.classList.contains('ff-form-invalid')).toBe(true);
+            expect(inputElement.classList.contains('ff-field-invalid')).toBe(true);
+            expect(getInputElement('.js-checkbox').classList.contains('ff-field-valid')).toBe(true);
+            expect(getInputElement('.js-group-input-1').classList.contains('ff-field-valid')).toBe(
+                true,
+            );
+            expect(
+                getInputElement('.js-group-input-2').classList.contains('ff-field-invalid'),
+            ).toBe(true);
+            expect(
+                getInputElement('.js-group-input-3').classList.contains('ff-field-invalid'),
+            ).toBe(true);
+            expect(onStatusChange).toHaveBeenCalledTimes(4);
+            expect(onStatusChange.mock.calls[3][0]).toBe('ff-form-invalid');
+            expect(onStatusChange.mock.calls[3][1]).toStrictEqual({
+                'input-name': ValidationResult.invalid('Invalid input.'),
+                'checkbox-name': ValidationResult.valid(),
+                'group-input-name.0': ValidationResult.valid(),
+                'group-input-name.1': ValidationResult.invalid('Invalid group input 2.'),
+                'group-input-name.2': ValidationResult.invalid('Invalid group input 3.'),
+                '*': ValidationResult.invalid(),
+            });
+            expect(onStatusChange.mock.calls[3][2]).toStrictEqual(invalidSubmissionResult);
+            expect(onStatusChange.mock.calls[3][3]).toBe(formElement);
+            expect(onFieldStatusChange).toHaveBeenCalledTimes(13);
+            expect(onFieldStatusChange.mock.calls[10][0]).toBe('ff-field-invalid');
+            expect(onFieldStatusChange.mock.calls[10][1]).toStrictEqual(
+                ValidationResult.invalid('Invalid input.'),
+            );
+            expect(onFieldStatusChange.mock.calls[10][2]).toBe(inputElement);
+            expect(onFieldStatusChange.mock.calls[11][0]).toBe('ff-field-invalid');
+            expect(onFieldStatusChange.mock.calls[11][1]).toStrictEqual(
+                ValidationResult.invalid('Invalid group input 2.'),
+            );
+            expect(onFieldStatusChange.mock.calls[11][2]).toBe(
+                getInputElement('.js-group-input-2'),
+            );
+            expect(onFieldStatusChange.mock.calls[12][0]).toBe('ff-field-invalid');
+            expect(onFieldStatusChange.mock.calls[12][1]).toStrictEqual(
+                ValidationResult.invalid('Invalid group input 3.'),
+            );
+            expect(onFieldStatusChange.mock.calls[12][2]).toBe(
+                getInputElement('.js-group-input-3'),
+            );
         });
     });
 
@@ -902,10 +975,10 @@ describe('statuses', () => {
             expect(formElement.classList.contains('ff-form-negative-submit')).toBe(true);
             expect(onStatusChange).toHaveBeenCalledTimes(4);
             expect(onStatusChange.mock.calls[3][0]).toBe('ff-form-negative-submit');
-            expect(onStatusChange.mock.calls[3][1]).toStrictEqual([
-                ValidationResult.valid(),
-                ValidationResult.valid(),
-            ]);
+            expect(onStatusChange.mock.calls[3][1]).toStrictEqual({
+                'input-name': ValidationResult.valid(),
+                '*': ValidationResult.valid(),
+            });
             expect(onStatusChange.mock.calls[3][2]).toStrictEqual(SubmissionResult.negative());
             expect(onStatusChange.mock.calls[3][3]).toBe(formElement);
         });
@@ -919,19 +992,22 @@ describe('statuses', () => {
             onStatusReset,
         });
         form.status = FormStatus.Valid;
-        form.validationResults = [ValidationResult.valid(), ValidationResult.valid()];
+        form.validationResult = {
+            'input-name': ValidationResult.valid(),
+            '*': ValidationResult.valid(),
+        };
         form.listen();
 
         formElement.classList.add('ff-form-valid');
 
         fireEvent.change(inputElement);
 
-        expect(form.validationResults).toStrictEqual([]);
+        expect(form.validationResult).toBeNull();
         expect(form.submissionResult).toBeNull();
         expect(formElement.classList.contains('ff-form-valid')).toBe(false);
         expect(onStatusChange).toHaveBeenCalledTimes(1);
         expect(onStatusChange.mock.calls[0][0]).toBe('');
-        expect(onStatusChange.mock.calls[0][1]).toStrictEqual([]);
+        expect(onStatusChange.mock.calls[0][1]).toBeNull();
         expect(onStatusChange.mock.calls[0][2]).toBeNull();
         expect(onStatusChange.mock.calls[0][3]).toBe(formElement);
         expect(onStatusReset).toHaveBeenCalledTimes(1);
@@ -946,7 +1022,10 @@ describe('statuses', () => {
             onStatusReset,
         });
         form.status = FormStatus.PositiveSubmit;
-        form.validationResults = [ValidationResult.valid(), ValidationResult.valid()];
+        form.validationResult = {
+            'input-name': ValidationResult.valid(),
+            '*': ValidationResult.valid(),
+        };
         form.submissionResult = SubmissionResult.positive();
         form.listen();
 
@@ -954,12 +1033,12 @@ describe('statuses', () => {
 
         fireEvent.keyUp(inputElement);
 
-        expect(form.validationResults).toStrictEqual([]);
+        expect(form.validationResult).toBeNull();
         expect(form.submissionResult).toBeNull();
         expect(formElement.classList.contains('ff-form-positive-submit')).toBe(false);
         expect(onStatusChange).toHaveBeenCalledTimes(1);
         expect(onStatusChange.mock.calls[0][0]).toBe('');
-        expect(onStatusChange.mock.calls[0][1]).toStrictEqual([]);
+        expect(onStatusChange.mock.calls[0][1]).toBeNull();
         expect(onStatusChange.mock.calls[0][2]).toBeNull();
         expect(onStatusChange.mock.calls[0][3]).toBe(formElement);
         expect(onStatusReset).toHaveBeenCalledTimes(1);
@@ -1007,7 +1086,7 @@ describe('statuses', () => {
         expect(formElement.classList.contains('ff-form-valid')).toBe(false);
         expect(onStatusChange).toHaveBeenCalledTimes(2);
         expect(onStatusChange.mock.calls[1][0]).toBe('');
-        expect(onStatusChange.mock.calls[1][1]).toStrictEqual([]);
+        expect(onStatusChange.mock.calls[1][1]).toBeNull();
         expect(onStatusChange.mock.calls[1][2]).toBeNull();
         expect(onStatusChange.mock.calls[1][3]).toBe(formElement);
         expect(onStatusReset).toHaveBeenCalledTimes(1);
@@ -1031,7 +1110,7 @@ describe('statuses', () => {
         expect(formElement.classList.contains('ff-form-valid')).toBe(false);
         expect(onStatusChange).toHaveBeenCalledTimes(2);
         expect(onStatusChange.mock.calls[1][0]).toBe('');
-        expect(onStatusChange.mock.calls[1][1]).toStrictEqual([]);
+        expect(onStatusChange.mock.calls[1][1]).toBeNull();
         expect(onStatusChange.mock.calls[1][2]).toBeNull();
         expect(onStatusChange.mock.calls[1][3]).toBe(formElement);
         expect(onStatusReset).toHaveBeenCalledTimes(1);
@@ -1046,7 +1125,10 @@ describe('statuses', () => {
             onStatusReset,
         });
         form.status = FormStatus.Valid;
-        form.validationResults = [ValidationResult.valid(), ValidationResult.valid()];
+        form.validationResult = {
+            'input-name': ValidationResult.valid(),
+            '*': ValidationResult.valid(),
+        };
         form.listen();
 
         fireEvent.submit(inputElement);
@@ -1054,7 +1136,7 @@ describe('statuses', () => {
         await waitFor(() => {
             expect(onStatusChange).toHaveBeenCalledTimes(4);
             expect(onStatusChange.mock.calls[0][0]).toBe('');
-            expect(onStatusChange.mock.calls[0][1]).toStrictEqual([]);
+            expect(onStatusChange.mock.calls[0][1]).toBeNull();
             expect(onStatusChange.mock.calls[0][2]).toBeNull();
             expect(onStatusChange.mock.calls[0][3]).toBe(formElement);
             expect(onStatusReset).toHaveBeenCalledTimes(1);
@@ -1076,7 +1158,10 @@ describe('statuses', () => {
                 onStatusReset,
             },
         );
-        form.validationResults = [ValidationResult.valid(), ValidationResult.valid()];
+        form.validationResult = {
+            'input-name': ValidationResult.valid(),
+            '*': ValidationResult.valid(),
+        };
         form.listen();
 
         inputElement.value = 'foo';
@@ -1089,10 +1174,10 @@ describe('statuses', () => {
             expect(formElement.classList.contains('ff-form-negative-submit')).toBe(false);
             expect(onStatusChange).toHaveBeenCalledTimes(2);
             expect(onStatusChange.mock.calls[1][0]).toBe('ff-form-valid');
-            expect(onStatusChange.mock.calls[1][1]).toStrictEqual([
-                ValidationResult.valid(),
-                ValidationResult.valid(),
-            ]);
+            expect(onStatusChange.mock.calls[1][1]).toStrictEqual({
+                'input-name': ValidationResult.valid(),
+                '*': ValidationResult.valid(),
+            });
             expect(onStatusChange.mock.calls[1][2]).toBeNull();
             expect(onStatusChange.mock.calls[1][3]).toBe(formElement);
             expect(onStatusReset).not.toHaveBeenCalled();
@@ -1120,10 +1205,10 @@ describe('statuses', () => {
             expect(formElement.classList.contains('ff-form-positive-submit')).toBe(false);
             expect(onStatusChange).toHaveBeenCalledTimes(4);
             expect(onStatusChange.mock.calls[3][0]).toBe('ff-form-positive-submit');
-            expect(onStatusChange.mock.calls[3][1]).toStrictEqual([
-                ValidationResult.valid(),
-                ValidationResult.valid(),
-            ]);
+            expect(onStatusChange.mock.calls[3][1]).toStrictEqual({
+                'input-name': ValidationResult.valid(),
+                '*': ValidationResult.valid(),
+            });
             expect(onStatusChange.mock.calls[3][2]).toStrictEqual(SubmissionResult.positive());
             expect(onStatusChange.mock.calls[3][3]).toBe(formElement);
         });
