@@ -5,9 +5,9 @@
 
 A library for field validation and form submission.
 
-Field elements are elements like input (of any type), select, and textarea.
+Field elements are elements like input (of any type), select and textarea. Each field is defined by validation rules — validators.
 
-For validation, you can use the `required` validator, 
+You can use the `required` validator, 
 any validator from the [validator](https://www.npmjs.com/package/validator) library (e.g. `isEmail`), 
 the `FileValidator` or your own custom validators (including AJAX-based validation).
 
@@ -33,13 +33,19 @@ the `FileValidator` or your own custom validators (including AJAX-based validati
 
 **JS:**
 ```JS
-import { Form, Field, SubmissionResult } from "forms-and-fields"
+import {
+    Form,
+    Field,
+    FieldStatus,
+    FormStatus,
+    SubmissionResult
+} from "forms-and-fields";
 
 const form = new Form(
     ".js-form",
     [
         new Field(".js-email", ".js-form", ["required", "isEmail"]),
-        new Field(".js-password", ".js-form", ["required"]),
+        new Field(".js-password", ".js-form", ["required"])
     ],
     (formData) => {
         const isOk =
@@ -50,39 +56,48 @@ const form = new Form(
     {
         invalidMessages: {
             required: "This field is required",
-            isEmail: "Invalid email",
+            isEmail: "Invalid email"
         },
-        onAfterValidateField: (validationResult, fieldElement) => {
-            if (!validationResult.isValid()) {
+        onFieldStatusChange: (status, validationResult, fieldElement) => {
+            if (status === FieldStatus.No) {
+                fieldElement.parentNode.querySelector(".error")?.remove();
+            }
+
+            if (status === FieldStatus.Invalid) {
                 fieldElement.insertAdjacentHTML(
                     "afterend",
-                    `<div class="error">${validationResult.getMessage()}</div>`,
+                    `<div class="error">${validationResult.getMessage()}</div>`
                 );
             }
         },
-        onFieldStatusReset: (fieldElement) => {
-            fieldElement.parentNode.querySelector(".error")?.remove();
-        },
-        onAfterSubmit: (submissionResult, formElement) => {
-            if (submissionResult.isPositive()) {
-                formElement.replaceWith("You are logged in.");
-            } else {
+        onStatusChange: (
+            status,
+            validationResult,
+            submissionResult,
+            formElement
+        ) => {
+            if (status === FormStatus.No) {
+                formElement.querySelector(".form-error")?.remove();
+            }
+
+            if (status === FormStatus.NegativeSubmit) {
                 formElement.insertAdjacentHTML(
                     "beforeend",
-                    `<div class="form-error"><br />${submissionResult.getMessage()}</div>`,
+                    `<div class="form-error"><br />${submissionResult.getMessage()}</div>`
                 );
             }
-        },
-        onStatusReset: (formElement) => {
-            formElement.querySelector(".form-error")?.remove();
-        },
-    },
-)
 
-form.listen()
+            if (status === FormStatus.PositiveSubmit) {
+                formElement.replaceWith("You are logged in");
+            }
+        }
+    }
+);
+
+form.listen();
 ```
 
-You can test the code above on [JSFiddle](https://jsfiddle.net/rincler/sw94da1b/).
+You can experiment with the code above in [CodePen](https://codepen.io/rincler/pen/ogNeXxM).
 
 **More examples:**
 
@@ -96,26 +111,24 @@ Or without installation and build tools:
 
 ```HTML
 <script type="module">
-    import { Field } from 'https://cdn.skypack.dev/forms-and-fields@latest';
+    import { Field } from 'https://esm.sh/forms-and-fields';
 </script>
 ```
 ## Documentation
 
 ### Common
 
-To validate and submit a form you need to create a `Form` object with required `Field` objects (associated with the field elements), a submit function, and call its `listen` method.
+To validate and submit a form, you need to create a `Form` object with `Field` objects (associated with the field elements), a submit function, and call its `listen` method.
 
-Form validation involves validating all fields.
-A form is considered valid when all its fields are valid.
+Form validation involves validating all fields. A form is considered valid when all its fields are valid.
 
 To validate an individual field (outside a form) you need to create a `Field` object and call its `listen` method.
 
-A custom validator can be either a function or an object with a `validate` method, which must return a `ValidationResult` object. A field value is passed as argument. It can be promised, so you can use AJAX.
-
-The `submit` function must return a `SubmissionResult` object. A `FormData` object is passed as argument. It can be promised, so you can use AJAX.
-
 When a user submits a form, validation is performed first. If the form passes validation, submission is then executed.
 
+### Validation and Submission results
+
+Any custom validator must return a `ValidationResult` object. The internal validators return `ValidationResult` also.
 
 #### `ValidationResult` class
 
@@ -130,6 +143,8 @@ When a user submits a form, validation is performed first. If the form passes va
 | hasMessage(): `bool`                                                                                                              | Returns `true` if a message exists.                                                                                                                                    |
 | getMessage(): `string`                                                                                                            | Returns the message.                                                                                                                                                   |
 | getData(): `object`                                                                                                               | Returns the data.                                                                                                                                                      |
+
+A form `submit` function must return a `SubmissionResult` object.
 
 #### `SubmissionResult` class
 
@@ -260,7 +275,7 @@ Example:
 
 ```JS
 new Field('.js-file', '.js-container', [
-    new FileValidator({ maxSize: 536870912, allowedMimeTypes: ['image/jpg'] }, { maxSize: 'The size of {file} must be less than {maxSizeInMiB} MiB.' })
+    new FileValidator({ maxSize: 536870912, allowedMimeTypes: ['image/jpg'] }, { maxSize: 'The size of {file} must be less than {maxSizeInMiB} MiB.' });
 ])
 ```
 
@@ -281,7 +296,7 @@ HTML:
 
 JS:
 ```JS
-import { Form, Field, SubmissionResult } from "forms-and-fields"
+import { Form, Field, SubmissionResult } from "forms-and-fields";
 
 const form = new Form(
     ".js-form",
@@ -289,9 +304,9 @@ const form = new Form(
         new Field(".js-sex", ".js-form", ["required"]),
     ],
     (formData) => SubmissionResult.positive()},
-)
+);
 
-form.listen()
+form.listen();
 ```
 
 ### Groups
@@ -333,23 +348,25 @@ const form = new Form(
 form.listen()
 ```
 
-**Important!** Don't use the `group-field` attribute for radio buttons.
+**Important!** Don't use the `data-group-field` attribute for radio buttons.
 
 ### Statuses
 
 The statuses of forms and fields change during validation and submission. You can subscribe to these events via `onStatusChange`.
 
-Also, by default, statuses are dynamically added as CSS classes to form and field elements:
+List of statuses:
 
-- `ff-field-validating`
-- `ff-field-valid`
-- `ff-field-invalid`
-- `ff-form-validating`
-- `ff-form-valid`
-- `ff-form-invalid`
-- `ff-form-submitting`
-- `ff-form-positive-submit`
-- `ff-form-negative-submit`
+- `FieldStatus.Validating` (`"ff-field-validating"`)
+- `FieldStatus.Valid` (`"ff-field-valid"`)
+- `FieldStatus.Invalid` (`"ff-field-invalid"`)
+- `FormStatus.Validating` (`"ff-form-validating"`)
+- `FormStatus.Valid` (`"ff-form-valid"`)
+- `FormStatus.Invalid` (`"ff-form-invalid"`)
+- `FormStatus.Submitting` (`"ff-form-submitting"`)
+- `FormStatus.PositiveSubmit` (`"ff-form-positive-submit"`)
+- `FormStatus.NegativeSubmit` (`"ff-form-negative-submit"`)
+
+Also, by default, statuses are dynamically added as CSS classes to form and field elements.
 
 You can wrap any field element in a container with the `data-field-wrapper` attribute then
 the classes will then be applied to this wrapper instead of the field element itself. This is particularly useful for checkboxes and radio buttons.
