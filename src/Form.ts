@@ -1,8 +1,16 @@
 import ValidationResult from './ValidationResult';
+import SubmissionResult from './SubmissionResult';
 import { finishAction, ignoreRejects, startAction } from './Reject';
 import Field from './Field';
-import { FormOptionName, FormOptions, FormStatus, SubmitFn } from './types';
-import SubmissionResult from './SubmissionResult.js';
+import {
+    FieldStatus,
+    FieldsValidationResult,
+    FormOptionName,
+    FormOptions,
+    FormStatus,
+    FormValidationResult,
+    SubmitFn,
+} from './types';
 
 const NOOP = (): void => {};
 
@@ -25,8 +33,10 @@ export default class Form {
     fields: Field[];
     submit: SubmitFn;
     options: FormOptions;
-    validationResults: ValidationResult[];
+    status: FormStatus;
+    validationResult: FormValidationResult | null;
     submissionResult: SubmissionResult | null;
+    processingFields: Record<string, Field>;
     actionId: number;
 
     constructor(
@@ -55,8 +65,10 @@ export default class Form {
         this.options = {};
         this.setOptions(options);
 
-        this.validationResults = [];
+        this.status = FormStatus.No;
+        this.validationResult = null;
         this.submissionResult = null;
+        this.processingFields = {};
         this.actionId = 0;
     }
 
@@ -84,9 +96,9 @@ export default class Form {
         this.reset();
 
         await ignoreRejects(async () => {
-            const validationResults = await this.validate();
+            const validationResult = await this.validate();
 
-            if (ValidationResult.areValid(validationResults)) {
+            if (ValidationResult.areValid(Object.values(validationResult))) {
                 await this.runSubmitProcess();
             }
         });
@@ -120,82 +132,84 @@ export default class Form {
     }
 
     setFieldOptions(options: FormOptions): void {
-        // eslint-disable-next-line no-restricted-syntax
-        for (const field of this.fields) {
-            field.setOptions({
-                invalidMessages: field.hasOption('invalidMessages')
-                    ? field.getOption('invalidMessages')
-                    : options.invalidMessages,
-                defaultInvalidMessage: field.hasOption('defaultInvalidMessage')
-                    ? field.getOption('defaultInvalidMessage')
-                    : options.defaultInvalidMessage,
-                trimEnabled: field.hasOption('trimEnabled')
-                    ? field.getOption('trimEnabled')
-                    : options.trimEnabled,
-                typingDelay: field.hasOption('typingDelay')
-                    ? field.getOption('typingDelay')
-                    : options.typingDelay,
-                validateOnChange: field.hasOption('validateOnChange')
-                    ? field.getOption('validateOnChange')
-                    : options.validateOnChange,
-                validateOnType: field.hasOption('validateOnType')
-                    ? field.getOption('validateOnType')
-                    : options.validateOnType,
-                validationCacheEnabled: field.hasOption('validationCacheEnabled')
-                    ? field.getOption('validationCacheEnabled')
-                    : options.validationCacheEnabled,
-                cssStatusEnabled: field.hasOption('cssStatusEnabled')
-                    ? field.getOption('cssStatusEnabled')
-                    : options.cssStatusEnabled,
-                validatorParams: field.hasOption('validatorParams')
-                    ? field.getOption('validatorParams')
-                    : options.validatorParams,
-                onChange: field.hasOption('onChange')
-                    ? field.getOption('onChange')
-                    : options.onChange,
-                onTypingStart: field.hasOption('onTypingStart')
-                    ? field.getOption('onTypingStart')
-                    : options.onTypingStart,
-                onTypingEnd: field.hasOption('onTypingEnd')
-                    ? field.getOption('onTypingEnd')
-                    : options.onTypingEnd,
-                onBeforeValidate: field.hasOption('onBeforeValidate')
-                    ? field.getOption('onBeforeValidate')
-                    : options.onBeforeValidateField,
-                onAfterValidate: field.hasOption('onAfterValidate')
-                    ? field.getOption('onAfterValidate')
-                    : options.onAfterValidateField,
-                onValidationError: field.hasOption('onValidationError')
-                    ? field.getOption('onValidationError')
-                    : options.onFieldValidationError,
-                onStatusChange: field.hasOption('onStatusChange')
-                    ? field.getOption('onStatusChange')
-                    : options.onFieldStatusChange,
-                onStatusReset: field.hasOption('onStatusReset')
-                    ? field.getOption('onStatusReset')
-                    : options.onFieldStatusReset,
-            });
-        }
+        this.fields.forEach((field) => {
+            this.setOptionsToField(options, field);
+        });
     }
 
-    async validate(): Promise<ValidationResult[]> {
+    setOptionsToField(options: FormOptions, field: Field): void {
+        field.setOptions({
+            invalidMessages: field.hasOption('invalidMessages')
+                ? field.getOption('invalidMessages')
+                : options.invalidMessages,
+            defaultInvalidMessage: field.hasOption('defaultInvalidMessage')
+                ? field.getOption('defaultInvalidMessage')
+                : options.defaultInvalidMessage,
+            trimEnabled: field.hasOption('trimEnabled')
+                ? field.getOption('trimEnabled')
+                : options.trimEnabled,
+            typingDelay: field.hasOption('typingDelay')
+                ? field.getOption('typingDelay')
+                : options.typingDelay,
+            validateOnChange: field.hasOption('validateOnChange')
+                ? field.getOption('validateOnChange')
+                : options.validateOnChange,
+            validateOnType: field.hasOption('validateOnType')
+                ? field.getOption('validateOnType')
+                : options.validateOnType,
+            validationCacheEnabled: field.hasOption('validationCacheEnabled')
+                ? field.getOption('validationCacheEnabled')
+                : options.validationCacheEnabled,
+            cssStatusEnabled: field.hasOption('cssStatusEnabled')
+                ? field.getOption('cssStatusEnabled')
+                : options.cssStatusEnabled,
+            validatorParams: field.hasOption('validatorParams')
+                ? field.getOption('validatorParams')
+                : options.validatorParams,
+            onChange: field.hasOption('onChange') ? field.getOption('onChange') : options.onChange,
+            onTypingStart: field.hasOption('onTypingStart')
+                ? field.getOption('onTypingStart')
+                : options.onTypingStart,
+            onTypingEnd: field.hasOption('onTypingEnd')
+                ? field.getOption('onTypingEnd')
+                : options.onTypingEnd,
+            onBeforeValidate: field.hasOption('onBeforeValidate')
+                ? field.getOption('onBeforeValidate')
+                : options.onBeforeValidateField,
+            onAfterValidate: field.hasOption('onAfterValidate')
+                ? field.getOption('onAfterValidate')
+                : options.onAfterValidateField,
+            onValidationError: field.hasOption('onValidationError')
+                ? field.getOption('onValidationError')
+                : options.onFieldValidationError,
+            onStatusChange: field.hasOption('onStatusChange')
+                ? field.getOption('onStatusChange')
+                : options.onFieldStatusChange,
+            onStatusReset: field.hasOption('onStatusReset')
+                ? field.getOption('onStatusReset')
+                : options.onFieldStatusReset,
+        });
+    }
+
+    async validate(): Promise<FormValidationResult> {
         this.getOption('onBeforeValidate')(this.formElement);
 
         const actionId = startAction(this);
 
         this.setStatus(FormStatus.Validating);
 
-        let validationResults = [];
+        let formValidationResult: FormValidationResult;
 
         try {
-            validationResults = await Promise.all(
-                this.getAllFields().map((field) => field.validate()),
-            );
-            const formValidationResult =
-                this.hasOption('validate') && ValidationResult.areValid(validationResults)
-                    ? await this.getOption('validate')(this.getData())
-                    : ValidationResult.make(ValidationResult.areValid(validationResults));
-            validationResults.push(formValidationResult);
+            const fieldsValidationResult = await this.validateFields();
+            const areFieldsValid = ValidationResult.areValid(Object.values(fieldsValidationResult));
+            formValidationResult = {
+                ...fieldsValidationResult,
+                '*':
+                    this.hasOption('validate') && areFieldsValid
+                        ? await this.getOption('validate')(this.getData())
+                        : ValidationResult.make(areFieldsValid),
+            };
         } catch (error) {
             finishAction(this, actionId);
             this.setStatus(FormStatus.No);
@@ -205,15 +219,21 @@ export default class Form {
 
         finishAction(this, actionId);
 
-        this.validationResults = validationResults;
+        this.validationResult = formValidationResult;
 
-        const isValid = ValidationResult.areValid(this.validationResults);
+        const isValid = ValidationResult.areValid(Object.values(formValidationResult));
 
         this.setStatus(isValid ? FormStatus.Valid : FormStatus.Invalid);
 
-        this.getOption('onAfterValidate')(this.validationResults, this.formElement);
+        this.getOption('onAfterValidate')(this.validationResult, this.formElement);
 
-        return this.validationResults;
+        return this.validationResult;
+    }
+
+    async validateFields(): Promise<FieldsValidationResult> {
+        const fieldEntries = Object.entries(this.getProcessingFields());
+        const results = await Promise.all(fieldEntries.map(([, field]) => field.validate()));
+        return Object.fromEntries(fieldEntries.map(([key], i) => [key, results[i]]));
     }
 
     async runSubmitProcess(): Promise<void> {
@@ -240,21 +260,42 @@ export default class Form {
 
         this.submissionResult = submissionResult;
 
-        this.setStatus(
-            this.submissionResult.isPositive()
-                ? FormStatus.PositiveSubmit
-                : FormStatus.NegativeSubmit,
-        );
+        if (this.submissionResult.isInvalid()) {
+            this.handleInvalidSubmissionResult();
+            this.setStatus(FormStatus.Invalid);
+        } else {
+            this.setStatus(
+                this.submissionResult.isPositive()
+                    ? FormStatus.PositiveSubmit
+                    : FormStatus.NegativeSubmit,
+            );
+        }
 
         this.getOption('onAfterSubmit')(this.submissionResult, this.formElement);
+    }
+
+    handleInvalidSubmissionResult(): void {
+        Object.entries(this.submissionResult!.getData().invalid!).forEach(([key, message]) => {
+            const validationResult = ValidationResult.invalid(message);
+            if (key in this.processingFields) {
+                this.processingFields[key].validationResult = validationResult;
+                this.processingFields[key].setStatus(FieldStatus.Invalid);
+            }
+            if (key in this.validationResult!) {
+                this.validationResult![key] = validationResult;
+            }
+        });
+        if (!('*' in this.submissionResult!.getData().invalid!)) {
+            this.validationResult!['*'] = ValidationResult.invalid();
+        }
     }
 
     getData(): FormData {
         return new FormData(this.formElement);
     }
 
-    getAllFields(): Field[] {
-        const fields = [];
+    getProcessingFields(): Record<string, Field> {
+        let processingFields: Record<string, Field> = {};
 
         // eslint-disable-next-line no-restricted-syntax
         for (const field of this.fields) {
@@ -263,23 +304,35 @@ export default class Form {
             }
 
             if (field.isGroup()) {
-                fields.push(...field.getVirtualFieldsOfGroup());
+                processingFields = field.getVirtualFieldsOfGroup().reduce((fields, field, i) => {
+                    return {
+                        ...fields,
+                        [`${field.name!}.${i}`]: field,
+                    };
+                }, processingFields);
             } else {
-                fields.push(field);
+                processingFields[field.name!] = field;
             }
         }
 
-        return fields;
+        this.processingFields = processingFields;
+
+        return this.processingFields;
     }
 
     reset(): void {
-        this.validationResults = [];
+        this.validationResult = null;
         this.submissionResult = null;
         this.setStatus(FormStatus.No);
     }
 
     setStatus(status: FormStatus): void {
-        this.setCssClass(status);
+        if (this.status === status) {
+            return;
+        }
+
+        this.status = status;
+        this.updateCssStatus();
 
         if (status === FormStatus.No) {
             this.getOption('onStatusReset')(this.formElement);
@@ -287,13 +340,13 @@ export default class Form {
 
         this.getOption('onStatusChange')(
             status,
-            this.validationResults,
+            this.validationResult,
             this.submissionResult,
             this.formElement,
         );
     }
 
-    setCssClass(cssClass: string): void {
+    updateCssStatus(): void {
         if (!this.getOption('cssStatusEnabled')) {
             return;
         }
@@ -307,8 +360,8 @@ export default class Form {
             FormStatus.NegativeSubmit,
         );
 
-        if (cssClass !== '') {
-            this.formElement.classList.add(cssClass);
+        if (this.status !== FormStatus.No) {
+            this.formElement.classList.add(this.status);
         }
     }
 }

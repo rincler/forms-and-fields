@@ -38,6 +38,11 @@ app.post('/positive-response', async (req, res) => {
     res.json({ isSuccess: true });
 });
 
+app.post('/invalid-response', async (req, res) => {
+    await sleep(SERVER_DELAY);
+    res.json({ isSuccess: false, invalid: { login: 'Login is already in use' } });
+});
+
 app.post('/negative-response', async (req, res) => {
     await sleep(SERVER_DELAY);
     res.json({ isSuccess: false });

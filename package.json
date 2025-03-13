@@ -1,6 +1,6 @@
 {
     "name": "forms-and-fields",
-    "version": "2.1.1",
+    "version": "3.0.0",
     "description": "A library for field validation and form submission.",
     "keywords": [
         "form",
@@ -12,8 +12,13 @@
         "validate"
     ],
     "type": "module",
-    "module": "dist/index.js",
-    "types": "dist/index.d.ts",
+    "module": "./dist/esm/index.js",
+    "exports": {
+        "types": "./dist/types/index.d.ts",
+        "import": "./dist/esm/index.js",
+        "require": "./dist/cjs/index.js"
+    },
+    "types": "./dist/types/index.d.ts",
     "files": [
         "dist"
     ],
@@ -52,9 +57,11 @@
         "typescript": "^5.7.3"
     },
     "scripts": {
-        "build": "tsc",
-        "prepack": "npm run build",
-        "check": "tsc --noEmit && eslint .",
+        "build:esm": "tsc --module ES2015 --outDir dist/esm",
+        "build:cjs": "tsc --module CommonJS --outDir dist/cjs",
+        "build:types": "tsc --emitDeclarationOnly --declarationDir dist/types --declaration --declarationMap ",
+        "prepack": "npm run build:esm && npm run build:cjs && npm run build:types",
+        "check": "tsc --noEmit --project tsconfig.allFiles.json && eslint .",
         "sandbox": "npm run sandbox:build && npm run sandbox:start",
         "sandbox:build": "esbuild sandbox/src/index.js --outfile=sandbox/web/bundle.js --format=iife --sourcemap=inline --bundle",
         "sandbox:start": "node sandbox/server.js",

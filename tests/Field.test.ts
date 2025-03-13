@@ -3,7 +3,7 @@ import { userEvent } from '@testing-library/user-event';
 import Field from '../src/Field';
 import ValidationResult from '../src/ValidationResult';
 import FileValidator from '../src/validators/FileValidator';
-import { FieldValue } from '../src';
+import { FieldStatus, FieldValue } from '../src';
 
 // @ts-expect-error It will not be `null` after the `beforeEach`.
 let containerElement: HTMLElement = null;
@@ -34,9 +34,9 @@ beforeEach(() => {
     document.body.innerHTML = `
         <div class="js-container">
             <input class="js-input" id="input" />
-            <input class="js-group-input js-group-input-1" name="group-input-name" />
-            <input class="js-group-input js-group-input-2" name="group-input-name" />
-            <input class="js-group-input js-group-input-3" name="group-input-name" />
+            <input class="js-group-input js-group-input-1" name="group-input-name" data-group-field />
+            <input class="js-group-input js-group-input-2" name="group-input-name" data-group-field />
+            <input class="js-group-input js-group-input-3" name="group-input-name" data-group-field />
             <input class="js-checkbox" type="checkbox" />
             <div class="js-wrapper" data-field-wrapper>
                 <input class="js-radio js-radio-1" type="radio" name="radio" value="1">
@@ -423,7 +423,7 @@ describe('callback options', () => {
             .querySelector('.js-container')!
             .insertAdjacentHTML(
                 'beforeend',
-                `<input class="js-group-input js-dynamic-input-x" name="group-input-name" />`,
+                `<input class="js-group-input js-dynamic-input-x" name="group-input-name" data-group-field />`,
             );
 
         const dynamicGroupInput = getInputElement('.js-dynamic-input-x');
@@ -1049,16 +1049,16 @@ describe('statuses', () => {
             onStatusChange,
             onStatusReset,
         });
+        field.status = FieldStatus.Valid;
         field.validationResult = ValidationResult.valid();
         field.listen();
 
-        inputElement.classList.add('ff-field-valid', 'ff-field-invalid');
+        inputElement.classList.add('ff-field-valid');
 
         fireEvent.change(inputElement);
 
         expect(field.validationResult).toStrictEqual(ValidationResult.valid());
         expect(inputElement.classList.contains('ff-field-valid')).toBe(true);
-        expect(inputElement.classList.contains('ff-field-invalid')).toBe(true);
         expect(onStatusChange).not.toHaveBeenCalled();
         expect(onStatusReset).not.toHaveBeenCalled();
     });
@@ -1070,18 +1070,18 @@ describe('statuses', () => {
             onStatusChange,
             onStatusReset,
         });
+        field.status = FieldStatus.Valid;
         field.validationResult = ValidationResult.valid();
         field.listen();
 
         const radioElement = getInputElement('.js-radio');
         const wrapperElement = document.querySelector('.js-wrapper') as HTMLElement;
-        wrapperElement.classList.add('ff-field-valid', 'ff-field-invalid');
+        wrapperElement.classList.add('ff-field-valid');
 
         fireEvent.change(getInputElement('.js-radio'));
 
         expect(field.validationResult).toBeNull();
         expect(wrapperElement.classList.contains('ff-field-valid')).toBe(false);
-        expect(wrapperElement.classList.contains('ff-field-invalid')).toBe(false);
         expect(onStatusChange).toHaveBeenCalledTimes(1);
         expect(onStatusChange.mock.calls[0][0]).toBe('');
         expect(onStatusChange.mock.calls[0][1]).toStrictEqual(null);
@@ -1101,16 +1101,16 @@ describe('statuses', () => {
             onStatusChange,
             onStatusReset,
         });
+        field.status = FieldStatus.Valid;
         field.validationResult = ValidationResult.valid();
         field.listen();
 
-        inputElement.classList.add('ff-field-valid', 'ff-field-invalid');
+        inputElement.classList.add('ff-field-valid');
 
         fireEvent.keyUp(inputElement);
 
         expect(field.validationResult).toBeNull();
         expect(inputElement.classList.contains('ff-field-valid')).toBe(false);
-        expect(inputElement.classList.contains('ff-field-invalid')).toBe(false);
         expect(onStatusChange).toHaveBeenCalledTimes(1);
         expect(onStatusChange.mock.calls[0][0]).toBe('');
         expect(onStatusChange.mock.calls[0][1]).toStrictEqual(null);
@@ -1121,6 +1121,21 @@ describe('statuses', () => {
         expect(onStatusReset.mock.calls[0][0]).toBe(inputElement);
         expect(onStatusReset.mock.calls[0][1]).toBe(containerElement);
         expect(onStatusReset.mock.calls[0][2]).toBeNull();
+    });
+
+    test('status is not reset because it is not changed', () => {
+        const onStatusChange = jest.fn();
+        const onStatusReset = jest.fn();
+        const field = new Field('.js-input', '.js-container', [], {
+            onStatusChange,
+            onStatusReset,
+        });
+        field.listen();
+
+        fireEvent.keyUp(inputElement);
+
+        expect(onStatusChange).not.toHaveBeenCalled();
+        expect(onStatusReset).not.toHaveBeenCalled();
     });
 
     test('status is reset on validation error', async () => {
@@ -1144,7 +1159,6 @@ describe('statuses', () => {
         await field.validate().catch(() => {});
 
         expect(inputElement.classList.contains('ff-field-valid')).toBe(false);
-        expect(inputElement.classList.contains('ff-field-invalid')).toBe(false);
         expect(onStatusChange).toHaveBeenCalledTimes(2);
         expect(onStatusChange.mock.calls[1][0]).toBe('');
         expect(onStatusChange.mock.calls[1][1]).toBeNull();

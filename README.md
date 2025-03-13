@@ -5,9 +5,9 @@
 
 A library for field validation and form submission.
 
-Field elements are elements like input (of any type), select, and textarea.
+Field elements are elements like input (of any type), select and textarea. Each field is defined by validation rules — validators.
 
-For validation, you can use the `required` validator, 
+You can use the `required` validator, 
 any validator from the [validator](https://www.npmjs.com/package/validator) library (e.g. `isEmail`), 
 the `FileValidator` or your own custom validators (including AJAX-based validation).
 
@@ -33,13 +33,19 @@ the `FileValidator` or your own custom validators (including AJAX-based validati
 
 **JS:**
 ```JS
-import { Form, Field, SubmissionResult } from "forms-and-fields"
+import {
+    Form,
+    Field,
+    FieldStatus,
+    FormStatus,
+    SubmissionResult
+} from "forms-and-fields";
 
 const form = new Form(
     ".js-form",
     [
         new Field(".js-email", ".js-form", ["required", "isEmail"]),
-        new Field(".js-password", ".js-form", ["required"]),
+        new Field(".js-password", ".js-form", ["required"])
     ],
     (formData) => {
         const isOk =
@@ -50,39 +56,48 @@ const form = new Form(
     {
         invalidMessages: {
             required: "This field is required",
-            isEmail: "Invalid email",
+            isEmail: "Invalid email"
         },
-        onAfterValidateField: (validationResult, fieldElement) => {
-            if (!validationResult.isValid()) {
+        onFieldStatusChange: (status, validationResult, fieldElement) => {
+            if (status === FieldStatus.No) {
+                fieldElement.parentNode.querySelector(".error")?.remove();
+            }
+
+            if (status === FieldStatus.Invalid) {
                 fieldElement.insertAdjacentHTML(
                     "afterend",
-                    `<div class="error">${validationResult.getMessage()}</div>`,
+                    `<div class="error">${validationResult.getMessage()}</div>`
                 );
             }
         },
-        onFieldStatusReset: (fieldElement) => {
-            fieldElement.parentNode.querySelector(".error")?.remove();
-        },
-        onAfterSubmit: (submissionResult, formElement) => {
-            if (submissionResult.isPositive()) {
-                formElement.replaceWith("You are logged in.");
-            } else {
+        onStatusChange: (
+            status,
+            validationResult,
+            submissionResult,
+            formElement
+        ) => {
+            if (status === FormStatus.No) {
+                formElement.querySelector(".form-error")?.remove();
+            }
+
+            if (status === FormStatus.NegativeSubmit) {
                 formElement.insertAdjacentHTML(
                     "beforeend",
-                    `<div class="form-error"><br />${submissionResult.getMessage()}</div>`,
+                    `<div class="form-error"><br />${submissionResult.getMessage()}</div>`
                 );
             }
-        },
-        onStatusReset: (formElement) => {
-            formElement.querySelector(".form-error")?.remove();
-        },
-    },
-)
 
-form.listen()
+            if (status === FormStatus.PositiveSubmit) {
+                formElement.replaceWith("You are logged in");
+            }
+        }
+    }
+);
+
+form.listen();
 ```
 
-You can test the code above on [JSFiddle](https://jsfiddle.net/rincler/sw94da1b/).
+You can experiment with the code above in [CodePen](https://codepen.io/rincler/pen/ogNeXxM).
 
 **More examples:**
 
@@ -96,53 +111,56 @@ Or without installation and build tools:
 
 ```HTML
 <script type="module">
-    import { Field } from 'https://cdn.skypack.dev/forms-and-fields@latest';
+    import { Field } from 'https://esm.sh/forms-and-fields';
 </script>
 ```
 ## Documentation
 
 ### Common
 
-To validate and submit a form you need to create a `Form` object with required `Field` objects (associated with the field elements), a submit function, and call its `listen` method.
+To validate and submit a form, you need to create a `Form` object with `Field` objects (associated with the field elements), a submit function, and call its `listen` method.
 
-Form validation involves validating all fields.
-A form is considered valid when all its fields are valid.
+Form validation involves validating all fields. A form is considered valid when all its fields are valid.
 
 To validate an individual field (outside a form) you need to create a `Field` object and call its `listen` method.
 
-A custom validator can be either a function or an object with a `validate` method, which must return a `ValidationResult` object. A field value is passed as argument. It can be promised, so you can use AJAX.
-
-The `submit` function must return a `SubmissionResult` object. A `FormData` object is passed as argument. It can be promised, so you can use AJAX.
-
 When a user submits a form, validation is performed first. If the form passes validation, submission is then executed.
 
+### Validation and Submission results
+
+Any custom validator must return a `ValidationResult` object. The internal validators return `ValidationResult` also.
 
 #### `ValidationResult` class
 
-| Method                                                                                                                | Description                                                                      |
-|-----------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------|
-| valid(data: `object` = {})                                                                                            | Static method. Creates a new valid result.                                       |
-| invalid(message: `string` = '', data: `object` = {})                                                                  | Static method. Creates a new invalid result.                                     |
-| make(result: `boolean`, messageForInvalid: `string` = '', dataForValid: `object` = {}, dataForInvalid: `object` = {}) | Static method. Creates a new valid or invalid result depending on the `result`.  |
-| isValid(): `bool`                                                                                                     | Returns `true` if valid.                                                         |
-| isInvalid(): `bool`                                                                                                   | Returns `true` if invalid.                                                       |
-| areValid(validationResults: `ValidationResult[]`): `bool`                                                             | Static method. Returns `true` if all the specified validation results are valid. |
-| hasMessage(): `bool`                                                                                                  | Returns `true` if a message exists.                                              |
-| getMessage(): `string`                                                                                                | Retrieves the message.                                                           |
-| getData(): `object`                                                                                                   | Retrieves the data.                                                              |
+| Method                                                                                                                            | Description                                                                                                                                                            |
+|-----------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| valid(resultDetails: `object \| string` = {})                                                                                     | Static method. Creates a new valid result. The `resultDetails` object is expected to have the keys `message` and/or `data`. The `resultDetails` string is a message.   |
+| invalid(resultDetails: `object \| string` = {})                                                                                   | Static method. Creates a new invalid result. The `resultDetails` object is expected to have the keys `message` and/or `data`. The `resultDetails` string is a message. |
+| make(result: `boolean`, resultDetailsForInvalidCase: `object \| string` = {}, resultDetailsForValidCase: `object \| string` = {}) | Static method. Creates a new valid or invalid result depending on the `result`.                                                                                        |
+| isValid(): `bool`                                                                                                                 | Returns `true` if valid.                                                                                                                                               |
+| isInvalid(): `bool`                                                                                                               | Returns `true` if invalid.                                                                                                                                             |
+| areValid(validationResults: `ValidationResult[]`): `bool`                                                                         | Static method. Returns `true` if all the specified validation results are valid.                                                                                       |
+| hasMessage(): `bool`                                                                                                              | Returns `true` if a message exists.                                                                                                                                    |
+| getMessage(): `string`                                                                                                            | Returns the message.                                                                                                                                                   |
+| getData(): `object`                                                                                                               | Returns the data.                                                                                                                                                      |
+
+A form `submit` function must return a `SubmissionResult` object.
 
 #### `SubmissionResult` class
 
-| Method                                                                                                                     | Description                                                                         |
-|----------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------|
-| positive(data: `object` = {})                                                                                              | Static method. Creates a new positive result.                                       |
-| negative(message: `string`, data: `object` = {})                                                                           | Static method. Creates a new negative result.                                       |
-| make(result: `boolean`, messageForNegative: `string` = '', dataForPositive: `object` = {}, dataForNegative: `object` = {}) | Static method. Creates a new positive or negative result depending on the `result`. |
-| isPositive(): `boolean`                                                                                                    | Returns `true` if positive.                                                         |
-| isNegative(): `boolean`                                                                                                    | Returns `true` if negative.                                                         |
-| hasMessage(): `boolean`                                                                                                    | Returns `true` if a message exists.                                                 |
-| getMessage(): `boolean`                                                                                                    | Retrieves the message.                                                              |
-| getData(): `object`                                                                                                        | Retrieves the data.                                                                 |
+| Method                                                                                                                                | Description                                                                                                                                                                                                                                                                                                                                     |
+|---------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| positive(resultDetails: `object \| string` = {})                                                                                      | Static method. Creates a new positive result. The `resultDetails` object is expected to have the keys `message` and/or `data`. The `resultDetails` string is a message.                                                                                                                                                                         |
+| invalid(invalidData: `object`, data: `object` = {})                                                                                   | Static method. Creates a new negative result with invalid data. The `invalidData` is an object in the following format: `{ [invalidFieldName]: message }`, for groups: `{ [invalidFieldName.index]: message }`, and for the entire form: `{"*": message}`. In this case, the form will set statuses and messages for the corresponding fields . |
+| negative(resultDetails: `object \| string` = {})                                                                                      | Static method. Creates a new negative result. The `resultDetails` object is expected to have the keys `message` and/or `data`. The `resultDetails` string is a message.                                                                                                                                                                         |
+| make(result: `boolean`, resultDetailsForNegativeCase: `object \| string` = {}, resultDetailsForPositiveCase: `object \| string` = {}) | Static method. Creates a new positive or negative result depending on the `result`.                                                                                                                                                                                                                                                             |
+| isPositive(): `boolean`                                                                                                               | Returns `true` if positive.                                                                                                                                                                                                                                                                                                                     |
+| isNegative(): `boolean`                                                                                                               | Returns `true` if negative.                                                                                                                                                                                                                                                                                                                     |
+| isValid(): `boolean`                                                                                                                  | Returns `true` if valid (i.e., it was not created by the `invalid` method).                                                                                                                                                                                                                                                                     |
+| isInvalid(): `boolean`                                                                                                                | Returns `true` if invalid (i.e., it was created by the `invalid` method).                                                                                                                                                                                                                                                                       |
+| hasMessage(): `boolean`                                                                                                               | Returns `true` if a message exists.                                                                                                                                                                                                                                                                                                             |
+| getMessage(): `boolean`                                                                                                               | Returns the message.                                                                                                                                                                                                                                                                                                                            |
+| getData(): `object`                                                                                                                   | Returns the data.                                                                                                                                                                                                                                                                                                                               |
 
 ### Fields
 
@@ -210,12 +228,12 @@ Additionally, the `Form` class supports the following options:
 | cssStatusEnabled       | `boolean`  | `true`  | Specifies whether to add CSS classes when the status changes.                                                                                                                                                                                                   |
 | onBeforeValidate       | `function` | `NOOP`  | Triggered before form validation. Passed as argument: `formElement: HTMLFormElement`.                                                                                                                                                                           |
 | validate               | `function` | `NOOP`  | An additional custom validation function, which must return a `ValidationResult` object.  Passed as argument: `formData: FormData`. This is executed after field validation when all fields are valid. Can be promised.                                         |
-| onAfterValidate        | `function` | `NOOP`  | Triggered after form validation. Passed as arguments: `validationResults: ValidationReslut[], formElement: HTMLFormElement`. `validationResults` contains the results for each field and the form itself.                                                       |
+| onAfterValidate        | `function` | `NOOP`  | Triggered after form validation. Passed as arguments: `validationResult: { [fieldName]: ValidationResult, "*": ValidationResult }, formElement: HTMLFormElement`. `validationResults` contains the results for each field and the form itself.                  |
 | onValidationError      | `function` | `NOOP`  | Triggered when an error occurs during validation. Passed as arguments: `error: any, formElement: HTMLFormElement`.                                                                                                                                              |
 | onBeforeSubmit         | `function` | `NOOP`  | Triggered before form submission. Passed as arguments: `formData: FormData, formElement: HTMLFormElement`.                                                                                                                                                      |
 | onAfterSubmit          | `function` | `NOOP`  | Triggered after form submission.  Passed as arguments: `submissionResult: SubmissionResult, formElement: HTMLFormElement`.                                                                                                                                      |
 | onSubmissionError      | `function` | `NOOP`  | Triggered when an error occurs during submission. Passed as arguments: `error: any, formElement: HTMLFormElement`.                                                                                                                                              |
-| onStatusChange         | `function` | `NOOP`  | Triggered when the form status changes. Passed as arguments: `status: string, validationResults: ValidationResult[], submissionResult: SubmissionResult \| null, formElement: HTMLFormElement`.                                                                 |
+| onStatusChange         | `function` | `NOOP`  | Triggered when the form status changes. Passed as arguments: `status: string, validationResult: { [fieldName]: ValidationResult, "*": ValidationResult } \| null, submissionResult: SubmissionResult \| null, formElement: HTMLFormElement`.                    |
 | onStatusReset          | `function` | `NOOP`  | Triggered when the form status resets. Passed as arguments: `formElement: HTMLFormElement`.                                                                                                                                                                     |
 | onBeforeValidateField  | `function` | `NOOP`  | Triggered before validating any field specified in the `Form` constructor. Passed as arguments: `fieldElement: HTMLElement, containerElement: Element`.                                                                                                         |
 | onAfterValidateField   | `function` | `NOOP`  | Triggered after validating any field specified in the `Form` constructor. Passed as arguments: `validationResult: ValidationResult, fieldElement: HTMLElement, containerElement: Element`.                                                                      |
@@ -257,7 +275,7 @@ Example:
 
 ```JS
 new Field('.js-file', '.js-container', [
-    new FileValidator({ maxSize: 536870912, allowedMimeTypes: ['image/jpg'] }, { maxSize: 'The size of {file} must be less than {maxSizeInMiB} MiB.' })
+    new FileValidator({ maxSize: 536870912, allowedMimeTypes: ['image/jpg'] }, { maxSize: 'The size of {file} must be less than {maxSizeInMiB} MiB.' });
 ])
 ```
 
@@ -278,7 +296,7 @@ HTML:
 
 JS:
 ```JS
-import { Form, Field, SubmissionResult } from "forms-and-fields"
+import { Form, Field, SubmissionResult } from "forms-and-fields";
 
 const form = new Form(
     ".js-form",
@@ -286,9 +304,9 @@ const form = new Form(
         new Field(".js-sex", ".js-form", ["required"]),
     ],
     (formData) => SubmissionResult.positive()},
-)
+);
 
-form.listen()
+form.listen();
 ```
 
 ### Groups
@@ -330,23 +348,25 @@ const form = new Form(
 form.listen()
 ```
 
-**Important!** Don't use the `group-field` attribute for radio buttons.
+**Important!** Don't use the `data-group-field` attribute for radio buttons.
 
 ### Statuses
 
 The statuses of forms and fields change during validation and submission. You can subscribe to these events via `onStatusChange`.
 
-Also, by default, statuses are dynamically added as CSS classes to form and field elements:
+List of statuses:
 
-- `ff-field-validating`
-- `ff-field-valid`
-- `ff-field-invalid`
-- `ff-form-validating`
-- `ff-form-valid`
-- `ff-form-invalid`
-- `ff-form-submitting`
-- `ff-form-positive-submit`
-- `ff-form-negative-submit`
+- `FieldStatus.Validating` (`"ff-field-validating"`)
+- `FieldStatus.Valid` (`"ff-field-valid"`)
+- `FieldStatus.Invalid` (`"ff-field-invalid"`)
+- `FormStatus.Validating` (`"ff-form-validating"`)
+- `FormStatus.Valid` (`"ff-form-valid"`)
+- `FormStatus.Invalid` (`"ff-form-invalid"`)
+- `FormStatus.Submitting` (`"ff-form-submitting"`)
+- `FormStatus.PositiveSubmit` (`"ff-form-positive-submit"`)
+- `FormStatus.NegativeSubmit` (`"ff-form-negative-submit"`)
+
+Also, by default, statuses are dynamically added as CSS classes to form and field elements.
 
 You can wrap any field element in a container with the `data-field-wrapper` attribute then
 the classes will then be applied to this wrapper instead of the field element itself. This is particularly useful for checkboxes and radio buttons.

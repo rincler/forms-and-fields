@@ -57,7 +57,7 @@ export default class FileValidator {
         return ValidationResult.valid();
     }
 
-    prepareMessage(message: string, file: File | undefined = undefined): string {
+    prepareMessage(message: string, file?: File): string {
         let preparedMessage = message;
 
         if (this.rules.maxCount) {

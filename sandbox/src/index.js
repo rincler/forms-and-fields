@@ -3,6 +3,7 @@ import Field from '../../src/Field';
 import SubmissionResult from '../../src/SubmissionResult';
 import ValidationResult from '../../src/ValidationResult';
 import FileValidator from '../../src/validators/FileValidator';
+import { FieldStatus } from '../../src/types';
 
 const fetchOk = async (input, init) => {
     const response = await fetch(input, init);
@@ -46,6 +47,16 @@ const form = new Form(
         new Field('.js-file', '.js-form', ['required']),
     ],
     () => SubmissionResult.positive(),
+    {
+        onFieldStatusChange: (status, validationResult, fieldElement, _, wrapperElement) => {
+            const element = wrapperElement || fieldElement;
+            if (status === FieldStatus.Invalid) {
+                setFieldError(element, validationResult.getMessage());
+            } else {
+                clearFieldError(element);
+            }
+        },
+    },
 );
 
 form.listen();
@@ -69,12 +80,11 @@ const domainField = new Field(
             isFQDN: 'Domain is not valid.',
         },
         validateOnType: true,
-        onStatusReset: (fieldElement) => {
-            clearFieldError(fieldElement);
-        },
-        onAfterValidate: (validationResult, fieldElement) => {
-            if (!validationResult.isValid()) {
+        onStatusChange: (status, validationResult, fieldElement) => {
+            if (status === FieldStatus.Invalid) {
                 setFieldError(fieldElement, validationResult.getMessage());
+            } else {
+                clearFieldError(fieldElement);
             }
         },
     },
@@ -85,6 +95,10 @@ domainField.listen();
 const mapResponseTypeToUrl = (value) => {
     if (value === 'positive') {
         return '/positive-response';
+    }
+
+    if (value === 'invalid') {
+        return '/invalid-response';
     }
 
     if (value === 'negative') {
@@ -145,7 +159,20 @@ const registrationForm = new Form(
 
         const result = await response.json();
 
+        if (!result.isSuccess && result.invalid) {
+            return SubmissionResult.invalid(result.invalid);
+        }
+
         return SubmissionResult.make(result.isSuccess);
+    },
+    {
+        onFieldStatusChange: (status, validationResult, fieldElement) => {
+            if (status === FieldStatus.Invalid) {
+                setFieldError(fieldElement, validationResult.getMessage());
+            } else {
+                clearFieldError(fieldElement);
+            }
+        },
     },
 );
 
@@ -167,6 +194,15 @@ const emailGroupForm = new Form(
         ]),
     ],
     () => SubmissionResult.positive(),
+    {
+        onFieldStatusChange: (status, validationResult, fieldElement) => {
+            if (status === FieldStatus.Invalid) {
+                setFieldError(fieldElement, validationResult.getMessage());
+            } else {
+                clearFieldError(fieldElement);
+            }
+        },
+    },
 );
 
 emailGroupForm.listen();
@@ -195,12 +231,11 @@ const uploadForm = new Form(
                 ),
             ],
             {
-                onStatusReset: (fieldElement) => {
-                    clearFieldError(fieldElement);
-                },
-                onAfterValidate: (validationResult, fieldElement) => {
-                    if (!validationResult.isValid()) {
+                onFieldStatusChange: (status, validationResult, fieldElement) => {
+                    if (status === FieldStatus.Invalid) {
                         setFieldError(fieldElement, validationResult.getMessage());
+                    } else {
+                        clearFieldError(fieldElement);
                     }
                 },
             },
@@ -225,9 +260,6 @@ const addressForm = new Form(
             ],
             {
                 validateOnType: true,
-                onStatusReset: (fieldElement) => {
-                    clearFieldError(fieldElement);
-                },
                 onValidationError: (error, fieldElement) => {
                     setFieldError(fieldElement, error);
                 },
@@ -252,6 +284,13 @@ const addressForm = new Form(
     {
         onStatusReset: (formElement) => {
             clearFormError(formElement);
+        },
+        onFieldStatusChange: (status, validationResult, fieldElement) => {
+            if (status === FieldStatus.Invalid) {
+                setFieldError(fieldElement, validationResult.getMessage());
+            } else {
+                clearFieldError(fieldElement);
+            }
         },
         onSubmissionError: (error, formElement) => {
             setFormError(formElement, error);

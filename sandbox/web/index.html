@@ -107,6 +107,9 @@ Legend:
         <input id="response-positive" type="radio" name="response" value="positive" checked />
         <label for="response-positive">Positive response</label>
         <br />
+        <input id="response-invalid" type="radio" name="response" value="invalid" />
+        <label for="response-invalid">Invalid response</label>
+        <br />
         <input id="response-negative" type="radio" name="response" value="negative" />
         <label for="response-negative">Negative response</label>
         <br />
@@ -125,17 +128,17 @@ Legend:
     <div>
         <label for="email-1">Email #1</label>
         <br />
-        <input id="email-1" type="text" name="email" class="js-email" />
+        <input id="email-1" type="text" name="email" class="js-email" data-group-field />
     </div>
     <div>
         <label for="email-2">Email #2</label>
         <br />
-        <input id="email-2" type="text" name="email" class="js-email" />
+        <input id="email-2" type="text" name="email" class="js-email" data-group-field />
     </div>
     <div>
         <label for="email-3">Email #3</label>
         <br />
-        <input id="email-3" type="text" name="email" class="js-email" />
+        <input id="email-3" type="text" name="email" class="js-email" data-group-field />
     </div>
     <br /><br />
     <button type="submit">Submit</button>

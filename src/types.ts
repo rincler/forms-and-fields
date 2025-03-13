@@ -176,14 +176,17 @@ export interface FormOptions
     cssStatusEnabled?: boolean;
     onBeforeValidate?: (formElement: HTMLFormElement) => void;
     validate?: (formData: FormData) => ValidationResult | Promise<ValidationResult>;
-    onAfterValidate?: (validationResults: ValidationResult[], formElement: HTMLFormElement) => void;
+    onAfterValidate?: (
+        validationResult: FormValidationResult,
+        formElement: HTMLFormElement,
+    ) => void;
     onValidationError?: (error: unknown, formElement: HTMLFormElement) => void;
     onBeforeSubmit?: (formData: FormData, formElement: HTMLFormElement) => void;
     onAfterSubmit?: (submissionResult: SubmissionResult, formElement: HTMLFormElement) => void;
     onSubmissionError?: (error: unknown, formElement: HTMLFormElement) => void;
     onStatusChange?: (
         status: FormStatus,
-        validationResults: ValidationResult[],
+        validationResult: FormValidationResult | null,
         submissionResult: SubmissionResult | null,
         formElement: HTMLFormElement,
     ) => void;
@@ -198,6 +201,11 @@ export interface FormOptions
 export type FormOptionName = keyof FormOptions;
 
 export type SubmitFn = (formData: FormData) => SubmissionResult | Promise<SubmissionResult>;
+
+export type FieldsValidationResult = Record<string, ValidationResult>;
+export interface FormValidationResult extends FieldsValidationResult {
+    '*': ValidationResult;
+}
 
 export interface FileValidatorRules {
     maxCount?: number;

@@ -1,31 +1,46 @@
+export interface ValidationResultDetails {
+    message: string;
+    data: {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        [key: string]: any;
+    };
+}
+
 export default class ValidationResult {
     result: boolean;
-    message: string;
-    data: object;
+    message: ValidationResultDetails['message'];
+    data: ValidationResultDetails['data'];
 
-    constructor(result: boolean, { message = '', data = {} }: { message?: string; data?: object }) {
+    constructor(result: boolean, { message = '', data = {} }: Partial<ValidationResultDetails>) {
         this.result = result;
         this.message = message;
         this.data = data;
     }
 
-    static valid(data: object = {}): ValidationResult {
-        return new ValidationResult(true, { data });
+    static valid(resultDetails: Partial<ValidationResultDetails> | string = {}): ValidationResult {
+        if (typeof resultDetails === 'string') {
+            return new ValidationResult(true, { message: resultDetails });
+        }
+        return new ValidationResult(true, resultDetails);
     }
 
-    static invalid(message: string = '', data: object = {}): ValidationResult {
-        return new ValidationResult(false, { message, data });
+    static invalid(
+        resultDetails: Partial<ValidationResultDetails> | string = {},
+    ): ValidationResult {
+        if (typeof resultDetails === 'string') {
+            return new ValidationResult(false, { message: resultDetails });
+        }
+        return new ValidationResult(false, resultDetails);
     }
 
     static make(
         result: boolean,
-        messageForInvalid: string = '',
-        dataForValid: object = {},
-        dataForInvalid: object = {},
+        resultDetailsForInvalidCase: Partial<ValidationResultDetails> | string = {},
+        resultDetailsForValidCase: Partial<ValidationResultDetails> | string = {},
     ): ValidationResult {
         return result
-            ? ValidationResult.valid(dataForValid)
-            : ValidationResult.invalid(messageForInvalid, dataForInvalid);
+            ? ValidationResult.valid(resultDetailsForValidCase)
+            : ValidationResult.invalid(resultDetailsForInvalidCase);
     }
 
     isValid(): boolean {
@@ -33,7 +48,7 @@ export default class ValidationResult {
     }
 
     isInvalid(): boolean {
-        return !this.result;
+        return !this.isValid();
     }
 
     static areValid(validationResults: ValidationResult[]): boolean {
@@ -48,7 +63,7 @@ export default class ValidationResult {
         return this.message;
     }
 
-    getData(): object {
+    getData(): ValidationResultDetails['data'] {
         return this.data;
     }
 }

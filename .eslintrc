@@ -18,17 +18,18 @@
     },
     "parser": "@typescript-eslint/parser",
     "parserOptions": {
-        "project": "./tsconfig.eslint.json",
+        "project": "./tsconfig.allFiles.json",
         "ecmaVersion": "latest",
         "sourceType": "module"
     },
     "rules": {
         "no-continue": ["off"],
-        "prefer-destructuring": ["off"],
         "no-plusplus": ["off"],
+        "prefer-destructuring": ["off"],
         "class-methods-use-this": ["off"],
         "@typescript-eslint/lines-between-class-members": ["off"],
-        "@typescript-eslint/explicit-function-return-type": ["error"]
+        "@typescript-eslint/explicit-function-return-type": ["error"],
+        "@typescript-eslint/no-shadow": ["off"]
     },
     "overrides": [
         {

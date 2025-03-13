@@ -1,6 +1,6 @@
 import validator from 'validator';
 import ValidationResult from './ValidationResult';
-import { ignoreRejects, startAction, finishAction } from './Reject';
+import { finishAction, ignoreRejects, startAction } from './Reject';
 import {
     FieldElement,
     FieldOptionName,
@@ -43,9 +43,11 @@ export default class Field {
     containerSelector: string;
     validators: Validator[];
     options: FieldOptions;
+    status: FieldStatus;
     validationResult: ValidationResult | null;
+    name: string | null;
     cachedFieldElement: FieldElement | null;
-    virtualFieldsCache: { [key: string]: Field };
+    virtualFieldsCache: Record<string, Field>;
     actionId: number;
     typingDelayId: number | null;
 
@@ -73,7 +75,9 @@ export default class Field {
         this.options = {};
         this.setOptions(options);
 
+        this.status = FieldStatus.No;
         this.validationResult = null;
+        this.name = null;
         this.cachedFieldElement = null;
         this.virtualFieldsCache = {};
         this.actionId = 0;
@@ -232,7 +236,10 @@ export default class Field {
         finishAction(this, actionId);
 
         if (!validationResult.isValid() && !validationResult.hasMessage()) {
-            validationResult = ValidationResult.invalid(this.getOption('defaultInvalidMessage'));
+            validationResult = ValidationResult.invalid({
+                message: this.getOption('defaultInvalidMessage'),
+                data: validationResult.getData(),
+            });
         }
 
         this.validationResult = validationResult;
@@ -325,10 +332,25 @@ export default class Field {
             return this.cachedFieldElement;
         }
 
-        const fieldElement = this.containerElement.querySelector(this.fieldSelector);
+        const fieldElement = this.findFieldElement<E>();
 
         if (!fieldElement) {
             throw new Error(`A field element with the "${this.fieldSelector}" selector not found.`);
+        }
+
+        return fieldElement;
+    }
+
+    findFieldElement<E extends FieldElement = FieldElement>(): E | null {
+        if (this.cachedFieldElement !== null) {
+            // @ts-expect-error It's ok.
+            return this.cachedFieldElement;
+        }
+
+        const fieldElement = this.containerElement.querySelector(this.fieldSelector);
+
+        if (!fieldElement) {
+            return null;
         }
 
         if (!this.isFieldElement(fieldElement)) {
@@ -336,6 +358,8 @@ export default class Field {
                 `A field element with the "${this.fieldSelector}" selector is not field element.`,
             );
         }
+
+        this.name = (fieldElement as E).name;
 
         return fieldElement as E;
     }
@@ -361,11 +385,13 @@ export default class Field {
     }
 
     exists(): boolean {
-        return this.containerElement.querySelector(this.fieldSelector) !== null;
+        return this.findFieldElement() !== null;
     }
 
     getGroupElements(): FieldElement[] {
-        return Array.from(this.containerElement.querySelectorAll(this.fieldSelector));
+        return Array.from(
+            this.containerElement.querySelectorAll(`${this.fieldSelector}[data-group-field]`),
+        );
     }
 
     findElementIndexInGroup(element: FieldElement): number {
@@ -412,6 +438,7 @@ export default class Field {
             this.validators,
             this.options,
         );
+        field.name = element.name;
         this.virtualFieldsCache[element.dataset.groupField] = field;
 
         return field;
@@ -426,15 +453,7 @@ export default class Field {
     }
 
     isGroup(): boolean {
-        const fieldElement = this.getFieldElement();
-
-        if ('groupField' in fieldElement.dataset) {
-            return true;
-        }
-
-        return (
-            this.containerElement.querySelectorAll(this.fieldSelector).length > 1 && !this.isRadio()
-        );
+        return this.getGroupElements().length > 0;
     }
 
     isTextarea(): boolean {
@@ -530,10 +549,15 @@ export default class Field {
     }
 
     setStatus(status: FieldStatus): void {
+        if (this.status === status) {
+            return;
+        }
+
+        this.status = status;
+        this.updateCssStatus();
+
         const fieldElement = this.getFieldElement();
         const wrapperElement = this.getFieldWrapperElement();
-
-        this.setCssClass(status);
 
         if (status === FieldStatus.No) {
             this.getOption('onStatusReset')(fieldElement, this.containerElement, wrapperElement);
@@ -548,7 +572,7 @@ export default class Field {
         );
     }
 
-    setCssClass(cssClass: string): void {
+    updateCssStatus(): void {
         if (!this.getOption('cssStatusEnabled')) {
             return;
         }
@@ -557,8 +581,8 @@ export default class Field {
 
         element.classList.remove(FieldStatus.Validating, FieldStatus.Valid, FieldStatus.Invalid);
 
-        if (cssClass !== '') {
-            element.classList.add(cssClass);
+        if (this.status !== FieldStatus.No) {
+            element.classList.add(this.status);
         }
     }
 }
