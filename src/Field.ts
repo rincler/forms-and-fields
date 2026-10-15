@@ -37,6 +37,8 @@ const DEFAULT_OPTIONS: FieldOptions = {
 
 const ALLOWED_OPTIONS = Object.keys(DEFAULT_OPTIONS);
 
+const TEXTABLE_INPUT_TYPES = ['text', 'email', 'password', 'search', 'tel', 'url', 'number'];
+
 export default class Field {
     containerElement: Element;
     fieldSelector: string;
@@ -86,14 +88,14 @@ export default class Field {
 
     listen(): () => void {
         const onChangeListener = this.createListener(this.onChange);
-        const onKeyUpListener = this.createListener(this.onKeyUp);
+        const onInputListener = this.createListener(this.onInput);
 
         this.containerElement.addEventListener('change', onChangeListener);
-        this.containerElement.addEventListener('keyup', onKeyUpListener);
+        this.containerElement.addEventListener('input', onInputListener);
 
         return () => {
             this.containerElement.removeEventListener('change', onChangeListener);
-            this.containerElement.removeEventListener('keyup', onKeyUpListener);
+            this.containerElement.removeEventListener('input', onInputListener);
         };
     }
 
@@ -118,31 +120,43 @@ export default class Field {
 
     async onChange(event: Event): Promise<void> {
         if (!this.isTextable()) {
-            this.reset();
+            this.validationResult = null;
+            if (!this.getOption('validateOnChange')) {
+                this.setStatus(FieldStatus.No);
+            }
         }
 
         const fieldElement = event.target as FieldElement;
         const value = this.getValue();
+        const typingInProgress = this.typingDelayId !== null;
 
-        if (this.typingDelayId) {
-            clearTimeout(this.typingDelayId);
+        if (typingInProgress) {
+            clearTimeout(this.typingDelayId!);
             this.typingDelayId = null;
             this.getOption('onTypingEnd')(value, fieldElement, this.containerElement);
-            this.getOption('onChange')(value, fieldElement, this.containerElement);
-            if (this.getOption('validateOnType') || this.getOption('validateOnChange')) {
-                await ignoreRejects(this.validate.bind(this));
-            }
-            return;
         }
 
         this.getOption('onChange')(value, fieldElement, this.containerElement);
-        if (this.getOption('validateOnChange')) {
+
+        const shouldValidate =
+            this.getOption('validateOnChange') ||
+            (typingInProgress && this.getOption('validateOnType'));
+
+        if (shouldValidate) {
             await ignoreRejects(this.validate.bind(this));
         }
     }
 
-    async onKeyUp(event: Event): Promise<void> {
-        this.reset();
+    async onInput(event: Event): Promise<void> {
+        if (!this.isTextable()) {
+            return;
+        }
+
+        this.validationResult = null;
+
+        if (!this.getOption('validateOnType')) {
+            this.setStatus(FieldStatus.No);
+        }
 
         const fieldElement = event.target as FieldElement;
 
@@ -522,7 +536,11 @@ export default class Field {
     }
 
     isTextable(): boolean {
-        return this.isText() || this.isTextarea();
+        const fieldElement = this.getFieldElement();
+        if (fieldElement instanceof HTMLInputElement) {
+            return TEXTABLE_INPUT_TYPES.includes(fieldElement.type);
+        }
+        return this.isTextarea();
     }
 
     getInvalidErrorMessage(validatorName: ValidatorName): string {
@@ -532,14 +550,12 @@ export default class Field {
         );
     }
 
-    reset(): void {
-        this.validationResult = null;
-        this.setStatus(FieldStatus.No);
-    }
-
     trimIfRequired(): void {
         if (this.getOption('trimEnabled') && this.isTextable()) {
             const fieldElement = this.getFieldElement();
+            if (fieldElement.type === 'password') {
+                return;
+            }
             const trimmedValue = fieldElement.value.trim();
             if (fieldElement.value !== trimmedValue) {
                 fieldElement.value = trimmedValue;

@@ -103,7 +103,6 @@ describe('field options', () => {
 
         expect(inputField.getOption('validateOnType')).toBe(validateOnType);
         expect(checkboxField.getOption('validateOnType')).toBe(validateOnType);
-
         expect(inputField.getOption('validatorParams')).toBe(validatorParams);
         expect(checkboxField.getOption('validatorParams')).toBe(validatorParams);
 
@@ -1031,7 +1030,7 @@ describe('statuses', () => {
 
         formElement.classList.add('ff-form-positive-submit');
 
-        fireEvent.keyUp(inputElement);
+        fireEvent.input(inputElement);
 
         expect(form.validationResult).toBeNull();
         expect(form.submissionResult).toBeNull();
@@ -1054,7 +1053,7 @@ describe('statuses', () => {
         });
         form.listen();
 
-        fireEvent.keyUp(inputElement);
+        fireEvent.input(inputElement);
 
         expect(onStatusChange).not.toHaveBeenCalled();
         expect(onStatusReset).not.toHaveBeenCalled();

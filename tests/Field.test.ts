@@ -75,9 +75,9 @@ describe('"validateOnType" and "validateOnChange" options', () => {
             field.validate = jest.fn();
             field.listen();
 
-            fireEvent.keyUp(inputElement, { key: 'b', code: 'KeyB' });
-            fireEvent.keyUp(inputElement, { key: 'a', code: 'KeyA' });
-            fireEvent.keyUp(inputElement, { key: 'r', code: 'KeyR' });
+            fireEvent.input(inputElement);
+            fireEvent.input(inputElement);
+            fireEvent.input(inputElement);
             jest.runAllTimers();
             fireEvent.change(inputElement, { target: { value: 'bar' } });
 
@@ -100,11 +100,11 @@ describe('"validateOnType" and "validateOnChange" options', () => {
             field.validate = jest.fn();
             field.listen();
 
-            fireEvent.keyUp(inputElement, { key: 'b', code: 'KeyB' });
+            fireEvent.input(inputElement);
             jest.runAllTimers();
-            fireEvent.keyUp(inputElement, { key: 'a', code: 'KeyA' });
+            fireEvent.input(inputElement);
             jest.runAllTimers();
-            fireEvent.keyUp(inputElement, { key: 'r', code: 'KeyR' });
+            fireEvent.input(inputElement);
             jest.runAllTimers();
             fireEvent.change(inputElement, { target: { value: 'bar' } });
 
@@ -127,9 +127,9 @@ describe('"validateOnType" and "validateOnChange" options', () => {
             field.validate = jest.fn();
             field.listen();
 
-            fireEvent.keyUp(inputElement, { key: 'b', code: 'KeyB' });
-            fireEvent.keyUp(inputElement, { key: 'a', code: 'KeyA' });
-            fireEvent.keyUp(inputElement, { key: 'r', code: 'KeyR' });
+            fireEvent.input(inputElement);
+            fireEvent.input(inputElement);
+            fireEvent.input(inputElement);
             fireEvent.change(inputElement, { target: { value: 'bar' } });
             jest.runAllTimers();
 
@@ -152,11 +152,11 @@ describe('"validateOnType" and "validateOnChange" options', () => {
             field.validate = jest.fn();
             field.listen();
 
-            fireEvent.keyUp(inputElement, { key: 'b', code: 'KeyB' });
+            fireEvent.input(inputElement);
             jest.runAllTimers();
-            fireEvent.keyUp(inputElement, { key: 'a', code: 'KeyA' });
+            fireEvent.input(inputElement);
             jest.runAllTimers();
-            fireEvent.keyUp(inputElement, { key: 'r', code: 'KeyR' });
+            fireEvent.input(inputElement);
             fireEvent.change(inputElement, { target: { value: 'bar' } });
             jest.runAllTimers();
 
@@ -171,9 +171,9 @@ describe('"validateOnType" and "validateOnChange" options', () => {
         field.validate = jest.fn();
         field.listen();
 
-        fireEvent.keyUp(inputElement, { key: 'b', code: 'KeyB' });
-        fireEvent.keyUp(inputElement, { key: 'a', code: 'KeyA' });
-        fireEvent.keyUp(inputElement, { key: 'r', code: 'KeyR' });
+        fireEvent.input(inputElement);
+        fireEvent.input(inputElement);
+        fireEvent.input(inputElement);
         jest.runAllTimers();
 
         expect(field.validate).not.toHaveBeenCalled();
@@ -209,9 +209,9 @@ describe('"validateOnType" and "validateOnChange" options', () => {
 
         await field.validate();
 
-        fireEvent.keyUp(inputElement, { key: 'b', code: 'KeyB' });
-        fireEvent.keyUp(inputElement, { key: 'a', code: 'KeyA' });
-        fireEvent.keyUp(inputElement, { key: 'r', code: 'KeyR' });
+        fireEvent.input(inputElement);
+        fireEvent.input(inputElement);
+        fireEvent.input(inputElement);
         inputElement.value = 'bar';
         jest.runAllTimers();
 
@@ -281,9 +281,9 @@ describe('callback options', () => {
         });
         field.listen();
 
-        fireEvent.keyUp(inputElement, { key: 'b', code: 'KeyB' });
-        fireEvent.keyUp(inputElement, { key: 'a', code: 'KeyA' });
-        fireEvent.keyUp(inputElement, { key: 'r', code: 'KeyR' });
+        fireEvent.input(inputElement);
+        fireEvent.input(inputElement);
+        fireEvent.input(inputElement);
 
         expect(onTypingStart).toHaveBeenCalledTimes(1);
         expect(onTypingStart.mock.calls[0][0]).toBe(inputElement);
@@ -297,9 +297,9 @@ describe('callback options', () => {
         });
         field.listen();
 
-        fireEvent.keyUp(inputElement, { key: 'b', code: 'KeyB' });
-        fireEvent.keyUp(inputElement, { key: 'a', code: 'KeyA' });
-        fireEvent.keyUp(inputElement, { key: 'r', code: 'KeyR' });
+        fireEvent.input(inputElement);
+        fireEvent.input(inputElement);
+        fireEvent.input(inputElement);
 
         expect(onTypingEnd).not.toHaveBeenCalled();
 
@@ -317,7 +317,7 @@ describe('callback options', () => {
         });
         field.listen();
         inputElement.value = 'Leo';
-        fireEvent.keyUp(inputElement, { key: 'n', code: 'KeyN' });
+        fireEvent.input(inputElement);
         fireEvent.change(inputElement, { target: { value: 'Leon' } });
 
         expect(onTypingEnd).toHaveBeenCalledTimes(1);
@@ -781,6 +781,22 @@ describe('some validators', () => {
         expect(fieldInput.getValue()).toBe('foo');
         expect(fieldTextarea.getValue()).toBe('bar');
     });
+
+    test('no trim of password before validation', async () => {
+        containerElement.insertAdjacentHTML(
+            'beforeend',
+            '<input class="js-password" type="password" />',
+        );
+        const field = new Field('.js-password', '.js-container', [], {
+            trimEnabled: true,
+        });
+
+        getInputElement('.js-password').value = ' foo ';
+
+        await field.validate();
+
+        expect(field.getValue()).toBe(' foo ');
+    });
 });
 
 describe('file validator', () => {
@@ -1107,7 +1123,7 @@ describe('statuses', () => {
 
         inputElement.classList.add('ff-field-valid');
 
-        fireEvent.keyUp(inputElement);
+        fireEvent.input(inputElement);
 
         expect(field.validationResult).toBeNull();
         expect(inputElement.classList.contains('ff-field-valid')).toBe(false);
@@ -1123,6 +1139,116 @@ describe('statuses', () => {
         expect(onStatusReset.mock.calls[0][2]).toBeNull();
     });
 
+    test('status is not reset on type when "validateOnType" is true', () => {
+        const onStatusChange = jest.fn();
+        const onStatusReset = jest.fn();
+        const field = new Field('.js-input', '.js-container', [], {
+            validateOnType: true,
+            onStatusChange,
+            onStatusReset,
+        });
+        field.status = FieldStatus.Invalid;
+        field.validationResult = ValidationResult.invalid();
+        field.listen();
+
+        inputElement.classList.add('ff-field-invalid');
+
+        fireEvent.input(inputElement);
+
+        expect(field.validationResult).toBeNull();
+        expect(field.status).toBe(FieldStatus.Invalid);
+        expect(inputElement.classList.contains('ff-field-invalid')).toBe(true);
+        expect(onStatusChange).not.toHaveBeenCalled();
+        expect(onStatusReset).not.toHaveBeenCalled();
+    });
+
+    test('status is kept until validation on type when "validateOnType" is true', async () => {
+        const onStatusChange = jest.fn();
+        const field = new Field(
+            '.js-input',
+            '.js-container',
+            [(value) => ValidationResult.make(value === 'bar')],
+            {
+                validateOnType: true,
+                onStatusChange,
+            },
+        );
+        field.listen();
+
+        inputElement.value = 'foo';
+        await field.validate();
+        expect(field.status).toBe(FieldStatus.Invalid);
+        onStatusChange.mockClear();
+
+        inputElement.value = 'bar';
+        fireEvent.input(inputElement);
+
+        expect(field.status).toBe(FieldStatus.Invalid);
+        expect(onStatusChange).not.toHaveBeenCalled();
+
+        jest.runAllTimers();
+
+        await waitFor(() => {
+            expect(field.status).toBe(FieldStatus.Valid);
+        });
+        expect(onStatusChange.mock.calls.map((call) => call[0])).toStrictEqual([
+            FieldStatus.Validating,
+            FieldStatus.Valid,
+        ]);
+    });
+
+    test('status is kept until validation on change radio when "validateOnChange" is true', async () => {
+        const onStatusChange = jest.fn();
+        const onStatusReset = jest.fn();
+        const field = new Field('.js-radio', '.js-container', ['required'], {
+            validateOnChange: true,
+            onStatusChange,
+            onStatusReset,
+        });
+        field.listen();
+
+        await field.validate();
+        expect(field.status).toBe(FieldStatus.Invalid);
+        onStatusChange.mockClear();
+
+        fireEvent.click(getInputElement('.js-radio-2'));
+
+        await waitFor(() => {
+            expect(field.status).toBe(FieldStatus.Valid);
+        });
+        expect(onStatusChange.mock.calls.map((call) => call[0])).toStrictEqual([
+            FieldStatus.Validating,
+            FieldStatus.Valid,
+        ]);
+        expect(onStatusReset).not.toHaveBeenCalled();
+    });
+
+    test('status is reset on type email', () => {
+        containerElement.insertAdjacentHTML('beforeend', '<input class="js-email" type="email" />');
+        const emailElement = getInputElement('.js-email');
+        const field = new Field('.js-email', '.js-container');
+        field.status = FieldStatus.Valid;
+        field.validationResult = ValidationResult.valid();
+        field.listen();
+
+        fireEvent.input(emailElement);
+
+        expect(field.validationResult).toBeNull();
+        expect(field.status).toBe(FieldStatus.No);
+    });
+
+    test('status is not reset on input checkbox', () => {
+        const field = new Field('.js-checkbox', '.js-container');
+        field.status = FieldStatus.Valid;
+        field.validationResult = ValidationResult.valid();
+        field.listen();
+
+        fireEvent.input(getInputElement('.js-checkbox'));
+
+        expect(field.validationResult).toStrictEqual(ValidationResult.valid());
+        expect(field.status).toBe(FieldStatus.Valid);
+    });
+
     test('status is not reset because it is not changed', () => {
         const onStatusChange = jest.fn();
         const onStatusReset = jest.fn();
@@ -1132,7 +1258,7 @@ describe('statuses', () => {
         });
         field.listen();
 
-        fireEvent.keyUp(inputElement);
+        fireEvent.input(inputElement);
 
         expect(onStatusChange).not.toHaveBeenCalled();
         expect(onStatusReset).not.toHaveBeenCalled();

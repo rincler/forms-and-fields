@@ -77,14 +77,14 @@ export default class Form {
         const onSubmitListener = this.onSubmit.bind(this);
 
         this.formElement.addEventListener('change', resetListener);
-        this.formElement.addEventListener('keyup', resetListener);
+        this.formElement.addEventListener('input', resetListener);
         this.formElement.addEventListener('submit', onSubmitListener);
 
         const stopListeningFields = this.fields.map((field) => field.listen());
 
         return () => {
             this.formElement.removeEventListener('change', resetListener);
-            this.formElement.removeEventListener('keyup', resetListener);
+            this.formElement.removeEventListener('input', resetListener);
             this.formElement.removeEventListener('submit', onSubmitListener);
             stopListeningFields.forEach((stopListeningField) => stopListeningField());
         };
