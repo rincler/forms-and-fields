@@ -1214,6 +1214,70 @@ describe('statuses', () => {
     });
 });
 
+describe('"getVisualStatus"', () => {
+    test('real status when fields are not validated', () => {
+        const form = new Form(
+            '.js-form',
+            [new Field('.js-input', '.js-form', ['required'])],
+            submit,
+        );
+
+        expect(form.getVisualStatus()).toBe(FormStatus.No);
+
+        form.status = FormStatus.PositiveSubmit;
+        expect(form.getVisualStatus()).toBe(FormStatus.PositiveSubmit);
+    });
+
+    test('invalid status when one of fields is invalid', async () => {
+        const inputField = new Field('.js-input', '.js-form', ['required']);
+        const checkboxField = new Field('.js-checkbox', '.js-form', ['required']);
+        const form = new Form('.js-form', [inputField, checkboxField], submit);
+
+        getInputElement('.js-checkbox').checked = true;
+        await checkboxField.validate();
+        expect(form.getVisualStatus()).toBe(FormStatus.No);
+
+        await inputField.validate();
+        expect(form.getVisualStatus()).toBe(FormStatus.Invalid);
+
+        inputElement.value = 'foo';
+        inputField.validationResult = null;
+        await inputField.validate();
+        expect(form.getVisualStatus()).toBe(FormStatus.No);
+    });
+
+    test('invalid status takes precedence over real status', async () => {
+        const inputField = new Field('.js-input', '.js-form', ['required']);
+        const form = new Form('.js-form', [inputField], submit);
+
+        form.status = FormStatus.PositiveSubmit;
+        await inputField.validate();
+
+        expect(form.getVisualStatus()).toBe(FormStatus.Invalid);
+    });
+
+    test('invalid status when one of group fields is invalid', async () => {
+        const groupField = new Field('.js-group-input', '.js-form', ['required']);
+        const form = new Form('.js-form', [groupField], submit);
+
+        await groupField.getVirtualFieldsOfGroup()[1].validate();
+
+        expect(form.getVisualStatus()).toBe(FormStatus.Invalid);
+    });
+
+    test('removed invalid field is not taken into account', async () => {
+        const inputField = new Field('.js-input', '.js-form', ['required']);
+        const form = new Form('.js-form', [inputField], submit);
+
+        await inputField.validate();
+        expect(form.getVisualStatus()).toBe(FormStatus.Invalid);
+
+        inputElement.remove();
+
+        expect(form.getVisualStatus()).toBe(FormStatus.No);
+    });
+});
+
 describe('rejection', () => {
     test('reject validation when new field validation starts', async () => {
         const onAfterValidate = jest.fn();

@@ -320,6 +320,14 @@ export default class Form {
         return this.processingFields;
     }
 
+    getVisualStatus(): FormStatus {
+        const hasInvalidFields = Object.values(this.getProcessingFields()).some(
+            (field) => field.status === FieldStatus.Invalid,
+        );
+
+        return hasInvalidFields ? FormStatus.Invalid : this.status;
+    }
+
     reset(): void {
         this.validationResult = null;
         this.submissionResult = null;
