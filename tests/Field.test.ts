@@ -1139,30 +1139,51 @@ describe('statuses', () => {
         expect(onStatusReset.mock.calls[0][2]).toBeNull();
     });
 
-    test('status is not reset on type when "validateOnType" is true', () => {
+    test('invalid status is kept during typing and reset when typing ends', () => {
         const onStatusChange = jest.fn();
         const onStatusReset = jest.fn();
+        const invalidResult = ValidationResult.invalid();
         const field = new Field('.js-input', '.js-container', [], {
-            validateOnType: true,
             onStatusChange,
             onStatusReset,
         });
         field.status = FieldStatus.Invalid;
-        field.validationResult = ValidationResult.invalid();
+        field.validationResult = invalidResult;
         field.listen();
 
         inputElement.classList.add('ff-field-invalid');
 
         fireEvent.input(inputElement);
+        fireEvent.input(inputElement);
 
-        expect(field.validationResult).toBeNull();
+        expect(field.validationResult).toBe(invalidResult);
         expect(field.status).toBe(FieldStatus.Invalid);
         expect(inputElement.classList.contains('ff-field-invalid')).toBe(true);
         expect(onStatusChange).not.toHaveBeenCalled();
         expect(onStatusReset).not.toHaveBeenCalled();
+
+        jest.runAllTimers();
+
+        expect(field.validationResult).toBeNull();
+        expect(field.status).toBe(FieldStatus.No);
+        expect(inputElement.classList.contains('ff-field-invalid')).toBe(false);
+        expect(onStatusReset).toHaveBeenCalledTimes(1);
     });
 
-    test('status is kept until validation on type when "validateOnType" is true', async () => {
+    test('invalid status is reset on change during typing', () => {
+        const field = new Field('.js-input', '.js-container');
+        field.status = FieldStatus.Invalid;
+        field.validationResult = ValidationResult.invalid();
+        field.listen();
+
+        fireEvent.input(inputElement);
+        fireEvent.change(inputElement, { target: { value: 'bar' } });
+
+        expect(field.validationResult).toBeNull();
+        expect(field.status).toBe(FieldStatus.No);
+    });
+
+    test('invalid status is kept until validation on type when "validateOnType" is true', async () => {
         const onStatusChange = jest.fn();
         const field = new Field(
             '.js-input',
@@ -1192,35 +1213,10 @@ describe('statuses', () => {
             expect(field.status).toBe(FieldStatus.Valid);
         });
         expect(onStatusChange.mock.calls.map((call) => call[0])).toStrictEqual([
+            FieldStatus.No,
             FieldStatus.Validating,
             FieldStatus.Valid,
         ]);
-    });
-
-    test('status is kept until validation on change radio when "validateOnChange" is true', async () => {
-        const onStatusChange = jest.fn();
-        const onStatusReset = jest.fn();
-        const field = new Field('.js-radio', '.js-container', ['required'], {
-            validateOnChange: true,
-            onStatusChange,
-            onStatusReset,
-        });
-        field.listen();
-
-        await field.validate();
-        expect(field.status).toBe(FieldStatus.Invalid);
-        onStatusChange.mockClear();
-
-        fireEvent.click(getInputElement('.js-radio-2'));
-
-        await waitFor(() => {
-            expect(field.status).toBe(FieldStatus.Valid);
-        });
-        expect(onStatusChange.mock.calls.map((call) => call[0])).toStrictEqual([
-            FieldStatus.Validating,
-            FieldStatus.Valid,
-        ]);
-        expect(onStatusReset).not.toHaveBeenCalled();
     });
 
     test('status is reset on type email', () => {

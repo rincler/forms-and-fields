@@ -374,9 +374,8 @@ To disable adding CSS classes, set `cssStatusEnabled` to `false`.
 
 The `onResetStatus` callback can be useful for clearing form or field errors that were set using the `onAfterValidate` or `onAfterSubmit` callbacks, for example.
 
-When the user changes a field value, the field status is reset only if the change does not trigger validation:
-for text fields (text, email, password, search, tel, url, number inputs and textareas) — when `validateOnType` is `false`,
-for other fields — when `validateOnChange` is `false`. Otherwise, the previous status is kept until the validation sets a new one.
+When the user changes a field value, the field status is reset. For text fields (text, email, password, search, tel, url, number inputs and textareas),
+the invalid status is kept during typing and is reset when typing ends, to avoid blinking of the error.
 
 ## License
 

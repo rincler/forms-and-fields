@@ -119,16 +119,14 @@ export default class Field {
     }
 
     async onChange(event: Event): Promise<void> {
-        if (!this.isTextable()) {
-            this.validationResult = null;
-            if (!this.getOption('validateOnChange')) {
-                this.setStatus(FieldStatus.No);
-            }
+        const typingInProgress = this.typingDelayId !== null;
+
+        if (!this.isTextable() || typingInProgress) {
+            this.reset();
         }
 
         const fieldElement = event.target as FieldElement;
         const value = this.getValue();
-        const typingInProgress = this.typingDelayId !== null;
 
         if (typingInProgress) {
             clearTimeout(this.typingDelayId!);
@@ -152,10 +150,9 @@ export default class Field {
             return;
         }
 
-        this.validationResult = null;
-
-        if (!this.getOption('validateOnType')) {
-            this.setStatus(FieldStatus.No);
+        // The invalid status is kept until the end of typing to avoid blinking of the error.
+        if (this.status !== FieldStatus.Invalid) {
+            this.reset();
         }
 
         const fieldElement = event.target as FieldElement;
@@ -175,6 +172,7 @@ export default class Field {
 
         this.typingDelayId = window.setTimeout(async () => {
             this.typingDelayId = null;
+            this.reset();
 
             this.getOption('onTypingEnd')(this.getValue(), fieldElement, this.containerElement);
 
@@ -548,6 +546,11 @@ export default class Field {
             this.getOption('invalidMessages')[validatorName] ||
             this.getOption('defaultInvalidMessage')
         );
+    }
+
+    reset(): void {
+        this.validationResult = null;
+        this.setStatus(FieldStatus.No);
     }
 
     trimIfRequired(): void {
